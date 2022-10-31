@@ -1,4 +1,3 @@
-from lib2to3.pgen2 import token
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from knox.models import AuthToken
@@ -12,7 +11,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from .utils import Util
 import jwt
-from django.contrib.auth.models import User
+from .models import User
 from django.conf import settings
 
 # Register API
@@ -28,6 +27,7 @@ class RegisterAPI(generics.GenericAPIView):
         current_site = get_current_site(request).domain
         relativeLink = reverse('email-verify')
         absurl = 'http://' + current_site + relativeLink + "?token=" + str(token)
+        print(absurl)
         email_body = 'Hi ' + user.username + ' Use link below to verify your email\n' + absurl
         data = {
             'email_body': email_body,
@@ -50,6 +50,8 @@ class LoginAPI(KnoxLoginView):
         serializer = AuthTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
+        if not user.is_email_verified:
+            return Response({'detail': 'Email is not verified'}, status=400)
         login(request, user)
         return super(LoginAPI, self).post(request, format=None)
 
@@ -60,7 +62,8 @@ class VerifyEmail(generics.GenericAPIView):
     def get(self, request):
         token = request.GET.get('token')
         try:
-            payload = jwt.decode(token, settings.SECRET_KEY)
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+            print(payload)
             user = User.objects.get(id=payload['user_id'])
             if not user.is_email_verified:
                 user.is_email_verified = True
@@ -70,4 +73,5 @@ class VerifyEmail(generics.GenericAPIView):
             return Response({'error': 'Activation Expired'}, status=400)
         except jwt.exceptions.DecodeError as identifier:
             return Response({'error': 'Invalid token'}, status=400)
-            
+
+
