@@ -14,6 +14,7 @@ import jwt
 from .models import User
 from django.conf import settings
 
+
 # Register API
 class RegisterAPI(generics.GenericAPIView):
     serializer_class = RegisterSerializer
@@ -73,5 +74,4 @@ class VerifyEmail(generics.GenericAPIView):
             return Response({'error': 'Activation Expired'}, status=400)
         except jwt.exceptions.DecodeError as identifier:
             return Response({'error': 'Invalid token'}, status=400)
-
 
