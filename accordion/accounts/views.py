@@ -47,6 +47,10 @@ class LoginAPI(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, format=None):
+        username_or_email = request.data.get('username')
+        user = User.objects.filter(email=username_or_email)
+        if user.exists():
+            request.data['username'] = user[0].username
         serializer = AuthTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
