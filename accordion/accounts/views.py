@@ -43,7 +43,6 @@ class RegisterAPI(generics.GenericAPIView):
         })
 
 
-
 class LoginAPI(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
 
@@ -53,6 +52,10 @@ class LoginAPI(KnoxLoginView):
         user = serializer.validated_data['user']
         if not user.is_email_verified:
             return Response({'detail': 'Email is not verified'}, status=400)
+        # check is login
+        token = AuthToken.objects.filter(user=user)
+        if token.exists():
+            return Response({'detail': 'User is already logged in'}, status=400)
         login(request, user)
         return super(LoginAPI, self).post(request, format=None)
 
@@ -64,7 +67,6 @@ class VerifyEmail(generics.GenericAPIView):
         token = request.GET.get('token')
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-            print(payload)
             user = User.objects.get(id=payload['user_id'])
             if not user.is_email_verified:
                 user.is_email_verified = True
