@@ -1,8 +1,6 @@
-from .views import RegisterAPI
+from .views import RegisterAPI,LoginAPI,VerifyEmail
 from django.urls import path
 from knox import views as knox_views
-from .views import *
-from django.urls import path
 
 urlpatterns = [
     path('api/register/', RegisterAPI.as_view(), name='register'),
@@ -12,4 +10,3 @@ urlpatterns = [
     path('verify-email/', VerifyEmail.as_view(), name='email-verify'),
 
 ]
-
