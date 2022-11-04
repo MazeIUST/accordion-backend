@@ -13,6 +13,8 @@ from .utils import Util
 import jwt
 from .models import User
 from django.conf import settings
+from django.http import JsonResponse
+
 
 
 # Register API
@@ -81,3 +83,18 @@ class VerifyEmail(generics.GenericAPIView):
         except jwt.exceptions.DecodeError as identifier:
             return Response({'error': 'Invalid token'}, status=400)
 
+
+def show_all_user(request):
+    users = User.objects.all()
+    user_list = []
+    for user in users:
+        new_user = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'is_email_verified': user.is_email_verified,
+            'is_Artist': user.is_Artist
+        }
+        user_list.append(new_user)
+    
+    return JsonResponse(user_list, safe=False)
