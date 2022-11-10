@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'knox',
     'corsheaders',
+    'soundcloudfeed'
 ]
 
 SIMPLE_JWT = {
@@ -173,3 +174,5 @@ CORS_ALLOW_CREDENTIALS = True
 # CORS_ALLOWED_ORIGIN_REGEXES = [
 #     'http://localhost:3030',
 # ]
+
+SOUNDCLOUD_ACCESS_TOKEN = ''
