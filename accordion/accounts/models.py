@@ -1,18 +1,17 @@
+import datetime
 from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 from django.conf import settings
-from django_countries.fields import CountryField
-from birthday import BirthdayField, BirthdayManager
+# from django_countries.fields import CountryField
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     is_email_verified = models.BooleanField(default=False)
     is_Artist = models.BooleanField(default=False)
 
-    Name = models.CharField(max_length=255)
-    Birthday = BirthdayField()
-    # objects = BirthdayManager()
-    Country = CountryField()
+    name = models.CharField(max_length=255,null=True)
+    birthday = models.DateField(null=True)
+    country = models.CharField(max_length=255,null=True)
 
     GENDER_Male = 'M'
     GENDER_Female = 'F'

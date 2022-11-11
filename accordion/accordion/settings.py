@@ -151,8 +151,14 @@ REST_FRAMEWORK = {
         # 'rest_framework.authentication.SessionAuthentication',
         'knox.auth.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ]
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAdminUser'
+   )
 }
+
 
 AUTH_USER_MODEL = 'accounts.User'
 

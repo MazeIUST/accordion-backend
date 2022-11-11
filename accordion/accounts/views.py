@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from knox.models import AuthToken
-from .serializers import UserSerializer, RegisterSerializer
+from .serializers import UserSerializer, RegisterSerializer,UpdateUserSerializer
 from django.contrib.auth import login
 from rest_framework import permissions
 from rest_framework.authtoken.serializers import AuthTokenSerializer
@@ -14,7 +14,10 @@ import jwt
 from .models import User
 from django.conf import settings
 from django.http import JsonResponse
-
+# from .serializers import MyTokenObtainPairSerializer
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import IsAuthenticated
 
 
 # Register API
@@ -85,6 +88,16 @@ class VerifyEmail(generics.GenericAPIView):
             return Response({'error': 'Activation Expired'}, status=400)
         except jwt.exceptions.DecodeError as identifier:
             return Response({'error': 'Invalid token'}, status=400)
+
+
+class UpdateProfileView(generics.UpdateAPIView):
+
+    queryset = User.objects.all()
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UpdateUserSerializer
+
+# def edit_profile(request):
+#     form = prof
 
 
 def show_all_user(request):
