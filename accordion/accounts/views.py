@@ -1,27 +1,21 @@
-from rest_framework import generics, permissions
+from rest_framework import generics
 from rest_framework.response import Response
-from knox.models import AuthToken
-from .serializers import UserSerializer, RegisterSerializer
-from django.contrib.auth import login
-from rest_framework import permissions
-from rest_framework.authtoken.serializers import AuthTokenSerializer
-from knox.views import LoginView as KnoxLoginView
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.sites.shortcuts import get_current_site
-from django.urls import reverse
-from .utils import Util
-import jwt
+from .serializers import *
 from .models import User
+from rest_framework_simplejwt.tokens import RefreshToken # for email
+from django.contrib.sites.shortcuts import get_current_site # for email
+from django.urls import reverse # for email
+from .utils import Util # for email 
+import jwt
 from django.conf import settings
 from django.http import JsonResponse
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 
-
-# Register API
-class RegisterAPI(generics.GenericAPIView):
+#Register API
+class RegisterApi(generics.GenericAPIView):
     serializer_class = RegisterSerializer
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args,  **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -41,33 +35,8 @@ class RegisterAPI(generics.GenericAPIView):
         # ------------------------------
         return Response({
             "user": UserSerializer(user, context=self.get_serializer_context()).data,
-            "token": AuthToken.objects.create(user)[1]
+            "message": "User Created Successfully. Now perform Login to get your token",
         })
-
-
-class LoginAPI(KnoxLoginView):
-    permission_classes = (permissions.AllowAny,)
-
-    def post(self, request, format=None):
-        # --------- login with email ---------
-        username_or_email = request.data.get('username')
-        user = User.objects.filter(email=username_or_email)
-        if user.exists():
-            request.data['username'] = user[0].username
-        # ------------------------------------
-        serializer = AuthTokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        if not user.is_email_verified:
-            return Response({'detail': 'Email is not verified'}, status=400)
-        # --------- check is login ---------
-        token = AuthToken.objects.filter(user=user)
-        if token.exists():
-            return Response({'detail': 'User is already logged in'}, status=400)
-        # ----------------------------------
-        login(request, user)
-        return super(LoginAPI, self).post(request, format=None)
-
 
 class VerifyEmail(generics.GenericAPIView):
     serializer_class = RegisterSerializer
@@ -87,6 +56,24 @@ class VerifyEmail(generics.GenericAPIView):
             return Response({'error': 'Invalid token'}, status=400)
 
 
+class LoginApi(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+    def change_username_to_email(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        user = User.objects.filter(email=username)
+        if user.exists():
+            _mutable = request.data._mutable
+            request.data._mutable = True        
+            request.data['username'] = user[0].username
+            request.data._mutable = _mutable
+        return None      
+
+    def post(self, request, *args, **kwargs):
+        self.change_username_to_email(request)
+        return super().post(request, *args, **kwargs)
+
+
 def show_all_user(request):
     users = User.objects.all()
     user_list = []
@@ -102,12 +89,12 @@ def show_all_user(request):
     
     return JsonResponse(user_list, safe=False)
 
-
 def show_all_user2(request):
     obj_list = []
     for i, user in enumerate(User.objects.all()):
         obj_list.append(user)
 
     users = UserSerializer(obj_list, many=True).data
-
     return JsonResponse(users, safe=False) 
+
+

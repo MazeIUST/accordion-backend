@@ -1,15 +1,10 @@
-from rest_framework import serializers
-from .models import *
+from rest_framework import  serializers
 from django.contrib.auth.hashers import make_password
+from accounts.models import Artist,User
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-# User Serializer
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id', 'username', 'email', 'is_email_verified', 'is_Artist')
-    
 
-# Register Serializer
+# Register serializer
 class RegisterSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
@@ -29,7 +24,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             })
         return attrs
 
-
     def create(self, validated_data):
         user = User.objects.create(
             username=validated_data['username'],
@@ -41,3 +35,27 @@ class RegisterSerializer(serializers.ModelSerializer):
             Artist.objects.create(user=user)
 
         return user
+
+# User serializer
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'is_email_verified', 'is_Artist','name', 'birthday','gender', 'country')
+
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        # Add extra responses here
+        # data['name'] = self.user.name
+        # ...
+
+        is_email_verified = self.user.is_email_verified
+        if not is_email_verified:
+            raise serializers.ValidationError({
+                'email': ['email is not verified.'],
+            })
+
+        return data
