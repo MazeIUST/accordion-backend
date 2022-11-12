@@ -18,6 +18,8 @@ from rest_framework.permissions import IsAuthenticated
 #Register API
 class RegisterApi(generics.GenericAPIView):
     serializer_class = RegisterSerializer
+    permission_classes = []
+
     def post(self, request, *args,  **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -43,6 +45,7 @@ class RegisterApi(generics.GenericAPIView):
 
 class VerifyEmail(generics.GenericAPIView):
     serializer_class = RegisterSerializer
+    permission_classes = []
 
     def get(self, request):
         token = request.GET.get('token')
@@ -61,6 +64,7 @@ class VerifyEmail(generics.GenericAPIView):
 
 class LoginApi(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+    permission_classes = []
 
     def change_username_to_email(self, request, *args, **kwargs):
         username = request.data.get('username')
