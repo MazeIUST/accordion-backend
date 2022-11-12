@@ -106,8 +106,6 @@ def show_all_user2(request):
 
 
 class ShowUser(APIView):
-    def get(self, request):
-        session = request.session['_auth_user_id']
-        user = User.objects.get(id=session)
-        content = UserSerializer(user).data
+    def get(self, request, format=None):
+        content = UserSerializer(request.user).data
         return Response(content)
