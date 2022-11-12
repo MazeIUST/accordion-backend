@@ -1,11 +1,9 @@
-from django.urls import path, include
-from .views import *
-from rest_framework import routers
+import imp
+from django.urls import path
+from .views import SongView
 
-router = routers.DefaultRouter()
-router.register(r'upload', UploadViewSet, basename="upload")
-
-# Wire up our API using automatic URL routing.
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', SongView.as_view(), name='songs'),
+    path('<int:song_id>/', SongView.as_view(), name='song'),
+    path('upload/', SongView.as_view(), name='upload'),
 ]
