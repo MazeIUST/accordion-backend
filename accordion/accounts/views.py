@@ -10,6 +10,9 @@ import jwt
 from django.conf import settings
 from django.http import JsonResponse
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.views import APIView
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 
 #Register API
@@ -98,3 +101,10 @@ def show_all_user2(request):
     return JsonResponse(users, safe=False) 
 
 
+class ShowUser(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        content = UserSerializer(request.user).data,  # `django.contrib.auth.User` instance.
+        return Response(content)
