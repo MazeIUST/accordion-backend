@@ -3,5 +3,8 @@ django-rest-knox==4.2.0
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
 django-cors-headers==3.13.0
+django-birthday==0.1.4
+django-countries==7.4.2
+
 
 
