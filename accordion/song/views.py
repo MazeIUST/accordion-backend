@@ -7,12 +7,9 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class SongView(APIView):
     serializer_class = SongSerializer
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (JWTAuthentication, SessionAuthentication)
     
     def put(self, request, *args, **kwargs):
         serializer = SongSerializer(data=request.data)
