@@ -5,8 +5,11 @@ from accounts.models import Artist
 from .models import Song
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+
 class SongView(APIView):
     serializer_class = SongSerializer
+    permission_classes = (IsAuthenticated,)
     
     def put(self, request, *args, **kwargs):
         serializer = SongSerializer(data=request.data)
