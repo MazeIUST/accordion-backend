@@ -106,9 +106,8 @@ def show_all_user2(request):
 
 
 class ShowUser(APIView):
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, format=None):
-        content = UserSerializer(request.user).data,  # `django.contrib.auth.User` instance.
+    def get(self, request):
+        session = request.session['_auth_user_id']
+        user = User.objects.get(id=session)
+        content = UserSerializer(user).data
         return Response(content)
