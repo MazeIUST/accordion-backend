@@ -8,10 +8,19 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 
-class SongView(APIView):
+
+class SongViewSet(ViewSet):
     serializer_class = SongSerializer
-    
-    def put(self, request, *args, **kwargs):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        artist = Artist.objects.get(user=request.user)
+        songs = Song.objects.filter(artist=artist)
+        serializer = SongSerializer(songs, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
         serializer = SongSerializer(data=request.data)
         if serializer.is_valid():
             artist = Artist.objects.get(user=request.user)
@@ -19,15 +28,21 @@ class SongView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def get(self, request, *args, **kwargs):
-        song_id = kwargs.get('song_id')
-        if song_id:
-            song = Song.objects.get(id=song_id)
-            serializer = SongSerializer(song)
-            return Response(serializer.data)
-        else:
-            artist = Artist.objects.get(user=request.user)
-            songs = Song.objects.filter(artist=artist)
-            serializer = SongSerializer(songs, many=True)
-            return Response(serializer.data)
+    def retrieve(self, request, pk=None):
+        song = Song.objects.get(id=pk)
+        serializer = SongSerializer(song)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        song = Song.objects.get(id=pk)
+        serializer = SongSerializer(instance=song, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        song = Song.objects.get(id=pk)
+        song.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 

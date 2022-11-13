@@ -1,9 +1,14 @@
 import imp
 from django.urls import path
-from .views import SongView
+from .views import SongViewSet
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r'songs', SongViewSet, basename='songs')
+
 
 urlpatterns = [
-    path('', SongView.as_view(), name='songs'),
-    path('<int:song_id>/', SongView.as_view(), name='song'),
-    path('upload/', SongView.as_view(), name='upload'),
+    path('', SongViewSet.as_view({'get': 'list', 'post': 'create'}), name='songs'),
+    path('<int:pk>/', SongViewSet.as_view({'get': 'retrieve', 'put': 'update'}), name='song'),
+    path('<int:pk>/delete/', SongViewSet.as_view({'delete': 'destroy'}), name='song_delete'),
 ]
