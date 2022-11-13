@@ -9,10 +9,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 
 
-class SongViewSet(ViewSet):
+class SongViewSet_Artist(ViewSet):
     serializer_class = SongSerializer
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def list(self, request):
         artist = Artist.objects.get(user=request.user)
@@ -46,3 +44,21 @@ class SongViewSet(ViewSet):
         song.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+class SongViewSet_User(ViewSet):
+    serializer_class = SongSerializer
+    authentication_classes = []
+    permission_classes = []
+
+    def list(self, request):
+        songs = Song.objects.all()
+        if len(songs) > 15:
+            songs = songs[:15]
+    
+        serializer = SongSerializer(songs, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        song = Song.objects.get(id=pk)
+        serializer = SongSerializer(song)
+        return Response(serializer.data)
