@@ -46,6 +46,20 @@ class SongViewSet_Artist(ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class ZahraViewSet(ViewSet):
+    serializer_class = SongSerializer
+    authentication_classes = []
+    permission_classes = []
+
+    def create(self, request):
+        serializer = SongSerializer(data=request.data)
+        if serializer.is_valid():
+            artist = Artist.objects.get(user__id = 2)
+            serializer.save(artist=artist)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
+
+
 class SongViewSet_User(ViewSet):
     serializer_class = SongSerializer
     authentication_classes = []
