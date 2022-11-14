@@ -13,6 +13,7 @@ class Song(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
+    lyrics = models.TextField(null=True, blank=True)
     song_link = models.CharField(max_length=1000)
     image = models.ImageField(upload_to='songs/images/', blank=True, null=True)
     note = models.FileField(upload_to='songs/notes/', blank=True, null=True)

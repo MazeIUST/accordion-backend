@@ -11,7 +11,7 @@ class SongSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Song
-        fields = ('id', 'artist', 'title', 'description', 'song_link', 'image', 'note', 'created_at', 'tags')
+        fields = ('id', 'artist', 'title', 'description', 'lyrics', 'song_link', 'image', 'note', 'created_at', 'tags')
         read_only_fields = ('id', 'created_at', 'artist')
 
     def create(self, validated_data):
