@@ -58,7 +58,6 @@ class VerifyEmail(generics.GenericAPIView):
         except jwt.exceptions.DecodeError as identifier:
             return Response({'error': 'Invalid token'}, status=400)
 
-
 class LoginApi(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
@@ -76,6 +75,17 @@ class LoginApi(TokenObtainPairView):
         self.change_username_to_email(request)
         return super().post(request, *args, **kwargs)
 
+class ChangePasswordView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ChangePasswordSerializer
+
+
+
+class UpdateProfileView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UpdateUserSerializer
 
 def show_all_user(request):
     users = User.objects.all()
