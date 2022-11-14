@@ -18,7 +18,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
+static_path = static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+media_path = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", include('accounts.urls')),    
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    path("", include('accounts.urls')), 
+    path('song/', include('song.urls')),
+] + static_path + media_path
