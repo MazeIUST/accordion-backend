@@ -54,7 +54,7 @@ class ZahraViewSet(ViewSet):
     def create(self, request):
         serializer = SongSerializer(data=request.data)
         if serializer.is_valid():
-            artist = Artist.objects.get(user__id = 2)
+            artist = Artist.objects.get(user__id = 1)
             serializer.save(artist=artist)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
