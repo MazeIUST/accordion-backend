@@ -40,9 +40,13 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'is_email_verified', 'is_Artist','name', 'birthday','gender', 'country')
+        fields = ('id', 'username', 'email', 'is_email_verified', 'is_Artist','first_name','last_name', 'birthday','gender', 'country')
 
-
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id','username', 'first_name','last_name', 'birthday', 'country','gender','image_url','email')
+        read_only_fields = ('id', 'email')
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):

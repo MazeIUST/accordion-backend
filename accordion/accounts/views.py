@@ -13,7 +13,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework.viewsets import ViewSet
+from rest_framework import status
 
 #Register API
 class RegisterApi(generics.GenericAPIView):
@@ -114,3 +115,22 @@ class ShowUser(APIView):
     def get(self, request, format=None):
         content = UserSerializer(request.user).data
         return Response(content)
+
+
+class ProfileViewSet(ViewSet):
+    serializer_class = ProfileSerializer
+
+    def retrieve(self, request):
+        user =  User.objects.get(user=request.user)
+        serializer = ProfileSerializer(user)
+        return Response(serializer.data)
+
+
+    def update(self, request):
+        serializer = ProfileSerializer(data=request.data)
+        if serializer.is_valid():
+            userId = User.objects.get(user=request.user)
+            serializer.save(id= userId)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
