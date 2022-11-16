@@ -4,6 +4,9 @@ from django.contrib.auth.models import User, AbstractUser
 from django.conf import settings
 # from django_countries.fields import CountryField
 
+# def upload_to(instance, filename):
+#     return 'images/{filename}'.format(filename=filename)
+
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     is_email_verified = models.BooleanField(default=False)
@@ -12,6 +15,7 @@ class User(AbstractUser):
     name = models.CharField(max_length=255,null=True)
     birthday = models.DateField(null=True)
     country = models.CharField(max_length=255,null=True)
+    image_url = models.ImageField(upload_to="profiles/images/", blank=True, null=True)
 
     GENDER_Male = 'M'
     GENDER_Female = 'F'

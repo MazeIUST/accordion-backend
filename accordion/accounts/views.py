@@ -13,11 +13,16 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework import permissions
+from rest_framework.parsers import MultiPartParser, FormParser
 
 #Register API
 class RegisterApi(generics.GenericAPIView):
+
     serializer_class = RegisterSerializer
+    permission_classes = []
+    authentication_classes = []
+
     def post(self, request, *args,  **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -43,6 +48,8 @@ class RegisterApi(generics.GenericAPIView):
 
 class VerifyEmail(generics.GenericAPIView):
     serializer_class = RegisterSerializer
+    permission_classes = []
+    authentication_classes = []
 
     def get(self, request):
         token = request.GET.get('token')
@@ -60,6 +67,8 @@ class VerifyEmail(generics.GenericAPIView):
 
 class LoginApi(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+    permission_classes = []
+    authentication_classes = []
 
     def change_username_to_email(self, request, *args, **kwargs):
         username = request.data.get('username')
@@ -86,6 +95,16 @@ class UpdateProfileView(generics.UpdateAPIView):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = UpdateUserSerializer
+
+    parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly]
+    
+    # permission_classes = []
+    authentication_classes = []
+
+    def perform_create(self, serializer):
+        serializer.save(creator=self.request.user)
 
 def show_all_user(request):
     users = User.objects.all()
@@ -118,3 +137,5 @@ class ShowUser(APIView):
     def get(self, request, format=None):
         content = UserSerializer(request.user).data,  # `django.contrib.auth.User` instance.
         return Response(content)
+
+
