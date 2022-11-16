@@ -121,7 +121,7 @@ class ProfileViewSet(ViewSet):
     serializer_class = ProfileSerializer
 
     def retrieve(self, request):
-        user =  User.objects.get(user=request.user)
+        user = request.user
         serializer = ProfileSerializer(user)
         return Response(serializer.data)
 
@@ -129,8 +129,8 @@ class ProfileViewSet(ViewSet):
     def update(self, request):
         serializer = ProfileSerializer(data=request.data)
         if serializer.is_valid():
-            userId = User.objects.get(user=request.user)
-            serializer.save(id= userId)
+            user = request.user
+            serializer.update(user, serializer.validated_data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
