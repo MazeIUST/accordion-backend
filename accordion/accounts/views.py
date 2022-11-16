@@ -126,11 +126,29 @@ class ProfileViewSet(ViewSet):
         return Response(serializer.data)
 
 
+
     def update(self, request):
         serializer = ProfileSerializer(data=request.data)
         if serializer.is_valid():
             user = request.user
             serializer.update(user, serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ArtistProfileViewSet(ViewSet):
+    serializer_class = ArtistProfileSerializer
+
+    def retrieve(self, request):
+        user = request.user
+        serializer = ArtistProfileSerializer(user)
+        return Response(serializer.data)
+
+    def update(self, request):
+        serializer = ArtistProfileSerializer(data=request.data)
+        if serializer.is_valid():
+            artist = request.artist
+            serializer.update(artist, serializer.validated_data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

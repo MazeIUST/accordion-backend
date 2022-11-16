@@ -49,13 +49,15 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'email', 'username')
 
 
+class ArtistProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id','username', 'first_name','last_name', 'birthday', 'country','gender','image_url','email','activitie_start_date','artistic_name')
+        read_only_fields = ('id', 'email', 'username')
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-
-        # Add extra responses here
-        # data['name'] = self.user.name
-        # ...
 
         is_email_verified = self.user.is_email_verified
         if not is_email_verified:
