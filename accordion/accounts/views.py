@@ -13,6 +13,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import authenticate, login
 
 
 #Register API
@@ -83,6 +84,11 @@ class LoginApi(TokenObtainPairView):
 
     def post(self, request, *args, **kwargs):
         self.change_username_to_email(request)
+        username = request.data.get('username')
+        user = User.objects.filter(username=username)
+        if user.exists():
+            user = user.get(username=username)
+            login(request, user)
         return super().post(request, *args, **kwargs)
 
 
