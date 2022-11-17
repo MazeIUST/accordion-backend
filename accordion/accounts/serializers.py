@@ -46,7 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ArtistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Artist
-        fields = ('id', 'artistic_name', 'activitie_start_date')
+        fields = ('id', 'artistic_name', 'activitie_start_date','description')
         read_only_fields = ('id',)
 
 

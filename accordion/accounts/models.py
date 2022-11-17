@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 from django.conf import settings
@@ -36,11 +37,19 @@ class User(AbstractUser):
         }
 
 
+# def year_choices():
+#     return [(r,r) for r in range(1950, datetime.date.today().year+1)]
+
+# def current_year():
+#     return datetime.date.today().year
+
+
 class Artist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     artistic_name = models.CharField(max_length=200,null=True)
-    activitie_start_date = models.DateField(null=True)
-    
+    # activitie_start_date = models.DateField(null=True)
+    description = models.TextField(null=True)
+    activitie_start_date = models.PositiveIntegerField(null=True)
     def __str__(self):
         return self.user.username
 
