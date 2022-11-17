@@ -4,14 +4,13 @@ from rest_framework.response import Response
 from accounts.models import Artist
 from .models import *
 from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from .scripts import create_tag
+from accordion.permissions import IsArtist
 
 
 class SongViewSet_Artist(ViewSet):
     serializer_class = SongSerializer
+    permission_classes = [IsArtist]
 
     def list(self, request):
         artist = Artist.objects.get(user=request.user)
