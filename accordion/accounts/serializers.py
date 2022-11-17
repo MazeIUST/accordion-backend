@@ -59,9 +59,12 @@ class ProfileSerializer(serializers.ModelSerializer):
         
 
     def update(self, instance, validated_data):
-        artist_data = validated_data.pop('artist')
-        artist = instance.artist
-        super().update(artist, artist_data)
+        try:
+            artist_data = validated_data.pop('artist')
+            artist = instance.artist
+            super().update(artist, artist_data)
+        except:
+            pass
         return super().update(instance, validated_data)
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
