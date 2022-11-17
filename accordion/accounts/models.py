@@ -40,7 +40,7 @@ class Artist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     artistic_name = models.CharField(max_length=200,null=True)
     activitie_start_date = models.DateField(null=True)
-    
+    description = models.TextField(null=True)
     def __str__(self):
         return self.user.username
 
