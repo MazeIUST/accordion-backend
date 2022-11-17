@@ -15,6 +15,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ViewSet
 from rest_framework import status
+from django.contrib.auth import authenticate, login
 
 #Register API
 class RegisterApi(generics.GenericAPIView):
@@ -84,6 +85,11 @@ class LoginApi(TokenObtainPairView):
 
     def post(self, request, *args, **kwargs):
         self.change_username_to_email(request)
+        username = request.data.get('username')
+        user = User.objects.filter(username=username)
+        if user.exists():
+            user = user.get(username=username)
+            login(request, user)
         return super().post(request, *args, **kwargs)
 
 
