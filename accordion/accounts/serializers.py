@@ -40,17 +40,33 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'is_email_verified', 'is_Artist','name', 'birthday','gender', 'country')
+        fields = ('id', 'username', 'email', 'is_email_verified', 'is_Artist','first_name','last_name', 'birthday','gender', 'country')
 
 
+class ArtistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Artist
+        fields = ('id', 'artistic_name', 'activitie_start_date')
+        read_only_fields = ('id',)
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    artist = ArtistSerializer()
+    class Meta:
+        model = User
+        fields = ('id','username', 'first_name','last_name', 'birthday', 'country','gender','image_url','email', 'artist')
+        read_only_fields = ('id', 'email', 'username')
+        
+
+    def update(self, instance, validated_data):
+        artist_data = validated_data.pop('artist')
+        artist = instance.artist
+        super().update(artist, artist_data)
+        return super().update(instance, validated_data)
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-
-        # Add extra responses here
-        # data['name'] = self.user.name
-        # ...
 
         is_email_verified = self.user.is_email_verified
         if not is_email_verified:

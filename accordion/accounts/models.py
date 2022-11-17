@@ -9,10 +9,9 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     is_email_verified = models.BooleanField(default=False)
     is_Artist = models.BooleanField(default=False)
-
-    name = models.CharField(max_length=255,null=True)
     birthday = models.DateField(null=True)
     country = models.CharField(max_length=255,null=True)
+    image_url = models.ImageField(upload_to='profiles/photos/', blank=True, null=True)
 
     GENDER_Male = 'M'
     GENDER_Female = 'F'
@@ -39,6 +38,8 @@ class User(AbstractUser):
 
 class Artist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    artistic_name = models.CharField(max_length=200,null=True)
+    activitie_start_date = models.DateField(null=True)
     
     def __str__(self):
         return self.user.username
