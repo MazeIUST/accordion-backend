@@ -7,5 +7,6 @@ class IsArtist(permissions.BasePermission):
 
     def has_permission(self, request, view):
         is_authenticated = request.user and request.user.is_authenticated
-        is_artist = request.user and request.user.is_Artist
-        return is_authenticated and is_artist
+        if is_authenticated:
+            return request.user.is_Artist
+        return False
