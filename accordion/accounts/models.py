@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 from django.conf import settings
@@ -9,10 +10,9 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     is_email_verified = models.BooleanField(default=False)
     is_Artist = models.BooleanField(default=False)
-
-    name = models.CharField(max_length=255,null=True)
     birthday = models.DateField(null=True)
     country = models.CharField(max_length=255,null=True)
+    image_url = models.ImageField(upload_to='profiles/photos/', blank=True, null=True)
 
     GENDER_Male = 'M'
     GENDER_Female = 'F'
@@ -37,9 +37,19 @@ class User(AbstractUser):
         }
 
 
+# def year_choices():
+#     return [(r,r) for r in range(1950, datetime.date.today().year+1)]
+
+# def current_year():
+#     return datetime.date.today().year
+
+
 class Artist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    
+    artistic_name = models.CharField(max_length=200,null=True)
+    # activitie_start_date = models.DateField(null=True)
+    description = models.TextField(null=True)
+    activitie_start_date = models.PositiveIntegerField(null=True)
     def __str__(self):
         return self.user.username
 
