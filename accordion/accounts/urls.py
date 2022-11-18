@@ -8,11 +8,10 @@ router = DefaultRouter()
 router.register(r'profile', UserViewSet, basename='profile')
 
 urlpatterns = [
-    path('api/register/', UserViewSet.as_view({'post': 'create'}), name='register'),
+    path('api/register/', RegisterView.as_view({'post': 'create'}), name='register'),
     path('api/login/', LoginApi.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
     path('verify-email/', VerifyEmail.as_view(), name='email-verify'),
     path('profile/', UserViewSet.as_view({'get': 'retrieve', 'put': 'update'}), name='profile'),
-    path('show_all_user/', UserViewSet.as_view({'get': 'list'}), name='show_all_user'),
-    path('showuser/', UserViewSet.as_view({'get': 'retrieve'}), name='showuser'),
+    path('profile/all/', UserViewSet.as_view({'get': 'list'}), name='show_all_user'),
 ]

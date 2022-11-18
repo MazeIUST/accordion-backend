@@ -43,43 +43,14 @@ class ArtistSerializer(serializers.ModelSerializer):
         fields = ('id', 'artistic_name', 'activitie_start_date','description')
         read_only_fields = ('id',)
 
+
 class UserSerializer(serializers.ModelSerializer):
-    password1 = serializers.CharField(write_only=True)
-    password2 = serializers.CharField(write_only=True)
-    is_Artist = serializers.BooleanField(required=False)
     artist = ArtistSerializer()
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'is_email_verified', 'is_Artist','first_name','last_name', 'birthday','gender', 'country', 'artist', 'password1', 'password2')
-        read_only_fields = ('id', 'email', 'username')
+        fields = ('id', 'username', 'email', 'is_email_verified', 'is_Artist','first_name','last_name', 'birthday','gender', 'country', 'artist')
+        read_only_fields = ('id', 'email', 'username', 'is_email_verified', 'is_Artist')
         
-        extra_kwargs = {
-            'password1': {'write_only': True},
-            'password1': {'write_only': True},
-        }
-
-    def validate(self, attrs):
-        if attrs['password1'] != attrs['password2']:
-            raise serializers.ValidationError({
-                'password2': ['Passwords must match.'],
-            })
-        return attrs
-
-
-    def create(self, validated_data):
-        user = User.objects.create(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            is_Artist=validated_data['is_Artist'],
-            password=make_password(validated_data['password1'])
-        )
-        if validated_data['is_Artist']:
-            Artist.objects.create(user=user)
-
-        return user
-
-        
-
 
     def update(self, instance, validated_data):
         try:

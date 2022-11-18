@@ -17,18 +17,12 @@ from rest_framework.viewsets import ViewSet
 from rest_framework import status
 from django.contrib.auth import authenticate, login
 
+
 #Register API
-class UserViewSet(ViewSet):
+class RegisterView(ViewSet):
     serializer_class = RegisterSerializer
     permission_classes_by_action = {'create': []}
     authentication_classes_by_action = {'create': []}
-
-
-    def list(self, request):
-        users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
-
 
     def create(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -52,6 +46,15 @@ class UserViewSet(ViewSet):
             "user": UserSerializer(user).data,
             "message": "User Created Successfully. Now perform Login to get your token",
         })
+
+
+class UserViewSet(ViewSet):
+    serializer_class = UserSerializer
+
+    def list(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
 
 
     def retrieve(self, request):
