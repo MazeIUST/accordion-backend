@@ -18,14 +18,20 @@ from rest_framework import status
 from django.contrib.auth import authenticate, login
 
 #Register API
-class RegisterApi(generics.GenericAPIView):
+class UserViewSet(ViewSet):
     serializer_class = RegisterSerializer
-    permission_classes = []
-    authentication_classes = []
+    permission_classes_by_action = {'create': []}
+    authentication_classes_by_action = {'create': []}
 
 
-    def post(self, request, *args,  **kwargs):
-        serializer = self.get_serializer(data=request.data)
+    def list(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+
+
+    def create(self, request):
+        serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         # --------- send email ---------
@@ -43,12 +49,25 @@ class RegisterApi(generics.GenericAPIView):
         Util.send_email(data)
         # ------------------------------
         return Response({
-            "user": UserSerializer(user, context=self.get_serializer_context()).data,
+            "user": UserSerializer(user).data,
             "message": "User Created Successfully. Now perform Login to get your token",
         })
 
+
+    def retrieve(self, request):
+        content = UserSerializer(request.user).data
+        return Response(content) 
+
+
+    def update(self, request):
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)     
+
+
 class VerifyEmail(generics.GenericAPIView):
-    serializer_class = RegisterSerializer
     permission_classes = []
     authentication_classes = []
 
@@ -92,49 +111,3 @@ class LoginApi(TokenObtainPairView):
             login(request, user)
         return super().post(request, *args, **kwargs)
 
-
-def show_all_user(request):
-    users = User.objects.all()
-    user_list = []
-    for user in users:
-        new_user = {
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-            'is_email_verified': user.is_email_verified,
-            'is_Artist': user.is_Artist
-        }
-        user_list.append(new_user)
-    
-    return JsonResponse(user_list, safe=False)
-
-def show_all_user2(request):
-    obj_list = []
-    for i, user in enumerate(User.objects.all()):
-        obj_list.append(user)
-
-    users = UserSerializer(obj_list, many=True).data
-    return JsonResponse(users, safe=False) 
-
-
-class ShowUser(APIView):
-    def get(self, request, format=None):
-        content = UserSerializer(request.user).data
-        return Response(content)
-
-
-class ProfileViewSet(ViewSet):
-    serializer_class = ProfileSerializer
-
-    def retrieve(self, request):
-        user = request.user
-        serializer = ProfileSerializer(user)
-        return Response(serializer.data)
-
-
-    def update(self, request):
-        serializer = ProfileSerializer(request.user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
