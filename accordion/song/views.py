@@ -6,7 +6,7 @@ from .models import *
 from rest_framework import status
 from .scripts import create_tag
 from accordion.permissions import IsArtist
-
+from django.db.models import Q
 
 class SongViewSet_Artist(ViewSet):
     serializer_class = SongSerializer
@@ -76,6 +76,35 @@ class SongViewSet_User(ViewSet):
         song = Song.objects.get(id=pk)
         serializer = SongSerializer(song)
         return Response(serializer.data)
+
+    def search(self, request, text=None):
+        scores = {}
+        title_contains = Song.objects.filter(title__contains=text)
+        artist_contains = Song.objects.filter(Q(artist__user__first_name__contains=text) | Q(artist__user__last_name__contains=text))
+        lyrics_contains = Song.objects.filter(lyrics__contains=text)
+        
+        for song in title_contains:
+            scores[song] = 10
+        for song in artist_contains:
+            scores[song] = 5 if song not in scores else scores[song] + 5
+        for song in lyrics_contains:
+            scores[song] = 3 if song not in scores else scores[song] + 3
+
+        # save songs in a queryset
+        songs = []
+        for song in scores:
+            songs.append(song)
+
+        # sort songs by score
+        songs.sort(key=lambda x: scores[x], reverse=True)
+
+        # return top 15 songs   
+        if len(songs) > 15:
+            songs = songs[:15]
+
+        serializer = SongSerializer(songs, many=True)
+        return Response(serializer.data)
+            
 
 
 class TagViewSet(ViewSet):

@@ -17,8 +17,10 @@ urlpatterns = [
 
     path('user/', SongViewSet_User.as_view({'get': 'list'}), name='songs'),
     path('user/<int:pk>/', SongViewSet_User.as_view({'get': 'retrieve'}), name='song'),
+    path('user/search/<str:text>/', SongViewSet_User.as_view({'get': 'search'}), name='song_search'),
 
     path('tag/', TagViewSet.as_view({'get': 'list', 'post': 'create'}), name='tags'),
     path('tag/<int:pk>/', TagViewSet.as_view({'get': 'retrieve', 'put': 'update'}), name='tag'),
     path('tag/<int:pk>/delete/', TagViewSet.as_view({'delete': 'destroy'}), name='tag_delete'),
+
 ]
