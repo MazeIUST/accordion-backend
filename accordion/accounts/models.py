@@ -12,7 +12,7 @@ class User(AbstractUser):
     is_Artist = models.BooleanField(default=False)
     birthday = models.DateField(null=True)
     country = models.CharField(max_length=255,null=True)
-    image_url = models.ImageField(upload_to='profiles/photos/', blank=True, null=True)
+    image = models.ImageField(upload_to='profiles/photos/', blank=True, null=True)
 
     GENDER_Male = 'M'
     GENDER_Female = 'F'
