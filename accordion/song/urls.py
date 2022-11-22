@@ -7,10 +7,15 @@ router = DefaultRouter()
 router.register(r'admin', SongViewSet_Admin, basename='admin')
 router.register(r'artist', SongViewSet_Artist, basename='artist')
 router.register(r'user', SongViewSet_User, basename='user')
+router.register(r'', SongViewSet, basename='songs')
 router.register(r'tag', TagViewSet, basename='tag')
 
 
 urlpatterns = [
+    path('', SongViewSet.as_view({'get': 'list'})),
+    path('<int:pk>/', SongViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
+    path('delete_all', SongViewSet.as_view({'delete': 'delete_all'})),
+
     path('admin/', SongViewSet_Admin.as_view({'get': 'list'})),
     path('admin/<int:pk>/', SongViewSet_Admin.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
     path('admin/delete_all/', SongViewSet_Admin.as_view({'delete': 'destroy_all'})),

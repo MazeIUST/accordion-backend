@@ -8,6 +8,7 @@ from .scripts import create_tag
 from accordion.permissions import *
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 
 
 class SongViewSet_Admin(ViewSet):
@@ -153,6 +154,93 @@ class SongViewSet_User(ViewSet):
         return Response(serializer.data)
             
 
+class SongViewSet(ViewSet):
+    serializer_class = SongSerializer
+    permission_classes = []
+
+    def get_permissions(self):
+        if self.action in ['list_all', 'destroy_all']:
+            permission_classes = [IsSuperUser]
+        elif self.action in ['list', 'create', 'update', 'destroy']:
+            permission_classes = [IsArtist]
+        else:
+            permission_classes = []
+        return permission_classes
+
+    def list_all(self, request):
+        songs = Song.objects.all()
+        serializer = SongSerializer(songs, many=True)
+        return Response(serializer.data)
+
+    def destroy_all(self, request):
+        songs = Song.objects.all()
+        songs.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def list(self, request):
+        artist = Artist.objects.get(user=request.user)
+        songs = Song.objects.filter(artist=artist)
+        serializer = SongSerializer(songs, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = SongSerializer(data=request.data)
+        if serializer.is_valid():
+            artist = Artist.objects.get(user=request.user)
+            serializer.save(artist=artist)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, pk=None):
+        song = get_object_or_404(Song, id=pk)
+        serializer = SongSerializer(song)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        song = get_object_or_404(Song, id=pk)
+        serializer = SongSerializer(instance=song, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def destroy(self, request, pk=None):
+        song = get_object_or_404(Song, id=pk)
+        song.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def search(self, request, text=None):
+        scores = {}
+        title_contains = Song.objects.filter(title__contains=text)
+        artist_contains = Song.objects.filter(Q(artist__user__first_name__contains=text) | Q(artist__user__last_name__contains=text))
+        lyrics_contains = Song.objects.filter(lyrics__contains=text)
+        
+        for song in title_contains:
+            scores[song] = 10
+        for song in artist_contains:
+            scores[song] = 5 if song not in scores else scores[song] + 5
+        for song in lyrics_contains:
+            scores[song] = 3 if song not in scores else scores[song] + 3
+
+        # save songs in a queryset
+        songs = []
+        for song in scores:
+            songs.append(song)
+
+        # sort songs by score
+        songs.sort(key=lambda x: scores[x], reverse=True)
+
+        # return top 15 songs   
+        if len(songs) > 15:
+            songs = songs[:15]
+
+        serializer = SongSerializer(songs, many=True)
+        return Response(serializer.data)
+
+    
+
+            
+        
 
 class TagViewSet(ViewSet):
     serializer_class = TagSerializer
