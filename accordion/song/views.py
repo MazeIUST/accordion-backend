@@ -27,9 +27,12 @@ class SongViewSet_Artist(ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None):
-        song = Song.objects.get(id=pk)
-        serializer = SongSerializer(song)
-        return Response(serializer.data)
+        try:
+            song = Song.objects.get(id=pk)
+            serializer = SongSerializer(song)
+            return Response(serializer.data)
+        except Song.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     def update(self, request, pk=None):
         song = Song.objects.get(id=pk)
@@ -75,9 +78,12 @@ class SongViewSet_User(ViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        song = Song.objects.get(id=pk)
-        serializer = SongSerializer(song)
-        return Response(serializer.data)
+        try:
+            song = Song.objects.get(id=pk)
+            serializer = SongSerializer(song)
+            return Response(serializer.data)
+        except Song.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     def search(self, request, text=None):
         scores = {}
@@ -128,9 +134,12 @@ class TagViewSet(ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None):
-        tag = Tag.objects.get(id=pk)
-        serializer = TagSerializer(tag)
-        return Response(serializer.data)
+        try:
+            tag = Tag.objects.get(id=pk)
+            serializer = TagSerializer(tag)
+            return Response(serializer.data)
+        except Tag.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     def update(self, request, pk=None):
         tag = Tag.objects.get(id=pk)
@@ -141,6 +150,9 @@ class TagViewSet(ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk=None):
-        tag = Tag.objects.get(id=pk)
-        tag.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            tag = Tag.objects.get(id=pk)
+            tag.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Tag.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
