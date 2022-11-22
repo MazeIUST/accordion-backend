@@ -10,3 +10,10 @@ class IsArtist(permissions.BasePermission):
         if is_authenticated:
             return request.user.is_Artist
         return False
+
+    def has_object_permission(self, request, view, obj):
+        if view.action in ['update', 'destroy']:
+            if obj.artist.user == request.user:
+                return True
+            return False
+        return True

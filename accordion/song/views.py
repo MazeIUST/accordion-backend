@@ -48,10 +48,8 @@ class SongViewSet_Artist(ViewSet):
             song = song.first()
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        if song.artist.user == request.user:
-            song.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_403_FORBIDDEN)
+        song.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ZahraViewSet(ViewSet):
