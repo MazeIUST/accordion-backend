@@ -5,8 +5,45 @@ from accounts.models import Artist
 from .models import *
 from rest_framework import status
 from .scripts import create_tag
-from accordion.permissions import IsArtist
+from accordion.permissions import *
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
+
+
+class SongViewSet_Admin(ViewSet):
+    serializer_class = SongSerializer
+    permission_classes = [IsSuperUser]
+
+    def list(self, request):
+        queryset = Song.objects.all()
+        serializer = SongSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = Song.objects.all()
+        song = get_object_or_404(queryset, pk=pk)
+        serializer = SongSerializer(song)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        queryset = Song.objects.all()
+        song = get_object_or_404(queryset, pk=pk)
+        serializer = SongSerializer(song, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        queryset = Song.objects.all()
+        song = get_object_or_404(queryset, pk=pk)
+        song.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def destroy_all(self, request):
+        queryset = Song.objects.all()
+        queryset.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class SongViewSet_Artist(ViewSet):
     serializer_class = SongSerializer
