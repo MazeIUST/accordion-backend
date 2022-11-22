@@ -156,16 +156,13 @@ class SongViewSet_User(ViewSet):
 
 class SongViewSet(ViewSet):
     serializer_class = SongSerializer
-    permission_classes = []
 
     def get_permissions(self):
         if self.action in ['list_all', 'destroy_all']:
-            permission_classes = [IsSuperUser]
+            return (IsSuperUser(),)
         elif self.action in ['list', 'create', 'update', 'destroy']:
-            permission_classes = [IsArtist]
-        else:
-            permission_classes = []
-        return permission_classes
+            return (IsArtist(),)
+        return (IsAuthenticated(),)
 
     def list_all(self, request):
         songs = Song.objects.all()
