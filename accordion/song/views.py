@@ -41,8 +41,10 @@ class SongViewSet_Artist(ViewSet):
 
     def destroy(self, request, pk=None):
         song = Song.objects.get(id=pk)
-        song.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if song.artist.user == request.user:
+            song.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_403_FORBIDDEN)
 
 
 class ZahraViewSet(ViewSet):
