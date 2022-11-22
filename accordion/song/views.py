@@ -43,13 +43,14 @@ class SongViewSet_Artist(ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk=None):
-        song = Song.objects.get(id=pk)
+        song = Song.objects.filter(id=pk)
+        if song.exists():
+            song = song.first()
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         if song.artist.user == request.user:
-            try:
-                song.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            except Song.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
+            song.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_403_FORBIDDEN)
 
 
