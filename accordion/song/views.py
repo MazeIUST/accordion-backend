@@ -29,10 +29,8 @@ class SongViewSet(ViewSet):
     permission_classes = []
 
     def get_permissions(self):
-        if self.action in ['update', 'destroy']:
+        if self.action in ['update', 'destroy', 'destroy_all']:
             self.permission_classes = [IsArtistORSuperuser]
-        elif self.action in ['destroy_all']:
-            self.permission_classes = [IsSuperUser]
         elif self.action in ['create']:
             self.permission_classes = [IsArtist]
         return super().get_permissions()
@@ -73,9 +71,13 @@ class SongViewSet(ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def destroy_all(self, request):
-        songs = Song.objects.all()
-        songs.delete()
+        if request.user.is_superuser:
+            Song.objects.all().delete()
+        else:
+            artist = Artist.objects.get(user=request.user)
+            Song.objects.filter(artist=artist).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
     def search(self, request, text=None):
         scores = {}
