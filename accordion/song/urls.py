@@ -11,7 +11,7 @@ router.register(r'tag', TagViewSet, basename='tag')
 urlpatterns = [
     path('', SongViewSet.as_view({'get': 'list', 'post': 'create'})),
     path('<int:pk>/', SongViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
-    path('delete_all/', SongViewSet.as_view({'delete': 'destroy_all'})),
+    path('delete_all/', SongViewSet.as_view({'delete': 'destroy_all', 'get': 'list'})),
     path('search/<str:text>/', SongViewSet.as_view({'get': 'search'}), name='song_search'),
 
     path('tag/', TagViewSet.as_view({'get': 'list', 'post': 'create'}), name='tags'),
