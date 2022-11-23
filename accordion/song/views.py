@@ -29,14 +29,13 @@ class SongViewSet(ViewSet):
     permission_classes = []
 
     def get_permissions(self):
-        if self.action in ['update', 'destroy', 'list']:
+        if self.action in ['update', 'destroy']:
             self.permission_classes = [IsArtistORSuperuser]
         elif self.action in ['destroy_all']:
             self.permission_classes = [IsSuperUser]
         elif self.action in ['create']:
             self.permission_classes = [IsArtist]
         return super().get_permissions()
-
 
     def list(self, request):
         if request.user.is_Artist:
