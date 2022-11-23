@@ -67,7 +67,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
 
         is_email_verified = self.user.is_email_verified
-        if not is_email_verified:
+        if not is_email_verified and not self.user.is_superuser:
             raise serializers.ValidationError({
                 'email': ['email is not verified.'],
             })
