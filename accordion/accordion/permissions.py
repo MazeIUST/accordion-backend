@@ -19,7 +19,7 @@ class IsArtist(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if view.action in ['update', 'destroy']:
-            if obj.artist.user == request.user or request.user.is_superuser:
+            if obj.artist.user == request.user:
                 return True
             return False
         return True
