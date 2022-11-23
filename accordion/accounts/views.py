@@ -21,8 +21,8 @@ from django.contrib.auth import authenticate, login
 #Register API
 class RegisterView(ViewSet):
     serializer_class = RegisterSerializer
-    permission_classes_by_action = {'create': []}
-    authentication_classes_by_action = {'create': []}
+    permission_classes = []
+    authentication_classes = []
 
     def create(self, request):
         serializer = RegisterSerializer(data=request.data)

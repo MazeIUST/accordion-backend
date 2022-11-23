@@ -156,29 +156,24 @@ class SongViewSet_User(ViewSet):
 
 class SongViewSet(ViewSet):
     serializer_class = SongSerializer
+    permission_classes = []
 
     def get_permissions(self):
-        if self.action in ['update', 'destroy']:
-            return (IsArtist()|IsSuperUser(),)
-        elif self.action in ['list_all', 'destroy_all']:
-            return (IsSuperUser(),)
-        elif self.action in ['list', 'create']:
-            return (IsArtist())
-        return (IsAuthenticated(),)
+        if self.action in ['update', 'destroy', 'list']:
+            self.permission_classes = [IsArtistORSuperuser]
+        elif self.action in ['destroy_all']:
+            self.permission_classes = [IsSuperUser]
+        elif self.action in ['create']:
+            self.permission_classes = [IsArtist]
+        return super().get_permissions()
 
-    def list_all(self, request):
-        songs = Song.objects.all()
-        serializer = SongSerializer(songs, many=True)
-        return Response(serializer.data)
-
-    def destroy_all(self, request):
-        songs = Song.objects.all()
-        songs.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def list(self, request):
-        artist = Artist.objects.get(user=request.user)
-        songs = Song.objects.filter(artist=artist)
+        if request.user.is_superuser:
+            songs = Song.objects.all()
+        else:
+            artist = Artist.objects.get(user=request.user)
+            songs = Song.objects.filter(artist=artist)
         serializer = SongSerializer(songs, many=True)
         return Response(serializer.data)
 
@@ -208,6 +203,11 @@ class SongViewSet(ViewSet):
         song.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def destroy_all(self, request):
+        songs = Song.objects.all()
+        songs.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     def search(self, request, text=None):
         scores = {}
         title_contains = Song.objects.filter(title__contains=text)
@@ -235,10 +235,6 @@ class SongViewSet(ViewSet):
 
         serializer = SongSerializer(songs, many=True)
         return Response(serializer.data)
-
-    
-
-            
         
 
 class TagViewSet(ViewSet):

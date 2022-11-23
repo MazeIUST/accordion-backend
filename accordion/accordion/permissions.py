@@ -23,3 +23,21 @@ class IsArtist(permissions.BasePermission):
                 return True
             return False
         return True
+
+class IsArtistORSuperuser(permissions.BasePermission):
+    """
+    Global permission check for is artist or superuser
+    """
+
+    def has_permission(self, request, view):
+        is_authenticated = request.user and request.user.is_authenticated
+        if is_authenticated:
+            return request.user.is_Artist or request.user.is_superuser
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        if view.action in ['update', 'destroy']:
+            if obj.artist.user == request.user or request.user.is_superuser:
+                return True
+            return False
+        return True
