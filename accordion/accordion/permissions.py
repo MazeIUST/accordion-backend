@@ -1,5 +1,6 @@
 from rest_framework import permissions
 from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 
 class IsSuperUser(IsAdminUser):
     def has_permission(self, request, view):
@@ -7,9 +8,6 @@ class IsSuperUser(IsAdminUser):
 
 
 class IsArtist(permissions.BasePermission):
-    """
-    Global permission check for is artist
-    """
 
     def has_permission(self, request, view):
         is_authenticated = request.user and request.user.is_authenticated
@@ -25,9 +23,6 @@ class IsArtist(permissions.BasePermission):
         return True
 
 class IsArtistORSuperuser(permissions.BasePermission):
-    """
-    Global permission check for is artist or superuser
-    """
 
     def has_permission(self, request, view):
         is_authenticated = request.user and request.user.is_authenticated
@@ -37,7 +32,5 @@ class IsArtistORSuperuser(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if view.action in ['update', 'destroy']:
-            if obj.artist.user == request.user or request.user.is_superuser:
-                return True
-            return False
+            return request.user.is_superuser or obj.artist.user == request.user
         return True

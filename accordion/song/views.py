@@ -9,34 +9,26 @@ from accordion.permissions import *
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-
-
-class ZahraViewSet(ViewSet):
-    serializer_class = SongSerializer
-    authentication_classes = []
-    permission_classes = []
-
-    def create(self, request):
-        serializer = SongSerializer(data=request.data)
-        if serializer.is_valid():
-            artist = Artist.objects.get(user__id = 1)
-            serializer.save(artist=artist)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)         
+       
 
 class SongViewSet(ViewSet):
     serializer_class = SongSerializer
-    permission_classes = []
 
     def get_permissions(self):
+        permission_classes = [IsAuthenticated]
         if self.action in ['update', 'destroy', 'destroy_all']:
-            self.permission_classes = [IsArtistORSuperuser]
+            permission_classes.append(IsArtistORSuperuser)
         elif self.action in ['create']:
-            self.permission_classes = [IsArtist]
-        return super().get_permissions()
+            permission_classes.append(IsArtist)
+        elif self.action in ['search', 'list']:
+            permission_classes = []
+        return [permission() for permission in permission_classes]
 
     def list(self, request):
-        if request.user.is_Artist:
+        # Anonimous users
+        if request.user.is_anonymous:
+            songs = Song.objects.all()
+        elif request.user.is_Artist:
             artist = Artist.objects.get(user=request.user)
             songs = Song.objects.filter(artist=artist)
         else:
@@ -77,7 +69,6 @@ class SongViewSet(ViewSet):
             artist = Artist.objects.get(user=request.user)
             Song.objects.filter(artist=artist).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
     def search(self, request, text=None):
         scores = {}

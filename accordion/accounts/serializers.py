@@ -5,7 +5,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 # Register serializer
-class RegisterSerializer(serializers.ModelSerializer):
+class SignUpSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
     is_Artist = serializers.BooleanField(required=False)
@@ -62,7 +62,7 @@ class UserSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+class LoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
 
@@ -73,3 +73,33 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             })
 
         return data
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password1 = serializers.CharField(required=True)
+    new_password2 = serializers.CharField(required=True)
+    class Meta:
+        model = User
+        fields = ('old_password', 'new_password1', 'new_password2')
+
+    def validate(self, attrs):
+        if attrs['new_password1'] != attrs['new_password2']:
+            raise serializers.ValidationError({
+                'new_password2': ['Passwords must match.'],
+            })
+        if attrs['old_password'] == attrs['new_password1']:
+            raise serializers.ValidationError({
+                'new_password1': ['New password must be different than old password.'],
+            })
+        return attrs
+
+    def update(self, instance, validated_data):
+        if instance.check_password(validated_data['old_password']):
+            instance.set_password(validated_data['new_password1'])
+            instance.save()
+            return instance
+        else:
+            raise serializers.ValidationError({
+                'old_password': ['Old password is incorrect.'],
+            })
+            
