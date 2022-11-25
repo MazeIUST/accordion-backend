@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import Artist
+from accounts.models import Artist,User
 
 
 class Tag(models.Model):
@@ -21,4 +21,14 @@ class Song(models.Model):
     tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
+        return self.title
+
+class Playlist(models.Model):
+    title = models.CharField(max_length=100)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    songs = models.ManyToManyField(Song, blank=True)
+    description = models.TextField(null=True, blank=True)
+
+    def str(self):
         return self.title
