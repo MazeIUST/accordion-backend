@@ -144,32 +144,45 @@ class TagViewSet(ViewSet):
 
 class PlaylistViewSet(ViewSet):
     serializer_class = PlaylistSerializer
-
+    permission_classes = [IsAuthenticated,IsPlaylistOwner]
+        
     def create(self, request):
         serializer = PlaylistSerializer(data=request.data)
         if serializer.is_valid():
-            creator = User.objects.get(user=request.user)
+            creator = request.user
             serializer.save(creator=creator)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk=None):
+    def destroy(self, request, pk=None):
         playlist = get_object_or_404(Playlist, id=pk)
         playlist.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # def update(self, request, pk=None):
-    #     playlist = get_object_or_404(Playlist, id=pk)
-    #     serializer = PlaylistSerializer(instance=playlist, data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def retrieve(self, request, pk=None):
+        playlist = get_object_or_404(Playlist, id=pk)
+        serializer = PlaylistSerializer(playlist)
+        return Response(serializer.data)
 
-    # def add_song
+    def update(self, request, pk=None):
+        playlist = get_object_or_404(Playlist, id=pk)
+        serializer = PlaylistSerializer(instance=playlist, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def add_song(self, request, song_pk=None,playlist_pk=None): 
+        song = get_object_or_404(Song, id=song_pk)
+        playlist = get_object_or_404(Playlist, id=playlist_pk)
+        playlist.songs.add(song)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # def remove_song
+    def remove_song(self, request, song_pk=None,playlist_pk=None):
+        song = get_object_or_404(Song, id=song_pk)
+        playlist = get_object_or_404(Playlist, id=playlist_pk)
+        playlist.songs.delete(song)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     
 
