@@ -1,5 +1,5 @@
 from rest_framework.viewsets import ViewSet
-from .serializers import SongSerializer, TagSerializer
+from .serializers import SongSerializer, TagSerializer,PlaylistSerializer
 from rest_framework.response import Response
 from accounts.models import Artist
 from .models import *
@@ -140,3 +140,40 @@ class TagViewSet(ViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Tag.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class PlaylistViewSet(ViewSet):
+    serializer_class = PlaylistSerializer
+
+    def create(self, request):
+        serializer = PlaylistSerializer(data=request.data)
+        if serializer.is_valid():
+            creator = User.objects.get(user=request.user)
+            serializer.save(creator=creator)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk=None):
+        playlist = get_object_or_404(Playlist, id=pk)
+        playlist.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # def update(self, request, pk=None):
+    #     playlist = get_object_or_404(Playlist, id=pk)
+    #     serializer = PlaylistSerializer(instance=playlist, data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # def add_song
+
+
+    # def remove_song
+
+    
+
+
+
+
+

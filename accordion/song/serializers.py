@@ -21,4 +21,13 @@ class SongSerializer(serializers.ModelSerializer):
             song.tags.add(tag)
         return song
 
+class PlaylistSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Playlist
+        fields = ('id','title','creator','created_at','description')
+        read_only_fields = ('id', 'created_at', 'creator')
+
+
+
         

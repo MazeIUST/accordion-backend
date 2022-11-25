@@ -16,4 +16,8 @@ urlpatterns = [
 
     path('tag/', TagViewSet.as_view({'get': 'list', 'post': 'create'}), name='tags'),
     path('tag/<int:pk>/', TagViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='tag'),
+
+
+
+    path('create/', PlaylistViewSet.as_view({'post': 'create'}), name='create'),
 ]
