@@ -105,6 +105,8 @@ class LoginView(TokenObtainPairView):
         
 
 class UserViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    
     def get_serializer_class(self):
         if self.action == 'change_password':
             return ChangePasswordSerializer
