@@ -32,6 +32,7 @@ class IsArtistORSuperuser(permissions.BasePermission):
         if is_authenticated:
             return request.user.is_Artist or request.user.is_superuser
         return False
+        
 
     def has_object_permission(self, request, view, obj):
         if view.action in ['update', 'destroy']:
