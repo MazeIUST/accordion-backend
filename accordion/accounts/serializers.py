@@ -48,8 +48,8 @@ class UserSerializer(serializers.ModelSerializer):
     artist = ArtistSerializer()
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'is_email_verified', 'is_Artist','first_name','last_name', 'birthday', 'gender', 'country', 'image', 'artist')
-        read_only_fields = ('id', 'email', 'username', 'is_email_verified', 'is_Artist')
+        fields = ('id', 'username', 'email', 'is_email_verified', 'is_Artist', 'telegram_chat_id', 'first_name','last_name', 'birthday', 'gender', 'country', 'image', 'artist')
+        read_only_fields = ('id', 'email', 'username', 'is_email_verified', 'is_Artist', 'telegram_chat_id')
         
 
     def update(self, instance, validated_data):
