@@ -18,9 +18,11 @@ def main():
 
     # handlers
     start_handler = CommandHandler('start', start)
+    search_handler = MessageHandler(Filters.text, search)
 
     # add handlers to dispatcher
     dispatcher.add_handler(start_handler)
+    dispatcher.add_handler(search_handler)
 
     updater.start_polling()
     updater.idle()

@@ -1,4 +1,5 @@
 from datetime import datetime
+from urllib import response
 from telegram import (Update,
                       ParseMode,
                       InlineKeyboardMarkup,
@@ -19,7 +20,10 @@ def send_request(url, options):
     for option in options:
         url += f'{option}/'
     response = requests.get(url)
-    return response.json()
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return {'status': 'error'}
 
 
 def cancel(update: Update, context: CallbackContext):
@@ -42,6 +46,15 @@ def get_user_telegram_info_from_update(update: Update, context: CallbackContext)
     result['is_group'] = update.message.chat.type != "private"
     result['language_code'] = update.message.from_user['language_code']
     return result
+
+def download_song(song_link):
+    song_id = song_link.split('/')[-2]
+    song_link = f'https://drive.google.com/u/0/uc?id={song_id}&export=download'
+    response = requests.get(song_link)
+    print(response.content)
+    with open(f'songs/song.mp3', 'wb') as f:
+        f.write(response.content)
+        return f.name
 
 
 
