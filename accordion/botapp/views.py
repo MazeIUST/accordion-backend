@@ -32,7 +32,7 @@ class UserViewSet(ViewSet):
         if serializer.is_valid():
             serializer.update(request.user, serializer.validated_data)
             return Response({'status': 'OK'})
-        return Response({'status': 'error'})
+        return Response(serializer.errors)
         
     def get_my_playlists(self, request, chat_id):
         song = get_object_or_404(Song, id=1)
