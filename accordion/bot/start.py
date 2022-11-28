@@ -43,12 +43,14 @@ def show_my_playlists(update: Update, context: CallbackContext):
 
 def search(update: Update, context: CallbackContext):
     user_info = get_user_telegram_info_from_update(update, context)
-    response = send_request('search', [user_info['chat_id'], update.message.text])
-    if response['status'] == 'OK':
-        for song in response['songs']:
-            update.message.reply_text(song['name'])
+    response = send_request('search', [update.message.text])
+    if response:
+        for song in response:
+            update.message.reply_text(song['title'])
     else:
-        update.message.reply_text('error')
+        update.message.reply_text('not found!')
+        
+
 
 
         
