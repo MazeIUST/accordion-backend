@@ -8,7 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    is_email_verified = models.BooleanField(default=False)
+    is_email_verified = models.BooleanField(default=True)
     is_Artist = models.BooleanField(default=False)
     birthday = models.DateField(null=True)
     country = models.CharField(max_length=255,null=True)

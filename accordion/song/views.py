@@ -7,7 +7,7 @@ from rest_framework import status
 from .scripts import create_tag
 from accordion.permissions import *
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404,get_list_or_404
 from rest_framework.permissions import IsAuthenticated
        
 
@@ -146,11 +146,12 @@ class PlaylistViewSet(ViewSet):
     serializer_class = PlaylistSerializer
     permission_classes = [IsAuthenticated,IsPlaylistOwner]
         
-    def create(self, request):
+    # this is working
+    def create(self, request):  
         serializer = PlaylistSerializer(data=request.data)
         if serializer.is_valid():
-            creator = request.user
-            serializer.save(creator=creator)
+            owner = request.user
+            serializer.save(owner=owner)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -159,9 +160,22 @@ class PlaylistViewSet(ViewSet):
         playlist.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def retrieve(self, request, pk=None):
+    # this is working
+    def retrieve(self, request, pk=None): #return a playlist by its id
         playlist = get_object_or_404(Playlist, id=pk)
         serializer = PlaylistSerializer(playlist)
+        return Response(serializer.data)
+    
+    # this is working
+    def retrieve_user_playlists(self, request): # return a playlists of a user for itself
+        playlists = get_list_or_404(Playlist, owner_id=request.user.id)
+        serializer = PlaylistSerializer(playlists, many=True)
+        return Response(serializer.data)
+
+    # this is working
+    def retrieve_other_playlists(self, request,pk=None): # return a playlists of a user for itself
+        playlists = get_list_or_404(Playlist, owner_id=pk,is_public=True)
+        serializer = PlaylistSerializer(playlists,many=True)
         return Response(serializer.data)
 
     def update(self, request, pk=None):
@@ -172,7 +186,16 @@ class PlaylistViewSet(ViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def add_song(self, request, song_pk=None,playlist_pk=None): 
+    # def add_song1(self, request, song_pk=None,playlist_pk=None):
+    #     song = get_object_or_404(Song, id=song_pk)
+    #     playlist = get_object_or_404(Playlist, id=playlist_pk)
+    #     playlist.songs.add(song)
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+    def add_song(self, request, *args, **kwargs):
+        song_pk = self.kwargs.get('song_pk')
+        playlist_pk = self.kwargs.get('playlist_pk') 
         song = get_object_or_404(Song, id=song_pk)
         playlist = get_object_or_404(Playlist, id=playlist_pk)
         playlist.songs.add(song)
