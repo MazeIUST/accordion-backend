@@ -71,10 +71,8 @@ class UserPublicSerializer(serializers.ModelSerializer):
     artist = ArtistPublicSerializer()
     class Meta:
         model = User
-        fields = ('username', 'is_Artist', 'first_name','last_name', 'image', 'artist','following') # should add playlist, followings there
-        read_only_fields = ('username', 'is_Artist', 'first_name','last_name', 'image', 'artist','following') # should add playlist,followings there
-
-
+        fields = ('username', 'is_Artist', 'first_name','last_name', 'image', 'artist','followers','following') # should add playlist there
+        read_only_fields = ('username', 'is_Artist', 'first_name','last_name', 'image', 'artist','followers','following') # should add playlist there
 
 class LoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):

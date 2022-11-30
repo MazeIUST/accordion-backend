@@ -18,5 +18,6 @@ urlpatterns = [
     path('profile/', UserViewSet.as_view({'get': 'retrieve', 'put': 'update'}), name='profile'),
     path('profile/all/', UserViewSet.as_view({'get': 'list'}), name='show_all_user'),
     path('profile/user/<int:pk>/', UserViewSet.as_view({'get': 'retrieve_other_user'}), name='show_other_user_profile'),
+    path('follow/<int:pk>/', UserViewSet.as_view({'get': 'follow'}), name='follow'),
     path('change_password/', UserViewSet.as_view({'put': 'change_password'}), name='change_password'),
 ]

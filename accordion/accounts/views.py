@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from .serializers import *
-from .models import User
+from .models import User,UserFollowing
 from rest_framework_simplejwt.tokens import RefreshToken # for email
 from django.contrib.sites.shortcuts import get_current_site # for email
 from django.urls import reverse # for email
@@ -149,6 +149,11 @@ class UserViewSet(ModelViewSet):
             song_serializer = SongSerializer(songs, many=True)
             return Response({ 'profile': profile_serializer.data,'songs': song_serializer.data})
         return Response({'profile': profile_serializer.data})
+
+    def follow(self, request,pk=None):
+        following = get_object_or_404(User, id=pk)
+        UserFollowing.objects.create(user=request.user,following_user=following)
+        return Response('doneeeeeeeee')
 
 
 class VerifyEmail(generics.GenericAPIView):
