@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from accounts.serializers import ArtistSerializer
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -8,7 +9,7 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 class SongSerializer(serializers.ModelSerializer):
-
+    artist = ArtistSerializer()
     class Meta:
         model = Song
         fields = ('id', 'artist', 'title', 'description', 'lyrics', 'song_link', 'image', 'note', 'created_at', 'tags')

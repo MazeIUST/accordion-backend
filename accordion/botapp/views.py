@@ -34,8 +34,8 @@ class UserViewSet(ViewSet):
             return Response({'status': 'OK'})
         return Response(serializer.errors)
         
-    def get_my_playlists(self, request, chat_id):
-        song = get_object_or_404(Song, id=1)
+    def get_song(self, request, song_id):
+        song = get_object_or_404(Song, id=song_id)
         return Response({'status': 'OK', 'song': song.song_link})
 
         

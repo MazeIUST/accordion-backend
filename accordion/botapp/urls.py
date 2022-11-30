@@ -9,6 +9,6 @@ from song.views import SongViewSet
 urlpatterns = [
     path('signup/<str:chat_id>/', UserViewSet.as_view({'get': 'signup'})),
     path('start/<int:chat_id>/', UserViewSet.as_view({'get': 'start'})),
-    path('get_my_playlists/<int:chat_id>/', UserViewSet.as_view({'get': 'get_my_playlists'})),
+    path('get_song/<int:song_id>/', UserViewSet.as_view({'get': 'get_song'})),
     path('search/<str:text>/', SongViewSet.as_view({'get': 'search'})),
 ]
