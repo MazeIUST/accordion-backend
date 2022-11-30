@@ -61,6 +61,20 @@ class UserSerializer(serializers.ModelSerializer):
             pass
         return super().update(instance, validated_data)
 
+class ArtistPublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Artist
+        fields = ( 'artistic_name', 'activitie_start_date','description') # should add songs 
+        read_only_fields = ( 'artistic_name', 'activitie_start_date','description') # should add songs 
+
+class UserPublicSerializer(serializers.ModelSerializer):
+    artist = ArtistPublicSerializer()
+    class Meta:
+        model = User
+        fields = ('username', 'is_Artist', 'first_name','last_name', 'image', 'artist','following') # should add playlist, followings there
+        read_only_fields = ('username', 'is_Artist', 'first_name','last_name', 'image', 'artist','following') # should add playlist,followings there
+
+
 
 class LoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):

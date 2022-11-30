@@ -14,6 +14,7 @@ class User(AbstractUser):
     country = models.CharField(max_length=255,null=True)
     image = models.ImageField(upload_to='profiles/photos/', blank=True, null=True)
     telegram_chat_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    # followings = models.ManyToManyField(User,blank=True)
 
     GENDER_Male = 'M'
     GENDER_Female = 'F'
@@ -46,4 +47,15 @@ class Artist(models.Model):
     def __str__(self):
         return self.user.username
 
+
+class UserFollowing(models.Model):
+    user_id = models.ForeignKey("User", related_name="following", on_delete=models.CASCADE)
+    following_user_id = models.ForeignKey("User", related_name="followers", on_delete=models.CASCADE)
+    # You can even add info about when user started following
+    created = models.DateTimeField(auto_now_add=True)
+
+    # Example
+    # user = User.objects.get(id=1)
+    # user.following.all()
+    # user.followers.all()
         

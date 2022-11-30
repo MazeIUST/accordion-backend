@@ -18,6 +18,9 @@ from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404,get_list_or_404
+from song.models import *
+from song.serializers import *
 
 
 class UrlsView(APIView):
@@ -134,6 +137,18 @@ class UserViewSet(ModelViewSet):
             serializer.update(request.user, serializer.validated_data)
             return Response(status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def retrieve_other_user(self, request,pk=None):
+        user = get_object_or_404(User, id=pk)
+        profile_serializer =UserPublicSerializer(user)
+        # playlists = get_list_or_404(Playlist,owner=user)
+        # playlist_serializer=PlaylistSerializer(playlists,many=True)
+        if user.is_Artist:
+            artist = Artist.objects.get(user=user)
+            songs = Song.objects.filter(artist=artist)
+            song_serializer = SongSerializer(songs, many=True)
+            return Response({ 'profile': profile_serializer.data,'songs': song_serializer.data})
+        return Response({'profile': profile_serializer.data})
 
 
 class VerifyEmail(generics.GenericAPIView):
