@@ -1,5 +1,5 @@
 from rest_framework.viewsets import ViewSet
-from .serializers import SongSerializer, TagSerializer
+from .serializers import SongSerializer, TagSerializer,PlaylistSerializer
 from rest_framework.response import Response
 from accounts.models import Artist
 from .models import *
@@ -7,7 +7,7 @@ from rest_framework import status
 from .scripts import create_tag
 from accordion.permissions import *
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404,get_list_or_404
 from rest_framework.permissions import IsAuthenticated
        
 
@@ -140,3 +140,71 @@ class TagViewSet(ViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Tag.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class PlaylistViewSet(ViewSet):
+    serializer_class = PlaylistSerializer
+    permission_classes = [IsAuthenticated, IsPlaylistOwner]
+        
+
+    def create(self, request):  
+        serializer = PlaylistSerializer(data=request.data)
+        if serializer.is_valid():
+            owner = request.user
+            serializer.save(owner=owner)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        playlist = get_object_or_404(Playlist, id=pk)
+        playlist.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+    def retrieve(self, request, pk=None):
+        playlist = get_object_or_404(Playlist, id=pk)
+        serializer = PlaylistSerializer(playlist)
+        return Response(serializer.data)
+    
+
+    def list(self, request):
+        playlists = get_list_or_404(Playlist, owner=request.user)
+        serializer = PlaylistSerializer(playlists, many=True)
+        return Response(serializer.data)
+
+
+    def update(self, request, pk=None):
+        playlist = get_object_or_404(Playlist, id=pk)
+        serializer = PlaylistSerializer(instance=playlist, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # def add_song1(self, request, song_pk=None,playlist_pk=None):
+    #     song = get_object_or_404(Song, id=song_pk)
+    #     playlist = get_object_or_404(Playlist, id=playlist_pk)
+    #     playlist.songs.add(song)
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+    def add_song(self, request, *args, **kwargs):
+        song_pk = self.kwargs.get('song_pk')
+        playlist_pk = self.kwargs.get('playlist_pk') 
+        song = get_object_or_404(Song, id=song_pk)
+        playlist = get_object_or_404(Playlist, id=playlist_pk)
+        playlist.songs.add(song)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def remove_song(self, request, song_pk=None,playlist_pk=None):
+        song = get_object_or_404(Song, id=song_pk)
+        playlist = get_object_or_404(Playlist, id=playlist_pk)
+        playlist.songs.delete(song)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    
+
+
+
+
+
