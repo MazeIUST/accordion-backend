@@ -1,8 +1,8 @@
 from rest_framework import  serializers
 from django.contrib.auth.hashers import make_password
-from accounts.models import Artist,User
+from accounts.models import *
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from song.serializers import *
 
 # Register serializer
 class SignUpSerializer(serializers.ModelSerializer):
@@ -38,11 +38,15 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class ArtistSerializer(serializers.ModelSerializer):
+    songs = serializers.SerializerMethodField()
     class Meta:
         model = Artist
-        fields = ('id', 'artistic_name', 'activitie_start_date','description')
+        fields = ('id', 'artistic_name', 'activitie_start_date', 'description', 'songs')
         read_only_fields = ('id',)
 
+    def get_songs(self, obj):
+        songs = Song.objects.filter(artist__user=obj.user)
+        return SongSerializer(songs, many=True).data
 
 class UserSerializer(serializers.ModelSerializer):
     artist = ArtistSerializer()
@@ -62,6 +66,38 @@ class UserSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+class ArtistPublicSerializer(serializers.ModelSerializer):
+    songs = serializers.SerializerMethodField()
+    class Meta:
+        model = Artist
+        fields = ('artistic_name', 'activitie_start_date', 'description', 'songs')
+        read_only_fields = ('artistic_name', 'activitie_start_date', 'description', 'songs')
+        
+    def get_songs(self, obj):
+        songs = Song.objects.filter(artist__user=obj.user)
+        return SongSerializer(songs, many=True).data
+
+
+class UserPublicSerializer(serializers.ModelSerializer):
+    artist = ArtistPublicSerializer()
+    followers = serializers.SerializerMethodField()
+    followings = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = ('username', 'is_Artist', 'first_name','last_name', 'image', 'artist', 'followers', 'followings') # should add playlist there
+        read_only_fields = ('username', 'is_Artist', 'first_name','last_name', 'image', 'artist', 'followers', 'followings') # should add playlist there
+        
+    def get_followers(self, obj):
+        followers = Follow.objects.filter(user2=obj)
+        return followers.count()
+    
+    def get_followings(self, obj):
+        followings = Follow.objects.filter(user1=obj)
+        return followings.count()
+        
+
+
 class LoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
@@ -73,6 +109,7 @@ class LoginSerializer(TokenObtainPairSerializer):
             })
 
         return data
+
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)

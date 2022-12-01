@@ -2,7 +2,6 @@ from rest_framework import serializers
 from .models import *
 from accounts.serializers import ArtistSerializer
 
-
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
