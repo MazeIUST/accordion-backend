@@ -1,8 +1,8 @@
 from rest_framework import  serializers
 from django.contrib.auth.hashers import make_password
-from accounts.models import Artist,User
+from accounts.models import *
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from song.serializers import *
 
 # Register serializer
 class SignUpSerializer(serializers.ModelSerializer):
@@ -38,20 +38,34 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class ArtistSerializer(serializers.ModelSerializer):
+    songs = serializers.SerializerMethodField()
     class Meta:
         model = Artist
-        fields = ('id', 'artistic_name', 'activitie_start_date','description')
+        fields = ('id', 'artistic_name', 'activitie_start_date', 'description', 'songs')
         read_only_fields = ('id',)
 
+    def get_songs(self, obj):
+        songs = Song.objects.filter(artist__user=obj.user)
+        return SongSerializer(songs, many=True).data
 
 class UserSerializer(serializers.ModelSerializer):
     artist = ArtistSerializer()
+    followers = serializers.SerializerMethodField()
+    followings = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'is_email_verified', 'is_Artist','first_name','last_name', 'birthday', 'gender', 'country', 'image', 'artist')
-        read_only_fields = ('id', 'email', 'username', 'is_email_verified', 'is_Artist')
+        fields = ('id', 'username', 'email', 'is_email_verified', 'is_Artist', 'telegram_chat_id', 'first_name','last_name', 'birthday', 'gender', 'country', 'image', 'followers', 'followings', 'artist')
+        read_only_fields = ('id', 'email', 'username', 'is_email_verified', 'is_Artist', 'telegram_chat_id')
         
 
+    def get_followers(self, obj):
+        followers = Follow.objects.filter(user2=obj)
+        return followers.count()
+    
+    def get_followings(self, obj):
+        followings = Follow.objects.filter(user1=obj)
+        return followings.count()
+        
     def update(self, instance, validated_data):
         try:
             artist_data = validated_data.pop('artist')
@@ -60,6 +74,38 @@ class UserSerializer(serializers.ModelSerializer):
         except:
             pass
         return super().update(instance, validated_data)
+
+
+class ArtistPublicSerializer(serializers.ModelSerializer):
+    songs = serializers.SerializerMethodField()
+    class Meta:
+        model = Artist
+        fields = ('artistic_name', 'activitie_start_date', 'description', 'songs')
+        read_only_fields = ('artistic_name', 'activitie_start_date', 'description', 'songs')
+        
+    def get_songs(self, obj):
+        songs = Song.objects.filter(artist__user=obj.user)
+        return SongSerializer(songs, many=True).data
+
+
+class UserPublicSerializer(serializers.ModelSerializer):
+    artist = ArtistPublicSerializer()
+    followers = serializers.SerializerMethodField()
+    followings = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = ('username', 'is_Artist', 'first_name','last_name', 'image', 'followers', 'followings', 'artist') # should add playlist there
+        read_only_fields = ('username', 'is_Artist', 'first_name','last_name', 'image', 'followers', 'followings', 'artist') # should add playlist there
+        
+    def get_followers(self, obj):
+        followers = Follow.objects.filter(user2=obj)
+        return followers.count()
+    
+    def get_followings(self, obj):
+        followings = Follow.objects.filter(user1=obj)
+        return followings.count()
+        
 
 
 class LoginSerializer(TokenObtainPairSerializer):
@@ -73,6 +119,7 @@ class LoginSerializer(TokenObtainPairSerializer):
             })
 
         return data
+
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)

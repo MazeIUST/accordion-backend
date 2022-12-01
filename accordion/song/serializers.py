@@ -1,19 +1,22 @@
 from rest_framework import serializers
 from .models import *
 
-
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ('id', 'name')
 
 class SongSerializer(serializers.ModelSerializer):
-
+    artist_name = serializers.SerializerMethodField()
     class Meta:
         model = Song
-        fields = ('id', 'artist', 'title', 'description', 'lyrics', 'song_link', 'image', 'note', 'created_at', 'tags')
+        fields = ('id', 'artist', 'artist_name', 'title', 'description', 'lyrics', 'song_link', 'image', 'note', 'created_at', 'tags')
         read_only_fields = ('id', 'created_at', 'artist')
 
+    def get_artist_name(self, obj):
+        artist = obj.artist
+        return artist.artistic_name
+        
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         song = Song.objects.create(**validated_data)
@@ -21,13 +24,10 @@ class SongSerializer(serializers.ModelSerializer):
             song.tags.add(tag)
         return song
 
+
 class PlaylistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Playlist
         fields = ('id','title','owner','created_at','is_public','description','image','songs')
-        read_only_fields = ('id', 'created_at', 'owner','songs')
-
-
-
-        
+        read_only_fields = ('id', 'created_at', 'owner','songs')        
