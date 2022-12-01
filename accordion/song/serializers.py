@@ -21,6 +21,6 @@ class SongSerializer(serializers.ModelSerializer):
         return song
     
     def get_artist_name(self, obj):
-        artist = Artist.objects.get(user=obj.artist)
+        artist = obj.artist
         return artist.artistic_name
         
