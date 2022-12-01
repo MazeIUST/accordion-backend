@@ -36,7 +36,7 @@ class UrlsView(APIView):
             'user logout': absurl + 'logout/',
             'user refresh token': absurl + 'token/refresh/',
             'user verify email': absurl + 'verify_email/',
-            'user profile': absurl + 'profile/',
+            'user profile get, put': absurl + 'profile/',
             'user all profile': absurl + 'profile/all/',
             'user other profile': absurl + 'profile/<int:pk>/',
             'user change password': absurl + 'change_password/',
