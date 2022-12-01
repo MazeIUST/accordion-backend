@@ -48,14 +48,8 @@ class Artist(models.Model):
         return self.user.username
 
 
-class UserFollowing(models.Model):
-    user = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE)
-    following_user= models.ForeignKey(User, related_name="followers", on_delete=models.CASCADE)
-    # You can even add info about when user started following
-    created = models.DateTimeField(auto_now_add=True)
-
-    # Example
-    # user = User.objects.get(id=1)
-    # user.following.all()
-    # user.followers.all()
+class Follow(models.Model):
+    user1 = models.ForeignKey(User, related_name="user1", on_delete=models.CASCADE)
+    user2= models.ForeignKey(User, related_name="user2", on_delete=models.CASCADE)
+    start_date = models.DateTimeField(default=datetime.datetime.now)
         

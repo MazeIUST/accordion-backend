@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from .serializers import *
-from .models import User,UserFollowing
+from .models import User,Follow
 from rest_framework_simplejwt.tokens import RefreshToken # for email
 from django.contrib.sites.shortcuts import get_current_site # for email
 from django.urls import reverse # for email
@@ -140,20 +140,25 @@ class UserViewSet(ModelViewSet):
     
     def retrieve_other_user(self, request,pk=None):
         user = get_object_or_404(User, id=pk)
-        profile_serializer =UserPublicSerializer(user)
+        user_serializer = UserPublicSerializer(user)
         # playlists = get_list_or_404(Playlist,owner=user)
         # playlist_serializer=PlaylistSerializer(playlists,many=True)
-        if user.is_Artist:
-            artist = Artist.objects.get(user=user)
-            songs = Song.objects.filter(artist=artist)
+        if request.user.is_Artist:
+            songs = Song.objects.filter(artist__user=user)
             song_serializer = SongSerializer(songs, many=True)
-            return Response({ 'profile': profile_serializer.data,'songs': song_serializer.data})
-        return Response({'profile': profile_serializer.data})
+            return Response({'profile': user_serializer.data, 'songs': song_serializer.data})
+        return Response({'profile': user_serializer.data})
 
-    def follow(self, request,pk=None):
-        following = get_object_or_404(User, id=pk)
-        UserFollowing.objects.create(user=request.user,following_user=following)
-        return Response('doneeeeeeeee')
+    def follow(self, request, pk=None):
+        user_to_follow = get_object_or_404(User, id=pk)
+        user = request.user
+        if user_to_follow == user:
+            return Response({'error': 'You cannot follow yourself'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            Follow.objects.get_or_create(user1=user, user2=user_to_follow)
+            return Response({'message': 'You are now following ' + user_to_follow.username}, status=status.HTTP_200_OK)
+            
+        
 
 
 class VerifyEmail(generics.GenericAPIView):
