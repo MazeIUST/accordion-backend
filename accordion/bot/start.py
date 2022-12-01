@@ -43,7 +43,7 @@ def search(update: Update, context: CallbackContext):
         keyboard = []
         USERS_SERACH_KEYBOARD[user_info['chat_id']] = {}
         for song in response:
-            song_text = f'🎵 {song["title"]} - {song["artist"]["artistic_name"]}'
+            song_text = f'🎵 {song["title"]} - {song["artist_name"]}'
             keyboard.append([KeyboardButton(song_text, callback_data=song['id'])])
             USERS_SERACH_KEYBOARD[user_info['chat_id']][song_text] = song['id']
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
