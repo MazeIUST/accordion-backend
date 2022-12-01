@@ -114,6 +114,12 @@ class UserViewSet(ModelViewSet):
         if self.action == 'change_password':
             return ChangePasswordSerializer
         return UserSerializer
+    
+    def get_permissions(self):
+        permission_classes = [IsAuthenticated]
+        if self.action == 'retrieve_other_user':
+            permission_classes = []
+        return [permission() for permission in permission_classes]
    
     def list(self, request):
         users = User.objects.all()
@@ -138,7 +144,7 @@ class UserViewSet(ModelViewSet):
             return Response(status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def retrieve_other_user(self, request,pk=None):
+    def retrieve_other_user(self, request, pk=None):
         user = get_object_or_404(User, id=pk)
         user_serializer = UserPublicSerializer(user)
         # playlists = get_list_or_404(Playlist,owner=user)
@@ -158,8 +164,14 @@ class UserViewSet(ModelViewSet):
             Follow.objects.get_or_create(user1=user, user2=user_to_follow)
             return Response({'message': 'You are now following ' + user_to_follow.username}, status=status.HTTP_200_OK)
             
-        
-
+    def unfollow(self, request, pk=None):
+        user_to_unfollow = get_object_or_404(User, id=pk)
+        user = request.user
+        if user_to_unfollow == user:
+            return Response({'error': 'You cannot unfollow yourself'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            Follow.objects.filter(user1=user, user2=user_to_unfollow).delete()
+            return Response({'message': 'You are no longer following ' + user_to_unfollow.username}, status=status.HTTP_200_OK)
 
 class VerifyEmail(generics.GenericAPIView):
     permission_classes = []
