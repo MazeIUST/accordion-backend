@@ -29,7 +29,7 @@ class Playlist(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     songs = models.ManyToManyField(Song, blank=True)
     description = models.TextField(null=True, blank=True)
-    is_public = models.BooleanField(default=False)
+    is_public = models.BooleanField(default=True)
     image = models.ImageField(null=True, blank=True,upload_to='playlists/photos/')
     def str(self):
         return self.title
