@@ -144,9 +144,9 @@ class TagViewSet(ViewSet):
 
 class PlaylistViewSet(ViewSet):
     serializer_class = PlaylistSerializer
-    permission_classes = [IsAuthenticated,IsPlaylistOwner]
+    permission_classes = [IsAuthenticated, IsPlaylistOwner]
         
-    # this is working
+
     def create(self, request):  
         serializer = PlaylistSerializer(data=request.data)
         if serializer.is_valid():
@@ -160,23 +160,18 @@ class PlaylistViewSet(ViewSet):
         playlist.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # this is working
-    def retrieve(self, request, pk=None): #return a playlist by its id
+
+    def retrieve(self, request, pk=None):
         playlist = get_object_or_404(Playlist, id=pk)
         serializer = PlaylistSerializer(playlist)
         return Response(serializer.data)
     
-    # this is working
-    def retrieve_user_playlists(self, request): # return a playlists of a user for itself
-        playlists = get_list_or_404(Playlist, owner_id=request.user.id)
+
+    def list(self, request):
+        playlists = get_list_or_404(Playlist, owner=request.user)
         serializer = PlaylistSerializer(playlists, many=True)
         return Response(serializer.data)
 
-    # this is working
-    def retrieve_other_playlists(self, request,pk=None): # return a playlists of a user for itself
-        playlists = get_list_or_404(Playlist, owner_id=pk,is_public=True)
-        serializer = PlaylistSerializer(playlists,many=True)
-        return Response(serializer.data)
 
     def update(self, request, pk=None):
         playlist = get_object_or_404(Playlist, id=pk)

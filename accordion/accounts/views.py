@@ -45,6 +45,9 @@ class UrlsView(APIView):
             'song search': absurl + 'songs/search/<str:text>/',
             'tag list': absurl + 'songs/tag/',
             'tag get, put, delete': absurl + 'songs/tag/<int:pk>/',
+            'playlist list': absurl + 'songs/playlist/',
+            'playlist get, put, delete': absurl + 'songs/playlist/<int:pk>/',
+            'playlist add song': absurl + 'songs/playlist/add_song/song_id/<int:song_pk>/playlist_id/<int:playlist_pk>/',
         }
 
         return Response({'account_urls': account_urls, 'songs_urls': songs_urls})
@@ -60,18 +63,18 @@ class SignUpView(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         # --------- send email ---------
-        # token = RefreshToken.for_user(user)
-        # current_site = get_current_site(request).domain
-        # relativeLink = reverse('email-verify')
-        # absurl = 'http://' + current_site + relativeLink + "?token=" + str(token)
-        # print(absurl)
-        # email_body = 'Hi ' + user.username + ' Use link below to verify your email\n' + absurl
-        # data = {
-        #     'email_body': email_body,
-        #     'to_email': user.email,
-        #     'email_subject': 'Verify your email'
-        # }
-        # Util.send_email(data)
+        token = RefreshToken.for_user(user)
+        current_site = get_current_site(request).domain
+        relativeLink = reverse('email-verify')
+        absurl = 'http://' + current_site + relativeLink + "?token=" + str(token)
+        print(absurl)
+        email_body = 'Hi ' + user.username + ' Use link below to verify your email\n' + absurl
+        data = {
+            'email_body': email_body,
+            'to_email': user.email,
+            'email_subject': 'Verify your email'
+        }
+        Util.send_email(data)
         # ------------------------------
         return Response({
             "user": UserSerializer(user).data,
