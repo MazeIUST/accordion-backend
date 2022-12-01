@@ -130,8 +130,8 @@ class UserViewSet(ModelViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request):
-        content = UserSerializer(request.user).data
-        return Response(content) 
+        user = UserSerializer(request.user).data
+        return Response(user, status=status.HTTP_200_OK) 
 
     def update(self, request):
         serializer = UserSerializer(request.user, data=request.data, partial=True)
@@ -150,13 +150,7 @@ class UserViewSet(ModelViewSet):
     def retrieve_other_user(self, request, pk=None):
         user = get_object_or_404(User, id=pk)
         user_serializer = UserPublicSerializer(user)
-        # playlists = get_list_or_404(Playlist,owner=user)
-        # playlist_serializer=PlaylistSerializer(playlists,many=True)
-        if request.user.is_Artist:
-            songs = Song.objects.filter(artist__user=user)
-            song_serializer = SongSerializer(songs, many=True)
-            return Response({'profile': user_serializer.data, 'songs': song_serializer.data})
-        return Response({'profile': user_serializer.data})
+        return Response(user_serializer.data, status=status.HTTP_200_OK)
 
     def follow(self, request, pk=None):
         user_to_follow = get_object_or_404(User, id=pk)

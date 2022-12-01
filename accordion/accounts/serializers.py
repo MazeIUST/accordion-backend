@@ -2,7 +2,7 @@ from rest_framework import  serializers
 from django.contrib.auth.hashers import make_password
 from accounts.models import *
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from song.serializers import *
 
 # Register serializer
 class SignUpSerializer(serializers.ModelSerializer):
@@ -38,11 +38,15 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class ArtistSerializer(serializers.ModelSerializer):
+    songs = serializers.SerializerMethodField()
     class Meta:
         model = Artist
-        fields = ('id', 'artistic_name', 'activitie_start_date', 'description')
+        fields = ('id', 'artistic_name', 'activitie_start_date', 'description', 'songs')
         read_only_fields = ('id',)
 
+    def get_songs(self, obj):
+        songs = Song.objects.filter(artist__user=obj.user)
+        return SongSerializer(songs, many=True).data
 
 class UserSerializer(serializers.ModelSerializer):
     artist = ArtistSerializer()
@@ -63,10 +67,15 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ArtistPublicSerializer(serializers.ModelSerializer):
+    songs = serializers.SerializerMethodField()
     class Meta:
         model = Artist
-        fields = ('artistic_name', 'activitie_start_date', 'description') # should add songs 
-        read_only_fields = ('artistic_name', 'activitie_start_date', 'description') # should add songs 
+        fields = ('artistic_name', 'activitie_start_date', 'description', 'songs')
+        read_only_fields = ('artistic_name', 'activitie_start_date', 'description', 'songs')
+        
+    def get_songs(self, obj):
+        songs = Song.objects.filter(artist__user=obj.user)
+        return SongSerializer(songs, many=True).data
 
 
 class UserPublicSerializer(serializers.ModelSerializer):
