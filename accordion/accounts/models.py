@@ -10,6 +10,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     is_email_verified = models.BooleanField(default=False)
     is_Artist = models.BooleanField(default=False)
+    is_public = models.BooleanField(default=True)
     birthday = models.DateField(null=True)
     country = models.CharField(max_length=255,null=True)
     image = models.ImageField(upload_to='profiles/photos/', blank=True, null=True)
