@@ -38,7 +38,10 @@ class UrlsView(APIView):
             'user verify email': absurl + 'verify_email/',
             'user profile': absurl + 'profile/',
             'user all profile': absurl + 'profile/all/',
+            'user other profile': absurl + 'profile/<int:pk>/',
             'user change password': absurl + 'change_password/',
+            'user follow': absurl + 'follow/<int:pk>/',
+            'user unfollow': absurl + 'unfollow/<int:pk>/',
         }
 
         songs_urls = {
@@ -177,7 +180,6 @@ class VerifyEmail(generics.GenericAPIView):
     permission_classes = []
     authentication_classes = []
 
-
     def get(self, request):
         token = request.GET.get('token')
         try:
@@ -191,7 +193,6 @@ class VerifyEmail(generics.GenericAPIView):
             return Response({'error': 'Activation Expired'}, status=400)
         except jwt.exceptions.DecodeError as identifier:
             return Response({'error': 'Invalid token'}, status=400)
-
 
 class LogoutView(APIView):
 
