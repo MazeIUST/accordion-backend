@@ -53,7 +53,8 @@ class UrlsView(APIView):
             'tag get, put, delete': absurl + 'songs/tag/<int:pk>/',
             'playlist list': absurl + 'songs/playlist/',
             'playlist get, put, delete': absurl + 'songs/playlist/<int:pk>/',
-            'playlist add song': absurl + 'songs/playlist/add_song/song_id/<int:song_pk>/playlist_id/<int:playlist_pk>/',
+            'playlist add song': absurl + 'songs/playlist/add_song/<int:pk>/',
+            'playlist remove song': absurl + 'songs/playlist/remove_song/<int:pk>/',
         }
 
         return Response({'account_urls': account_urls, 'songs_urls': songs_urls})
