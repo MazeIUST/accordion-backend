@@ -61,8 +61,9 @@ def get_song(update: Update, context: CallbackContext, song_id):
         message_id = update.message.reply_text('downloading...').message_id
         song_name = download_song(song_link)
         # send song and delete message
-        update.message.edit_message_text('sending...', message_id=message_id)
+        update.message.bot.edit_message_text('sending...', chat_id=user_info['chat_id'], message_id=message_id)
         update.message.reply_audio(audio=open(song_name, 'rb'))
+        update.message.bot.delete_message(chat_id=user_info['chat_id'], message_id=message_id)
     else:
         update.message.reply_text(RESPONSE_TEXTS['error'])
         

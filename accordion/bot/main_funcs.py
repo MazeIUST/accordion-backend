@@ -51,7 +51,6 @@ def download_song(song_link):
     song_id = song_link.split('/')[-2]
     song_link = f'https://drive.google.com/u/0/uc?id={song_id}&export=download'
     response = requests.get(song_link)
-    print(response.content)
     with open(f'songs/song.mp3', 'wb') as f:
         f.write(response.content)
         return f.name
