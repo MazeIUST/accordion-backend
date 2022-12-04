@@ -58,9 +58,10 @@ def get_song(update: Update, context: CallbackContext, song_id):
     if response:
         song_link = response['song']
         # download song
+        message_id = update.message.reply_text('downloading...').message_id
         song_name = download_song(song_link)
-        # send song
-        print(song_name)
+        # send song and delete message
+        update.message.edit_message_text('sending...', message_id=message_id)
         update.message.reply_audio(audio=open(song_name, 'rb'))
     else:
         update.message.reply_text(RESPONSE_TEXTS['error'])
