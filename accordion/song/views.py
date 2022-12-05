@@ -144,9 +144,13 @@ class TagViewSet(ViewSet):
 
 class PlaylistViewSet(ViewSet):
     serializer_class = PlaylistSerializer
-    permission_classes = [IsAuthenticated, IsPlaylistOwner]
-        
 
+    def get_permissions(self):
+        permission_classes = [IsAuthenticated, IsPlaylistOwner]
+        if self.action in ['get_3_public_playlists']:
+            permission_classes = []
+        return [permission() for permission in permission_classes]
+        
     def create(self, request):  
         serializer = PlaylistSerializer(data=request.data)
         if serializer.is_valid():
