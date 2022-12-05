@@ -191,6 +191,13 @@ class PlaylistViewSet(ViewSet):
         playlist.songs.remove(song)
         playlist.save()
         return Response(status=status.HTTP_200_OK)
+
+    def get_3_public_playlists(self, request):
+        playlists = Playlist.objects.filter(is_public=True)
+        if len(playlists) > 3:
+            playlists = playlists[:3]
+        serializer = PlaylistSerializer(playlists, many=True)
+        return Response(serializer.data)
     
 
 
