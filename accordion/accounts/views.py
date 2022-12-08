@@ -140,7 +140,7 @@ class UserViewSet(ModelViewSet):
         return Response(serializer, status=status.HTTP_200_OK) 
 
     def update(self, request):
-        serializer = UserPrivateSerializer(request.user, data=request.data, partial=True)
+        serializer = UserPrivateSerializer(request.user, data=request.data, partial=True, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK) 
