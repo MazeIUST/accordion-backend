@@ -42,6 +42,10 @@ class UrlsView(APIView):
             'user change password': absurl + 'change_password/',
             'user follow': absurl + 'follow/<int:pk>/',
             'user unfollow': absurl + 'unfollow/<int:pk>/',
+            'user get followers': absurl + 'followers/',
+            'user get followings': absurl + 'followings/',
+            'user get followers of other user': absurl + 'followers/<int:pk>/',
+            'user get followings of other user': absurl + 'followings/<int:pk>/',
         }
 
         songs_urls = {
