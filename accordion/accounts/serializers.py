@@ -36,36 +36,77 @@ class SignUpSerializer(serializers.ModelSerializer):
 
         return user
 
-
+class FollowerSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user1.username', read_only=True)
+    profile = serializers.HyperlinkedRelatedField(source='user1', read_only=True, view_name='show_other_user_profile')
+    
+    class Meta:
+        model = Follow
+        fields = ('username', 'profile')
+        
+        
+class FollowingSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user2.username', read_only=True)
+    profile = serializers.HyperlinkedRelatedField(source='user2', read_only=True, view_name='show_other_user_profile')
+    
+    class Meta:
+        model = Follow
+        fields = ('username', 'profile')
+        
+        
 class ArtistSerializer(serializers.ModelSerializer):
     songs = serializers.SerializerMethodField()
     class Meta:
         model = Artist
-        fields = ('id', 'artistic_name', 'activitie_start_date', 'description', 'songs')
-        read_only_fields = ('id',)
+        fields = ['artistic_name', 'activitie_start_date', 'description', 'songs']
 
     def get_songs(self, obj):
         songs = Song.objects.filter(artist__user=obj.user)
         return SongSerializer(songs, many=True).data
 
+
 class UserSerializer(serializers.ModelSerializer):
     artist = ArtistSerializer()
+    followers_count = serializers.SerializerMethodField()
+    followings_count = serializers.SerializerMethodField()
     followers = serializers.SerializerMethodField()
     followings = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'is_email_verified', 'is_Artist', 'telegram_chat_id', 'first_name','last_name', 'birthday', 'gender', 'country', 'image', 'followers', 'followings', 'artist')
-        read_only_fields = ('id', 'email', 'username', 'is_email_verified', 'is_Artist', 'telegram_chat_id')
-        
+        fields = ['username', 'is_Artist', 'first_name', 'last_name', 'image', 'followers_count', 'followings_count', 'followers', 'followings', 'artist'] # should add playlist there
 
+        
+    def get_followers_count(self, obj):
+        followers_count = Follow.objects.filter(user2=obj).count()
+        return followers_count
+    
+    def get_followings_count(self, obj):
+        followings_count = Follow.objects.filter(user1=obj).count()
+        return followings_count
+    
     def get_followers(self, obj):
         followers = Follow.objects.filter(user2=obj)
-        return followers.count()
+        return FollowerSerializer(followers, many=True, context={'request': self.context['request']}).data
     
     def get_followings(self, obj):
         followings = Follow.objects.filter(user1=obj)
-        return followings.count()
+        return FollowingSerializer(followings, many=True, context={'request': self.context['request']}).data
+    
+
+
+class ArtistPrivateSerializer(ArtistSerializer):
+    class Meta(ArtistSerializer.Meta):
+        fields = ['id'] + ArtistSerializer.Meta.fields
+        read_only_fields = ['id']
         
+
+class UserPrivateSerializer(UserSerializer):
+    artist = ArtistPrivateSerializer()
+    
+    class Meta(UserSerializer.Meta):
+        fields = ['id', 'email', 'is_email_verified', 'telegram_chat_id', 'birthday', 'gender', 'country'] + UserSerializer.Meta.fields
+        read_only_fields = ['id', 'username', 'is_Artist', 'email', 'is_email_verified', 'telegram_chat_id']      
+
     def update(self, instance, validated_data):
         try:
             artist_data = validated_data.pop('artist')
@@ -74,39 +115,6 @@ class UserSerializer(serializers.ModelSerializer):
         except:
             pass
         return super().update(instance, validated_data)
-
-
-class ArtistPublicSerializer(serializers.ModelSerializer):
-    songs = serializers.SerializerMethodField()
-    class Meta:
-        model = Artist
-        fields = ('artistic_name', 'activitie_start_date', 'description', 'songs')
-        read_only_fields = ('artistic_name', 'activitie_start_date', 'description', 'songs')
-        
-    def get_songs(self, obj):
-        songs = Song.objects.filter(artist__user=obj.user)
-        return SongSerializer(songs, many=True).data
-
-
-class UserPublicSerializer(serializers.ModelSerializer):
-    artist = ArtistPublicSerializer()
-    followers = serializers.SerializerMethodField()
-    followings = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = User
-        fields = ('username', 'is_Artist', 'first_name','last_name', 'image', 'followers', 'followings', 'artist') # should add playlist there
-        read_only_fields = ('username', 'is_Artist', 'first_name','last_name', 'image', 'followers', 'followings', 'artist') # should add playlist there
-        
-    def get_followers(self, obj):
-        followers = Follow.objects.filter(user2=obj)
-        return followers.count()
-    
-    def get_followings(self, obj):
-        followings = Follow.objects.filter(user1=obj)
-        return followings.count()
-        
-
 
 class LoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):

@@ -121,42 +121,32 @@ class UserViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'change_password':
             return ChangePasswordSerializer
-        return UserSerializer
-    
-    def get_permissions(self):
-        permission_classes = [IsAuthenticated]
-        if self.action == 'retrieve_other_user':
-            permission_classes = []
-        return [permission() for permission in permission_classes]
+        return UserPrivateSerializer
    
     def list(self, request):
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
-    def retrieve(self, request):
-        user = UserSerializer(request.user).data
-        return Response(user, status=status.HTTP_200_OK) 
+    def retrieve(self, request, pk=None):
+        if pk:
+            serializer = UserSerializer(get_object_or_404(User, pk=pk), context={'request': request}).data
+        else:  
+            serializer = UserPrivateSerializer(request.user, context={'request': request}).data
+        return Response(serializer, status=status.HTTP_200_OK) 
 
     def update(self, request):
-        serializer = UserSerializer(request.user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)   
+        serializer = UserPrivateSerializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK) 
 
     def change_password(self, request):
         serializer = ChangePasswordSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.update(request.user, serializer.validated_data)
-            return Response(status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.update(request.user, serializer.validated_data)
+        return Response({'message': 'Password updated successfully'}, status=status.HTTP_200_OK)
     
-    def retrieve_other_user(self, request, pk=None):
-        user = get_object_or_404(User, id=pk)
-        user_serializer = UserPublicSerializer(user)
-        return Response(user_serializer.data, status=status.HTTP_200_OK)
-
     def follow(self, request, pk=None):
         user_to_follow = get_object_or_404(User, id=pk)
         user = request.user
@@ -174,6 +164,19 @@ class UserViewSet(ModelViewSet):
         else:
             Follow.objects.filter(user1=user, user2=user_to_unfollow).delete()
             return Response({'message': 'You are no longer following ' + user_to_unfollow.username}, status=status.HTTP_200_OK)
+        
+    def get_followers(self, request, pk=None):
+        user = get_object_or_404(User, id=pk) if pk else request.user
+        followers = Follow.objects.filter(user2=user)
+        followers_serializer = FollowerSerializer(followers, many=True, context={'request': request})
+        return Response(followers_serializer.data, status=status.HTTP_200_OK)
+    
+    def get_followings(self, request, pk=None):
+        user = get_object_or_404(User, id=pk) if pk else request.user
+        followings = Follow.objects.filter(user1=user)
+        followings_serializer = FollowingSerializer(followings, many=True, context={'request': request})
+        return Response(followings_serializer.data, status=status.HTTP_200_OK)
+
 
 class VerifyEmail(generics.GenericAPIView):
     permission_classes = []

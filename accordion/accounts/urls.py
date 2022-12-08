@@ -13,8 +13,12 @@ urlpatterns = [
     path('verify_email/', VerifyEmail.as_view(), name='email-verify'),
     path('profile/', UserViewSet.as_view({'get': 'retrieve', 'put': 'update'}), name='profile'),
     path('profile/all/', UserViewSet.as_view({'get': 'list'}), name='show_all_user'),
-    path('profile/<int:pk>/', UserViewSet.as_view({'get': 'retrieve_other_user'}), name='show_other_user_profile'),
+    path('profile/<int:pk>/', UserViewSet.as_view({'get': 'retrieve'}), name='show_other_user_profile'),
     path('follow/<int:pk>/', UserViewSet.as_view({'get': 'follow'}), name='follow'),
     path('unfollow/<int:pk>/', UserViewSet.as_view({'get': 'unfollow'}), name='unfollow'),
+    path('followers/', UserViewSet.as_view({'get': 'get_followers'}), name='followers'),
+    path('followings/', UserViewSet.as_view({'get': 'get_followings'}), name='followings'),
+    path('followers/<int:pk>/', UserViewSet.as_view({'get': 'get_followers'}), name='user-followers'),
+    path('followings/<int:pk>/', UserViewSet.as_view({'get': 'get_followings'}), name='user-followings'),
     path('change_password/', UserViewSet.as_view({'put': 'change_password'}), name='change_password'),
 ]
