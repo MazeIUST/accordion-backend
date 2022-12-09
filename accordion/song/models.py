@@ -18,7 +18,7 @@ class Song(models.Model):
     image = models.ImageField(upload_to='songs/images/', blank=True, null=True)
     note = models.FileField(upload_to='songs/notes/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    tags = models.ManyToManyField(Tag, blank=True)
+    tags = models.ManyToManyField(Tag, blank=True,related_name='tags')
 
     def __str__(self):
         return self.title
