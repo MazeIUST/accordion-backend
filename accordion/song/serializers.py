@@ -37,8 +37,14 @@ class SongSerializer(serializers.ModelSerializer):
 
 
 class PlaylistSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Playlist
         fields = ('id', 'title', 'owner', 'created_at', 'is_public', 'description', 'image', 'songs')
-        read_only_fields = ('id', 'created_at', 'owner', 'songs')        
+        read_only_fields = ('id', 'created_at', 'owner')   
+
+    def create(self, validated_data):
+        songs = validated_data.pop('songs')
+        playlist = Playlist.objects.create(**validated_data)
+        for song in songs:
+            playlist.songs.add(song)
+        return playlist     

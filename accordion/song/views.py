@@ -182,20 +182,6 @@ class PlaylistViewSet(ViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def add_song(self, request, pk=None):
-        playlist = get_object_or_404(Playlist, id=pk)
-        song = get_object_or_404(Song, id=request.data['song'])
-        playlist.songs.add(song)
-        playlist.save()
-        return Response(status=status.HTTP_200_OK)
-
-    def remove_song(self, request, pk=None):
-        playlist = get_object_or_404(Playlist, id=pk)
-        song = get_object_or_404(Song, id=request.data['song'])
-        playlist.songs.remove(song)
-        playlist.save()
-        return Response(status=status.HTTP_200_OK)
-
     def get_3_public_playlists(self, request):
         playlists = Playlist.objects.filter(is_public=True)
         if len(playlists) > 3:

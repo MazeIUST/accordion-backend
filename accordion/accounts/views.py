@@ -49,16 +49,14 @@ class UrlsView(APIView):
         }
 
         songs_urls = {
-            'song list': absurl + 'songs/',
+            'song list, create': absurl + 'songs/',
             'song get, put, delete': absurl + 'songs/<int:pk>/',
             'song delete all': absurl + 'songs/delete_all/',
             'song search': absurl + 'songs/search/<str:text>/',
             'tag list': absurl + 'songs/tag/',
             'tag get, put, delete': absurl + 'songs/tag/<int:pk>/',
-            'playlist list': absurl + 'songs/playlist/',
+            'playlist list, create': absurl + 'songs/playlist/',
             'playlist get, put, delete': absurl + 'songs/playlist/<int:pk>/',
-            'playlist add song': absurl + 'songs/playlist/add_song/<int:pk>/',
-            'playlist remove song': absurl + 'songs/playlist/remove_song/<int:pk>/',
             'playlist 3 public': absurl + 'songs/playlist/home/',
         }
 
