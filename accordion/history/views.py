@@ -15,11 +15,42 @@ class HistoryViewSet(ViewSet):
         user_history =History.objects.filter(user=user,add_datetime__range=[yesterday,today])
         songs_tags = user_history.annotate(tags=F("song_id__tags")).values()
         tags = Tag.objects.all()
-        # result = []
         result = {}
         for tag in tags:
-            count = songs_tags.filter(tags__contains =tag ).count() # ارور میده که تگ رو نمیتونه مساوی قرار بده باید استرینگ یا اینت باشه
-            result[tag]= count
+            result[tag.id]=0
+        for song_tag in songs_tags:
+            for tag in song_tag.tags:
+                result[tag.id]=+1
+        return Response(result)
+
+    def get_last_week(self, request):
+        user = request.user
+        today = datetime.datetime.now()
+        last_week = today-datetime.timedelta(weeks=1)
+        user_history =History.objects.filter(user=user,add_datetime__range=[last_week,today])
+        songs_tags = user_history.annotate(tags=F("song_id__tags")).values()
+        tags = Tag.objects.all()
+        result = {}
+        for tag in tags:
+            result[tag.id]=0
+        for song_tag in songs_tags:
+            for tag in song_tag.tags:
+                result[tag.id]=+1
+        return Response(result)
+
+    def get_last_month(self, request):
+        user = request.user
+        today = datetime.datetime.now()
+        last_month = today-datetime.timedelta(days=30)
+        user_history =History.objects.filter(user=user,add_datetime__range=[last_month,today])
+        songs_tags = user_history.annotate(tags=F("song_id__tags")).values()
+        tags = Tag.objects.all()
+        result = {}
+        for tag in tags:
+            result[tag.id]=0
+        for song_tag in songs_tags:
+            for tag in song_tag.tags:
+                result[tag.id]=+1
         return Response(result)
 
 
