@@ -21,8 +21,11 @@ class SongSerializer(serializers.ModelSerializer):
 
     def get_song_download_link(self, obj):
         view_link = obj.song_link
-        song_id = view_link.split('/')[-2]
-        song_link = f'https://drive.google.com/u/0/uc?id={song_id}&export=download'
+        try:
+            song_id = view_link.split('/')[-2]
+            song_link = f'https://drive.google.com/u/0/uc?id={song_id}&export=download'
+        except:
+            song_link = view_link
         return song_link
 
     def create(self, validated_data):
