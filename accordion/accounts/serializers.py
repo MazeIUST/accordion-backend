@@ -158,7 +158,7 @@ class PaymentSerializer(serializers.ModelSerializer):
         money = attrs['amount']
         if user_money + money < 0:
             raise serializers.ValidationError({
-                'amount': [f'user does not have enough money. your money is {user_money}.'],
+                'money': [f'user does not have enough money. your money is {user_money}.'],
             })
         
         return attrs
