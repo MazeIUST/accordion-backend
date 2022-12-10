@@ -21,6 +21,8 @@ from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404,get_list_or_404
 from song.models import *
 from song.serializers import *
+from datetime import datetime
+from django.db.models import F, Q
 
 
 class UrlsView(APIView):
@@ -46,6 +48,9 @@ class UrlsView(APIView):
             'user get followings': absurl + 'followings/',
             'user get followers of other user': absurl + 'followers/<int:pk>/',
             'user get followings of other user': absurl + 'followings/<int:pk>/',
+            'user payment': absurl + 'payment/',
+            'user payment get': absurl + 'payment/<int:pk>/',
+            'user permium': absurl + 'permium/',
         }
 
         songs_urls = {
@@ -57,6 +62,8 @@ class UrlsView(APIView):
             'tag get, put, delete': absurl + 'songs/tag/<int:pk>/',
             'playlist list, create': absurl + 'songs/playlist/',
             'playlist get, put, delete': absurl + 'songs/playlist/<int:pk>/',
+            'playlist add song': absurl + 'songs/playlist/<int:pk>/add_song/',
+            'playlist remove song': absurl + 'songs/playlist/<int:pk>/remove_song/',
             'playlist 3 public': absurl + 'songs/playlist/home/',
         }
 
@@ -149,6 +156,9 @@ class UserViewSet(ModelViewSet):
         serializer.update(request.user, serializer.validated_data)
         return Response({'message': 'Password updated successfully'}, status=status.HTTP_200_OK)
     
+
+class FollowViewSet(ViewSet):
+
     def follow(self, request, pk=None):
         user_to_follow = get_object_or_404(User, id=pk)
         user = request.user
@@ -178,6 +188,54 @@ class UserViewSet(ModelViewSet):
         followings = Follow.objects.filter(user1=user)
         followings_serializer = FollowingSerializer(followings, many=True, context={'request': request})
         return Response(followings_serializer.data, status=status.HTTP_200_OK)
+
+
+class PermiumViewSet(ViewSet):
+    serializer_class = PermiumSerializer
+
+    def create(self, request):
+        _mutable = request.data._mutable
+        request.data._mutable = True        
+        request.data['days'] = int(request.data.get('days'))
+        request.data._mutable = _mutable
+        amount = request.data.get('days') * 100
+        payment_serializer = PaymentSerializer(data={'amount': amount}, context={'request': request})
+        payment_serializer.is_valid(raise_exception=True)
+        payment = payment_serializer.save(user=request.user)
+        serializer = PermiumSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(payment=payment) 
+        return Response({'message': 'Permium created successfully'}, status=status.HTTP_200_OK)      
+
+    def retrieve(self, request):
+        permiums = Permium.objects.filter(payment__user=request.user, end_date__gte=datetime.now())
+        serializer = PermiumSerializer(permiums, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def list(self, request):
+        permium = Permium.objects.filter(user=request.user)
+        serializer = PermiumSerializer(permium, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PaymentViewSet(ViewSet):
+    serializer_class = PaymentSerializer
+
+    def create(self, request):
+        serializer = PaymentSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
+        return Response({'message': f'Payment created successfully. your money is {request.user.money}'}, status=status.HTTP_200_OK)
+
+    def retrieve(self, request, pk=None):
+        payment = get_object_or_404(Payment, id=pk)
+        serializer = PaymentSerializer(payment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def list(self, request):
+        payment = Payment.objects.filter(user=request.user)
+        serializer = PaymentSerializer(payment, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class VerifyEmail(generics.GenericAPIView):
