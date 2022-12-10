@@ -199,7 +199,7 @@ class PermiumViewSet(ViewSet):
         request.data['days'] = int(request.data.get('days'))
         request.data._mutable = _mutable
         amount = request.data.get('days') * 100
-        payment_serializer = PaymentSerializer(data={'amount': amount}, context={'request': request})
+        payment_serializer = PaymentSerializer(data={'amount': -1*amount}, context={'request': request})
         payment_serializer.is_valid(raise_exception=True)
         payment = payment_serializer.save(user=request.user)
         serializer = PermiumSerializer(data=request.data, context={'request': request})
