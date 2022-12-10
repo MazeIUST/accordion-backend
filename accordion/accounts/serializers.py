@@ -3,6 +3,7 @@ from django.contrib.auth.hashers import make_password
 from accounts.models import *
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from song.serializers import *
+from datetime import datetime, timedelta
 
 # Register serializer
 class SignUpSerializer(serializers.ModelSerializer):
@@ -35,6 +36,7 @@ class SignUpSerializer(serializers.ModelSerializer):
             Artist.objects.create(user=user)
 
         return user
+
 
 class FollowerSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user1.username', read_only=True)
@@ -104,8 +106,8 @@ class UserPrivateSerializer(UserSerializer):
     artist = ArtistPrivateSerializer()
     
     class Meta(UserSerializer.Meta):
-        fields = ['id', 'email', 'is_email_verified', 'telegram_chat_id', 'birthday', 'gender', 'country'] + UserSerializer.Meta.fields
-        read_only_fields = ['id', 'username', 'is_Artist', 'email', 'is_email_verified', 'telegram_chat_id']      
+        fields = ['id', 'email', 'is_email_verified', 'telegram_chat_id', 'birthday', 'gender', 'country', 'money'] + UserSerializer.Meta.fields
+        read_only_fields = ['id', 'username', 'is_Artist', 'email', 'is_email_verified', 'telegram_chat_id', 'money']      
 
     def update(self, instance, validated_data):
         try:
@@ -115,6 +117,52 @@ class UserPrivateSerializer(UserSerializer):
         except:
             pass
         return super().update(instance, validated_data)
+
+
+class PermiumSerializer(serializers.ModelSerializer):
+    days = serializers.IntegerField(write_only=True)
+    class Meta:
+        model = Permium
+        fields = ['id', 'start_date', 'end_date', 'is_active', 'days_left', 'days', 'payment']
+        read_only_fields = ['id', 'start_date', 'end_date', 'days_left', 'is_active', 'payment']
+
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+        active_permium = Permium.objects.filter(payment__user=user, end_date__gte=datetime.now())
+
+        if attrs['days'] < 1:
+            raise serializers.ValidationError({
+                'days': ['days must be greater than 0.'],
+            })
+        if active_permium.exists():
+            raise serializers.ValidationError({
+                'user': ['user already has active permium.'],
+            })
+        
+        return attrs  
+
+    def create(self, validated_data):
+        days = validated_data.pop('days')
+        validated_data['end_date'] = datetime.now() + timedelta(days=days)
+        return super().create(validated_data)
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ['id', 'user', 'amount', 'date']
+        read_only_fields = ['id', 'user', 'date']
+
+    def validate(self, attrs):
+        user_money = self.context['request'].user.money
+        money = attrs['amount']
+        if user_money + money < 0:
+            raise serializers.ValidationError({
+                'amount': [f'user does not have enough money. your money is {user_money}.'],
+            })
+        
+        return attrs
+
 
 class LoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):

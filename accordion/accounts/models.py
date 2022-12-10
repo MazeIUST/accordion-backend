@@ -3,8 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
-# Create your models here.
-
+from django.core.exceptions import ValidationError
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
@@ -15,7 +14,7 @@ class User(AbstractUser):
     country = models.CharField(max_length=255,null=True)
     image = models.ImageField(upload_to='profiles/photos/', blank=True, null=True)
     telegram_chat_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
-    # followings = models.ManyToManyField(User,blank=True)
+    money = models.IntegerField(default=0)
 
     GENDER_Male = 'M'
     GENDER_Female = 'F'
@@ -32,6 +31,7 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
     def tokens(self):
         refresh = RefreshToken.for_user(self)
         return {
@@ -39,6 +39,11 @@ class User(AbstractUser):
             'access_token':str(refresh.access_token),
         }
 
+    def update_money(self):
+        money = self.payment_set.aggregate(models.Sum('amount'))['amount__sum'] or 0
+        self.money = money
+        self.save()
+        return money
 
 class Artist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -52,5 +57,37 @@ class Artist(models.Model):
 class Follow(models.Model):
     user1 = models.ForeignKey(User, related_name="user1", on_delete=models.CASCADE)
     user2= models.ForeignKey(User, related_name="user2", on_delete=models.CASCADE)
-    start_date = models.DateTimeField(default=datetime.datetime.now)
+    start_date = models.DateTimeField(auto_now_add=True)
         
+
+
+class Payment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount = models.IntegerField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        self.user.update_money()
+        super(Payment, self).save(*args, **kwargs)
+        self.user.update_money()
+
+    def __str__(self):
+        return self.user.username
+
+
+class Permium(models.Model):
+    payment = models.ForeignKey(Payment, on_delete=models.CASCADE)
+    start_date = models.DateTimeField(auto_now_add=True)
+    end_date = models.DateTimeField(default=datetime.datetime.now)
+
+    def is_active(self):
+        if self.end_date > datetime.datetime.now(tz=datetime.timezone.utc):
+            return True
+        return False
+
+    def days_left(self):
+        return (self.end_date - datetime.datetime.now(tz=datetime.timezone.utc)).days
+
+
+    def __str__(self):
+        return self.user.username
