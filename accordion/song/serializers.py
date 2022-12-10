@@ -40,11 +40,37 @@ class PlaylistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlist
         fields = ('id', 'title', 'owner', 'created_at', 'is_public', 'description', 'image', 'songs')
-        read_only_fields = ('id', 'created_at', 'owner')   
+        read_only_fields = ('id', 'created_at', 'owner', 'songs')   
 
     def create(self, validated_data):
         songs = validated_data.pop('songs')
         playlist = Playlist.objects.create(**validated_data)
         for song in songs:
             playlist.songs.add(song)
-        return playlist     
+        return playlist 
+
+
+class PlaylistSongsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Playlist
+        fields = ('id', 'songs')
+
+    # def validate(self, attrs):
+    #     songs = attrs.get('songs')
+    #     if songs:
+    #         for song in songs:
+    #             if song not in self.instance.songs.all():
+    #                 raise serializers.ValidationError({'songs': 'Song does not exist in this playlist'})
+    #     return attrs
+
+    def add(self, instance, validated_data):
+        songs = validated_data.get('songs')
+        for song in songs:
+            instance.songs.add(song)
+        return instance
+
+    def remove(self, instance, validated_data):
+        songs = validated_data.get('songs')
+        for song in songs:
+            instance.songs.remove(song)
+        return instance

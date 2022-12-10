@@ -1,5 +1,5 @@
-from rest_framework.viewsets import ViewSet
-from .serializers import SongSerializer, TagSerializer,PlaylistSerializer
+from rest_framework.viewsets import ViewSet, ModelViewSet
+from .serializers import *
 from rest_framework.response import Response
 from accounts.models import Artist
 from .models import *
@@ -142,14 +142,19 @@ class TagViewSet(ViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-class PlaylistViewSet(ViewSet):
-    serializer_class = PlaylistSerializer
+class PlaylistViewSet(ModelViewSet):
+    queryset = Playlist.objects.all()
 
     def get_permissions(self):
         permission_classes = [IsAuthenticated, IsPlaylistOwner]
         if self.action in ['get_3_public_playlists']:
             permission_classes = []
         return [permission() for permission in permission_classes]
+
+    def get_serializer_class(self):
+        if self.action in ['add_song', 'remove_song']:
+            return PlaylistSongsSerializer
+        return PlaylistSerializer
         
     def create(self, request):  
         serializer = PlaylistSerializer(data=request.data)
@@ -181,6 +186,20 @@ class PlaylistViewSet(ViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def add_song(self, request, pk=None):
+        playlist = get_object_or_404(Playlist, pk=pk)
+        serializer = PlaylistSongsSerializer(playlist, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'message': 'Song added to playlist'}, status=status.HTTP_200_OK)
+
+    def remove_song(self, request, pk=None):
+        playlist = get_object_or_404(Playlist, pk=pk)
+        serializer = PlaylistSongsSerializer(playlist, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.remove(playlist, request.data)
+        return Response({'message': 'Song removed from playlist'}, status=status.HTTP_200_OK)
 
     def get_3_public_playlists(self, request):
         playlists = Playlist.objects.filter(is_public=True)
