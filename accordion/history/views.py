@@ -145,3 +145,19 @@ class HistoryViewSet(ViewSet):
             for tag in song_tag.tags:
                 result[tag.id]=+1
         return Response(result)
+
+    def analysis_by_age(self,request):
+        lower_age = request.data.get('lower_age')
+        upper_age = request.data.get('upper_age')
+        history =History.objects.filter(user_age__range=[lower_age,upper_age])
+        songs_tags = history.annotate(tags=F("song_id__tags")).values()
+        tags = Tag.objects.all()
+        result = {}
+        for tag in tags:
+            result[tag.id]=0
+        for song_tag in songs_tags:
+            for tag in song_tag.tags:
+                result[tag.id]=+1
+        return Response(result)
+
+
