@@ -4,6 +4,7 @@ import datetime
 from django.shortcuts import render
 from history.models import  History
 from song.models import Song,Tag
+from accounts.models import User
 from rest_framework.response import Response
 # Create your views here.
 
@@ -53,6 +54,7 @@ class HistoryViewSet(ViewSet):
                 result[tag.id]=+1
         return Response(result)
 
-
+    def get_city(self,request):
+        users = User.objects.all().filter(city=request.data.get('city'))
 
         # songs = Song.objects.filter(id__in=played_songs_id).values
