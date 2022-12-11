@@ -203,8 +203,11 @@ class PermiumViewSet(ViewSet):
         payment_serializer.is_valid(raise_exception=True)
         payment = payment_serializer.save(user=request.user)
         serializer = PermiumSerializer(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        serializer.save(payment=payment) 
+        if serializer.is_valid():
+            serializer.save(payment=payment) 
+        else:
+            payment.delete()
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response({'message': 'Permium created successfully'}, status=status.HTTP_200_OK)      
 
     def retrieve(self, request):
