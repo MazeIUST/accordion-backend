@@ -75,8 +75,8 @@ class UserSerializer(serializers.ModelSerializer):
     followings = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ['username', 'is_Artist', 'first_name', 'last_name', 'image', 'followers_count', 'followings_count', 'followers', 'followings', 'artist'] # should add playlist there
-
+        fields = ['username', 'is_Artist', 'first_name', 'last_name', 'image', 'bio', 'followers_count', 'followings_count', 'followers', 'followings', 'artist'] # should add playlist there
+        read_only_fields = ['id', 'username', 'email']  
         
     def get_followers_count(self, obj):
         followers_count = Follow.objects.filter(user2=obj).count()
@@ -106,7 +106,7 @@ class UserPrivateSerializer(UserSerializer):
     artist = ArtistPrivateSerializer()
     
     class Meta(UserSerializer.Meta):
-        fields = ['id', 'email', 'is_email_verified', 'telegram_chat_id', 'birthday', 'gender', 'country', 'money'] + UserSerializer.Meta.fields
+        fields = ['id', 'email', 'is_email_verified', 'telegram_chat_id', 'birthday', 'gender', 'country', 'city', 'bio', 'money'] + UserSerializer.Meta.fields
         read_only_fields = ['id', 'username', 'is_Artist', 'email', 'is_email_verified', 'telegram_chat_id', 'money']      
 
     def update(self, instance, validated_data):
