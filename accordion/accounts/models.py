@@ -13,6 +13,8 @@ class User(AbstractUser):
     is_public = models.BooleanField(default=True)
     birthday = models.DateField(null=True)
     country = models.CharField(max_length=255,null=True)
+    city = models.CharField(max_length=255,null=True)
+    bio = models.TextField(null=True)
     image = models.ImageField(upload_to='profiles/photos/', blank=True, null=True)
     telegram_chat_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
     # followings = models.ManyToManyField(User,blank=True)
