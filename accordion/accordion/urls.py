@@ -25,4 +25,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include('accounts.urls')), 
     path('songs/', include('song.urls')),
+    path('bot/', include('botapp.urls')),
 ] + static_path + media_path

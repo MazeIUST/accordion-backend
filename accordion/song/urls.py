@@ -4,21 +4,23 @@ from rest_framework.routers import DefaultRouter
 
 
 router = DefaultRouter()
-router.register(r'artist', SongViewSet_Artist, basename='artist')
-router.register(r'user', SongViewSet_User, basename='user')
+router.register(r'', SongViewSet, basename='songs')
 router.register(r'tag', TagViewSet, basename='tag')
+router.register(r'playlist', PlaylistViewSet, basename='playlist')
 
 
 urlpatterns = [
-    path('artist/', SongViewSet_Artist.as_view({'get': 'list', 'post': 'create'}), name='songs'),
-    path('artist/<int:pk>/', SongViewSet_Artist.as_view({'get': 'retrieve', 'put': 'update'}), name='song'),
-    path('artist/<int:pk>/delete/', SongViewSet_Artist.as_view({'delete': 'destroy'}), name='song_delete'),
-    path('artist/zahra/', ZahraViewSet.as_view({'post': 'create'}), name='zahra'),
-
-    path('user/', SongViewSet_User.as_view({'get': 'list'}), name='songs'),
-    path('user/<int:pk>/', SongViewSet_User.as_view({'get': 'retrieve'}), name='song'),
+    path('', SongViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path('<int:pk>/', SongViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
+    path('delete_all/', SongViewSet.as_view({'delete': 'destroy_all', 'get': 'list'})),
+    path('search/<str:text>/', SongViewSet.as_view({'get': 'search'}), name='song_search'),
 
     path('tag/', TagViewSet.as_view({'get': 'list', 'post': 'create'}), name='tags'),
-    path('tag/<int:pk>/', TagViewSet.as_view({'get': 'retrieve', 'put': 'update'}), name='tag'),
-    path('tag/<int:pk>/delete/', TagViewSet.as_view({'delete': 'destroy'}), name='tag_delete'),
+    path('tag/<int:pk>/', TagViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='tag'),
+
+    path('playlist/', PlaylistViewSet.as_view({'post': 'create', 'get': 'list'}), name='playlist'),
+    path('playlist/<int:pk>/', PlaylistViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='playlist'),
+    path('playlist/<int:pk>/add_song/', PlaylistViewSet.as_view({'put': 'add_song'}), name='playlist_add_song'),
+    path('playlist/<int:pk>/remove_song/', PlaylistViewSet.as_view({'put': 'remove_song'}), name='playlist_remove_song'),
+    path('playlist/home/', PlaylistViewSet.as_view({'get': 'get_3_public_playlists'}), name='playlist_home'),
 ]

@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from .serializers import *
-from .models import User
+from .models import User,Follow
 from rest_framework_simplejwt.tokens import RefreshToken # for email
 from django.contrib.sites.shortcuts import get_current_site # for email
 from django.urls import reverse # for email
@@ -13,19 +13,70 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import ViewSet, ModelViewSet
 from rest_framework import status
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404,get_list_or_404
+from song.models import *
+from song.serializers import *
+from datetime import datetime
+from django.db.models import F, Q
 
-#Register API
-class RegisterApi(generics.GenericAPIView):
-    serializer_class = RegisterSerializer
+
+class UrlsView(APIView):
     permission_classes = []
     authentication_classes = []
 
+    def get(self, request):
+        current_site = get_current_site(request).domain
+        absurl = 'http://' + current_site + '/'
+        account_urls = {
+            'user signup': absurl + 'signup/',
+            'user login': absurl + 'login/',
+            'user logout': absurl + 'logout/',
+            'user refresh token': absurl + 'token/refresh/',
+            'user verify email': absurl + 'verify_email/',
+            'user profile get, put': absurl + 'profile/',
+            'user all profile': absurl + 'profile/all/',
+            'user other profile': absurl + 'profile/<int:pk>/',
+            'user change password': absurl + 'change_password/',
+            'user follow': absurl + 'follow/<int:pk>/',
+            'user unfollow': absurl + 'unfollow/<int:pk>/',
+            'user get followers': absurl + 'followers/',
+            'user get followings': absurl + 'followings/',
+            'user get followers of other user': absurl + 'followers/<int:pk>/',
+            'user get followings of other user': absurl + 'followings/<int:pk>/',
+            'user payment': absurl + 'payment/',
+            'user payment get': absurl + 'payment/<int:pk>/',
+            'user permium': absurl + 'permium/',
+        }
 
-    def post(self, request, *args,  **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        songs_urls = {
+            'song list, create': absurl + 'songs/',
+            'song get, put, delete': absurl + 'songs/<int:pk>/',
+            'song delete all': absurl + 'songs/delete_all/',
+            'song search': absurl + 'songs/search/<str:text>/',
+            'tag list': absurl + 'songs/tag/',
+            'tag get, put, delete': absurl + 'songs/tag/<int:pk>/',
+            'playlist list, create': absurl + 'songs/playlist/',
+            'playlist get, put, delete': absurl + 'songs/playlist/<int:pk>/',
+            'playlist add song': absurl + 'songs/playlist/<int:pk>/add_song/',
+            'playlist remove song': absurl + 'songs/playlist/<int:pk>/remove_song/',
+            'playlist 3 public': absurl + 'songs/playlist/home/',
+        }
+
+        return Response({'account_urls': account_urls, 'songs_urls': songs_urls})
+        
+
+class SignUpView(APIView):
+    serializer_class = SignUpSerializer
+    permission_classes = []
+    authentication_classes = []
+
+    def post(self, request):
+        serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         # --------- send email ---------
@@ -43,33 +94,13 @@ class RegisterApi(generics.GenericAPIView):
         Util.send_email(data)
         # ------------------------------
         return Response({
-            "user": UserSerializer(user, context=self.get_serializer_context()).data,
+            "user": UserSerializer(user).data,
             "message": "User Created Successfully. Now perform Login to get your token",
         })
 
-class VerifyEmail(generics.GenericAPIView):
-    serializer_class = RegisterSerializer
-    permission_classes = []
-    authentication_classes = []
 
-
-    def get(self, request):
-        token = request.GET.get('token')
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-            user = User.objects.get(id=payload['user_id'])
-            if not user.is_email_verified:
-                user.is_email_verified = True
-                user.save()
-            return Response({'email': 'Successfully activated'}, status=200)
-        except jwt.ExpiredSignatureError as identifier:
-            return Response({'error': 'Activation Expired'}, status=400)
-        except jwt.exceptions.DecodeError as identifier:
-            return Response({'error': 'Invalid token'}, status=400)
-
-
-class LoginApi(TokenObtainPairView):
-    serializer_class = MyTokenObtainPairSerializer
+class LoginView(TokenObtainPairView):
+    serializer_class = LoginSerializer
     permission_classes = []
     authentication_classes = []
 
@@ -91,50 +122,146 @@ class LoginApi(TokenObtainPairView):
             user = user.get(username=username)
             login(request, user)
         return super().post(request, *args, **kwargs)
+        
 
-
-def show_all_user(request):
-    users = User.objects.all()
-    user_list = []
-    for user in users:
-        new_user = {
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-            'is_email_verified': user.is_email_verified,
-            'is_Artist': user.is_Artist
-        }
-        user_list.append(new_user)
+class UserViewSet(ModelViewSet):
+    queryset = User.objects.all()
     
-    return JsonResponse(user_list, safe=False)
-
-def show_all_user2(request):
-    obj_list = []
-    for i, user in enumerate(User.objects.all()):
-        obj_list.append(user)
-
-    users = UserSerializer(obj_list, many=True).data
-    return JsonResponse(users, safe=False) 
-
-
-class ShowUser(APIView):
-    def get(self, request, format=None):
-        content = UserSerializer(request.user).data
-        return Response(content)
-
-
-class ProfileViewSet(ViewSet):
-    serializer_class = ProfileSerializer
-
-    def retrieve(self, request):
-        user = request.user
-        serializer = ProfileSerializer(user)
+    def get_serializer_class(self):
+        if self.action == 'change_password':
+            return ChangePasswordSerializer
+        return UserPrivateSerializer
+   
+    def list(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
+    def retrieve(self, request, pk=None):
+        if pk:
+            serializer = UserSerializer(get_object_or_404(User, pk=pk), context={'request': request}).data
+        else:  
+            serializer = UserPrivateSerializer(request.user, context={'request': request}).data
+        return Response(serializer, status=status.HTTP_200_OK) 
 
     def update(self, request):
-        serializer = ProfileSerializer(request.user, data=request.data, partial=True)
+        serializer = UserPrivateSerializer(request.user, data=request.data, partial=True, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK) 
+
+    def change_password(self, request):
+        serializer = ChangePasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.update(request.user, serializer.validated_data)
+        return Response({'message': 'Password updated successfully'}, status=status.HTTP_200_OK)
+    
+
+class FollowViewSet(ViewSet):
+
+    def follow(self, request, pk=None):
+        user_to_follow = get_object_or_404(User, id=pk)
+        user = request.user
+        if user_to_follow == user:
+            return Response({'error': 'You cannot follow yourself'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            Follow.objects.get_or_create(user1=user, user2=user_to_follow)
+            return Response({'message': 'You are now following ' + user_to_follow.username}, status=status.HTTP_200_OK)
+            
+    def unfollow(self, request, pk=None):
+        user_to_unfollow = get_object_or_404(User, id=pk)
+        user = request.user
+        if user_to_unfollow == user:
+            return Response({'error': 'You cannot unfollow yourself'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            Follow.objects.filter(user1=user, user2=user_to_unfollow).delete()
+            return Response({'message': 'You are no longer following ' + user_to_unfollow.username}, status=status.HTTP_200_OK)
+        
+    def get_followers(self, request, pk=None):
+        user = get_object_or_404(User, id=pk) if pk else request.user
+        followers = Follow.objects.filter(user2=user)
+        followers_serializer = FollowerSerializer(followers, many=True, context={'request': request})
+        return Response(followers_serializer.data, status=status.HTTP_200_OK)
+    
+    def get_followings(self, request, pk=None):
+        user = get_object_or_404(User, id=pk) if pk else request.user
+        followings = Follow.objects.filter(user1=user)
+        followings_serializer = FollowingSerializer(followings, many=True, context={'request': request})
+        return Response(followings_serializer.data, status=status.HTTP_200_OK)
+
+
+class PermiumViewSet(ViewSet):
+    serializer_class = PermiumSerializer
+
+    def create(self, request):
+        _mutable = request.data._mutable
+        request.data._mutable = True        
+        request.data['days'] = int(request.data.get('days'))
+        request.data._mutable = _mutable
+        amount = request.data.get('days') * 100
+        payment_serializer = PaymentSerializer(data={'amount': -1*amount}, context={'request': request})
+        payment_serializer.is_valid(raise_exception=True)
+        payment = payment_serializer.save(user=request.user)
+        serializer = PermiumSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save(payment=payment) 
+        else:
+            payment.delete()
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'Permium created successfully'}, status=status.HTTP_200_OK)      
+
+    def retrieve(self, request):
+        permiums = Permium.objects.filter(payment__user=request.user, end_date__gte=datetime.now())
+        serializer = PermiumSerializer(permiums, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def list(self, request):
+        permium = Permium.objects.filter(user=request.user)
+        serializer = PermiumSerializer(permium, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PaymentViewSet(ViewSet):
+    serializer_class = PaymentSerializer
+
+    def create(self, request):
+        serializer = PaymentSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
+        return Response({'message': f'Payment created successfully. your money is {request.user.money}'}, status=status.HTTP_200_OK)
+
+    def retrieve(self, request, pk=None):
+        payment = get_object_or_404(Payment, id=pk)
+        serializer = PaymentSerializer(payment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def list(self, request):
+        payment = Payment.objects.filter(user=request.user)
+        serializer = PaymentSerializer(payment, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class VerifyEmail(generics.GenericAPIView):
+    permission_classes = []
+    authentication_classes = []
+
+    def get(self, request):
+        token = request.GET.get('token')
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+            user = User.objects.get(id=payload['user_id'])
+            if not user.is_email_verified:
+                user.is_email_verified = True
+                user.save()
+            return Response({'email': 'Successfully activated'}, status=200)
+        except jwt.ExpiredSignatureError as identifier:
+            return Response({'error': 'Activation Expired'}, status=400)
+        except jwt.exceptions.DecodeError as identifier:
+            return Response({'error': 'Invalid token'}, status=400)
+
+class LogoutView(APIView):
+
+    def get(self, request):
+        logout(request)
+        return Response(status=status.HTTP_200_OK)
+
