@@ -9,11 +9,15 @@ from rest_framework.response import Response
 # Create your views here.
 
 class HistoryViewSet(ViewSet):
-    def get_last_day(self, request):
-        user = request.user
+    def analysis(self, request, days=None, city=None, country=None, min_age=None, max_age=None):
         today = datetime.datetime.now()
-        yesterday = today-datetime.timedelta(days=1)
-        user_history =History.objects.filter(user=user,add_datetime__range=[yesterday,today])
+        last_time = today-datetime.timedelta(days=days)
+        days_filter = Q(add_datetime__range=[last_time,today]) if days!= 0 else Q()
+        city_filter = Q(user__city=city) if city!= '0' else Q()
+        country_filter = Q(user__country=country) if country!= '0' else Q()
+        min_age_filter = Q(user__birthday__lte=today-datetime.timedelta(days=min_age*365)) if min_age!= 0 else Q()
+        max_age_filter = Q(user__birthday__gte=today-datetime.timedelta(days=max_age*365)) if max_age!= 0 else Q()
+        user_history =History.objects.filter(days_filter,city_filter,country_filter,min_age_filter,max_age_filter)
         songs_tags = user_history.annotate(tags=F("song_id__tags")).values()
         tags = Tag.objects.all()
         result = {}
@@ -23,141 +27,4 @@ class HistoryViewSet(ViewSet):
             for tag in song_tag.tags:
                 result[tag.id]=+1
         return Response(result)
-
-    def get_last_week(self, request):
-        user = request.user
-        today = datetime.datetime.now()
-        last_week = today-datetime.timedelta(weeks=1)
-        user_history =History.objects.filter(user=user,add_datetime__range=[last_week,today])
-        songs_tags = user_history.annotate(tags=F("song_id__tags")).values()
-        tags = Tag.objects.all()
-        result = {}
-        for tag in tags:
-            result[tag.id]=0
-        for song_tag in songs_tags:
-            for tag in song_tag.tags:
-                result[tag.id]=+1
-        return Response(result)
-
-    def get_last_month(self, request):
-        user = request.user
-        today = datetime.datetime.now()
-        last_month = today-datetime.timedelta(days=30)
-        user_history =History.objects.filter(user=user,add_datetime__range=[last_month,today])
-        songs_tags = user_history.annotate(tags=F("song_id__tags")).values()
-        tags = Tag.objects.all()
-        result = {}
-        for tag in tags:
-            result[tag.id]=0
-        for song_tag in songs_tags:
-            for tag in song_tag.tags:
-                result[tag.id]=+1
-        return Response(result)
-
-    def get_city_last_day(self,request):
-        users = User.objects.all().filter(city=request.data.get('city'))
-        today = datetime.datetime.now()
-        yesterday = today-datetime.timedelta(days=1)
-        users_history =History.objects.filter(add_datetime__range=[yesterday,today],user__in = users)
-        songs_tags = users_history.annotate(tags=F("song_id__tags")).values()
-        tags = Tag.objects.all()
-        result = {}
-        for tag in tags:
-            result[tag.id]=0
-        for song_tag in songs_tags:
-            for tag in song_tag.tags:
-                result[tag.id]=+1
-        return Response(result)
-        # songs = Song.objects.filter(id__in=played_songs_id).values
-
-    def get_city_last_week(self,request):
-        users = User.objects.all().filter(city=request.data.get('city'))
-        today = datetime.datetime.now()
-        last_week = today-datetime.timedelta(weeks=1)
-        users_history =History.objects.filter(add_datetime__range=[last_week,today],user__in = users)
-        songs_tags = users_history.annotate(tags=F("song_id__tags")).values()
-        tags = Tag.objects.all()
-        result = {}
-        for tag in tags:
-            result[tag.id]=0
-        for song_tag in songs_tags:
-            for tag in song_tag.tags:
-                result[tag.id]=+1
-        return Response(result)
-
-    def get_city_last_month(self,request):
-        users = User.objects.all().filter(city=request.data.get('city'))
-        today = datetime.datetime.now()
-        last_month = today-datetime.timedelta(days=30)
-        users_history =History.objects.filter(add_datetime__range=[last_month,today],user__in = users)
-        songs_tags = users_history.annotate(tags=F("song_id__tags")).values()
-        tags = Tag.objects.all()
-        result = {}
-        for tag in tags:
-            result[tag.id]=0
-        for song_tag in songs_tags:
-            for tag in song_tag.tags:
-                result[tag.id]=+1
-        return Response(result)
-
-
-    def get_country_last_day(self,request):
-        users = User.objects.all().filter(country=request.data.get('country'))
-        today = datetime.datetime.now()
-        yesterday = today-datetime.timedelta(days=1)
-        users_history =History.objects.filter(add_datetime__range=[yesterday,today],user__in = users)
-        songs_tags = users_history.annotate(tags=F("song_id__tags")).values()
-        tags = Tag.objects.all()
-        result = {}
-        for tag in tags:
-            result[tag.id]=0
-        for song_tag in songs_tags:
-            for tag in song_tag.tags:
-                result[tag.id]=+1
-        return Response(result)
-
-    def get_country_last_week(self,request):
-        users = User.objects.all().filter(country=request.data.get('country'))
-        today = datetime.datetime.now()
-        last_week = today-datetime.timedelta(weeks=1)
-        users_history =History.objects.filter(add_datetime__range=[last_week,today],user__in = users)
-        songs_tags = users_history.annotate(tags=F("song_id__tags")).values()
-        tags = Tag.objects.all()
-        result = {}
-        for tag in tags:
-            result[tag.id]=0
-        for song_tag in songs_tags:
-            for tag in song_tag.tags:
-                result[tag.id]=+1
-        return Response(result)
-
-    def get_country_last_month(self,request):
-        users = User.objects.all().filter(country=request.data.get('country'))
-        today = datetime.datetime.now()
-        last_month = today-datetime.timedelta(days=30)
-        users_history =History.objects.filter(add_datetime__range=[last_month,today],user__in = users)
-        songs_tags = users_history.annotate(tags=F("song_id__tags")).values()
-        tags = Tag.objects.all()
-        result = {}
-        for tag in tags:
-            result[tag.id]=0
-        for song_tag in songs_tags:
-            for tag in song_tag.tags:
-                result[tag.id]=+1
-        return Response(result)
-
-    def analysis_by_age(self,request):
-        lower_age = request.data.get('lower_age')
-        upper_age = request.data.get('upper_age')
-        history =History.objects.filter(user_age__range=[lower_age,upper_age])
-        songs_tags = history.annotate(tags=F("song_id__tags")).values()
-        tags = Tag.objects.all()
-        result = {}
-        for tag in tags:
-            result[tag.id]=0
-        for song_tag in songs_tags:
-            for tag in song_tag.tags:
-                result[tag.id]=+1
-        return Response(result)
-
 
