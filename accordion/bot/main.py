@@ -8,10 +8,13 @@ from telegram.ext import (Updater,
 from start import *
 from const import *
 from main_funcs import *
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
 
 
 
-
+@app.route("/", methods=['GET', 'POST'])
 def main():
     updater = Updater("5659133746:AAFQ7yYYMdBCNYwvA3-YSssaJXiNeyAs4Eg", use_context=True)
     dispatcher = updater.dispatcher
@@ -29,4 +32,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    app.run(debug=True)
+    
