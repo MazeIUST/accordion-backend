@@ -8,8 +8,8 @@ from telegram.ext import (Updater,
 from start import *
 from const import *
 from main_funcs import *
-
 import os
+
 PORT = int(os.environ.get('PORT', 5000))
 
 def main():
