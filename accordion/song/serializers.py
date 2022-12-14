@@ -38,4 +38,17 @@ class PlaylistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlist
         fields = ('id', 'title', 'owner', 'created_at', 'is_public', 'description', 'image', 'songs')
-        read_only_fields = ('id', 'created_at', 'owner', 'songs')        
+        read_only_fields = ('id', 'created_at', 'owner', 'songs')  
+
+class HistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ( 'user_id','song_id','playlist_id')
+
+    def create(self, validated_data):
+        history = History.objects.create(
+            song_id=validated_data['song_id'],
+            user_id=validated_data['user_id'],
+            playlist_id=validated_data['playlist_id'],
+        )
+        return history

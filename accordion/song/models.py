@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 from accounts.models import Artist,User
 
@@ -33,3 +34,11 @@ class Playlist(models.Model):
     image = models.ImageField(null=True, blank=True,upload_to='playlists/photos/')
     def str(self):
         return self.title
+
+class History(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
+    add_datetime = models.DateTimeField(auto_now_add=True)
+    user_age=20
+    # user_age=datetime.datetime.now().year - user.birthday.year 

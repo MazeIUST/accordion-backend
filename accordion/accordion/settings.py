@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'song',
-    'history',
     'botapp',
     'rest_framework',
     'rest_framework.authtoken',
