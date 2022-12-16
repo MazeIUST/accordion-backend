@@ -37,40 +37,39 @@ class SongSerializer(serializers.ModelSerializer):
 
 
 class PlaylistSerializer(serializers.ModelSerializer):
+    songs = serializers.SerializerMethodField()
     class Meta:
         model = Playlist
         fields = ('id', 'title', 'owner', 'created_at', 'is_public', 'description', 'image', 'songs')
         read_only_fields = ('id', 'created_at', 'owner', 'songs')   
 
-    def create(self, validated_data):
-        songs = validated_data.pop('songs')
-        playlist = Playlist.objects.create(**validated_data)
-        for song in songs:
-            playlist.songs.add(song)
-        return playlist 
+    def get_songs(self, obj):
+        playlist_songs = PlaylistSong.objects.filter(playlist=obj)
+        songs = [playlist_song.song for playlist_song in playlist_songs]
+        return SongSerializer(songs, many=True).data
 
 
 class PlaylistSongsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Playlist
-        fields = ('id', 'songs')
+        model = PlaylistSong
+        fields = ('id', 'playlist', 'song')
+        read_only_fields = ('id', 'playlist')
 
-    # def validate(self, attrs):
-    #     songs = attrs.get('songs')
-    #     if songs:
-    #         for song in songs:
-    #             if song not in self.instance.songs.all():
-    #                 raise serializers.ValidationError({'songs': 'Song does not exist in this playlist'})
-    #     return attrs
+    def validate(self, attrs):
+        request = self.context.get('request')
+        playlist = self.context.get('playlist')
+        song = attrs['song']
+        if request.method == 'POST':
+            if PlaylistSong.objects.filter(playlist=playlist, song=song).exists():
+                raise serializers.ValidationError('Song already exists in playlist')
+        elif request.method == 'DELETE':
+            if not PlaylistSong.objects.filter(playlist=playlist, song=song).exists():
+                raise serializers.ValidationError('Song does not exist in playlist')
+        return attrs
 
-    def add(self, instance, validated_data):
-        songs = validated_data.get('songs')
-        for song in songs:
-            instance.songs.add(song)
-        return instance
 
-    def remove(self, instance, validated_data):
-        songs = validated_data.get('songs')
-        for song in songs:
-            instance.songs.remove(song)
-        return instance
+    
+
+
+
+    

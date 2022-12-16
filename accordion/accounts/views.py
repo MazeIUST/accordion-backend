@@ -63,7 +63,7 @@ class UrlsView(APIView):
             'playlist list, create': absurl + 'songs/playlist/',
             'playlist get, put, delete': absurl + 'songs/playlist/<int:pk>/',
             'playlist add song': absurl + 'songs/playlist/<int:pk>/add_song/',
-            'playlist remove song': absurl + 'songs/playlist/<int:pk>/remove_song/',
+            'playlist remove song': absurl + 'songs/playlist/<int:playlist_pk>/remove_song/<int:song_pk>/',
             'playlist 3 public': absurl + 'songs/playlist/home/',
         }
 

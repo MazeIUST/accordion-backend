@@ -170,7 +170,7 @@ class PlaylistViewSet(ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def retrieve(self, request, pk=None):
-        playlist = get_object_or_404(Playlist, id=pk)
+        playlist = get_object_or_404(Playlist, pk=pk)
         serializer = PlaylistSerializer(playlist)
         return Response(serializer.data)
     
@@ -180,7 +180,7 @@ class PlaylistViewSet(ModelViewSet):
         return Response(serializer.data)
 
     def update(self, request, pk=None):
-        playlist = get_object_or_404(Playlist, id=pk)
+        playlist = get_object_or_404(Playlist, pk=pk)
         serializer = PlaylistSerializer(instance=playlist, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -189,17 +189,17 @@ class PlaylistViewSet(ModelViewSet):
 
     def add_song(self, request, pk=None):
         playlist = get_object_or_404(Playlist, pk=pk)
-        serializer = PlaylistSongsSerializer(playlist, data=request.data)
+        song = get_object_or_404(Song, pk=request.data['song'])
+        serializer = PlaylistSongsSerializer(data=request.data , context={'request': request, 'playlist': playlist})
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(playlist=playlist, song=song)
         return Response({'message': 'Song added to playlist'}, status=status.HTTP_200_OK)
 
-    def remove_song(self, request, pk=None):
-        playlist = get_object_or_404(Playlist, pk=pk)
-        serializer = PlaylistSongsSerializer(playlist, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.remove(playlist, request.data)
-        return Response({'message': 'Song removed from playlist'}, status=status.HTTP_200_OK)
+    def remove_song(self, request, playlist_pk=None, song_pk=None):
+        playlist = get_object_or_404(Playlist, pk=playlist_pk)
+        song = get_object_or_404(Song, pk=song_pk)
+        playlistsong = get_object_or_404(PlaylistSong, playlist=playlist, song=song)
+        playlistsong.delete()
 
     def get_3_public_playlists(self, request):
         playlists = Playlist.objects.filter(is_public=True)

@@ -20,7 +20,7 @@ urlpatterns = [
 
     path('playlist/', PlaylistViewSet.as_view({'post': 'create', 'get': 'list'}), name='playlist'),
     path('playlist/<int:pk>/', PlaylistViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='playlist'),
-    path('playlist/<int:pk>/add_song/', PlaylistViewSet.as_view({'put': 'add_song'}), name='playlist_add_song'),
-    path('playlist/<int:pk>/remove_song/', PlaylistViewSet.as_view({'put': 'remove_song'}), name='playlist_remove_song'),
+    path('playlist/<int:pk>/add_song/', PlaylistViewSet.as_view({'post': 'add_song', 'get': 'retrieve'}), name='playlist_add_song'),
+    path('playlist/<int:playlist_pk>/remove_song/<int:song_pk>/', PlaylistViewSet.as_view({'delete': 'remove_song'}), name='playlist_remove_song'),
     path('playlist/home/', PlaylistViewSet.as_view({'get': 'get_3_public_playlists'}), name='playlist_home'),
 ]
