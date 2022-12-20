@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import Artist
+from accounts.models import Artist,User
 
 
 class Tag(models.Model):
@@ -22,3 +22,25 @@ class Song(models.Model):
 
     def __str__(self):
         return self.title
+
+class Playlist(models.Model):
+    title = models.CharField(max_length=100)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(null=True, blank=True)
+    is_public = models.BooleanField(default=True)
+    image = models.ImageField(null=True, blank=True,upload_to='playlists/photos/')
+
+    def str(self):
+        return self.title
+
+
+class PlaylistSong(models.Model):
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('playlist', 'song')
+
+    def __str__(self):
+        return f'{self.playlist} - {self.song}'
