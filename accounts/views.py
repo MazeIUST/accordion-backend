@@ -243,7 +243,10 @@ class PaymentViewSet(ViewSet):
             data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user)
-        return Response({'message': f'Payment created successfully. your money is {request.user.money}'}, status=status.HTTP_200_OK)
+        return Response({
+            'message': f'Payment created successfully. your money is {request.user.money}',
+            'money': request.user.money
+        }, status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None):
         payment = get_object_or_404(Payment, id=pk)
