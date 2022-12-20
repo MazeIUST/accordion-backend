@@ -46,7 +46,7 @@ class PlaylistSerializer(serializers.ModelSerializer):
     def get_songs(self, obj):
         playlist_songs = PlaylistSong.objects.filter(playlist=obj)
         songs = [playlist_song.song for playlist_song in playlist_songs]
-        return SongSerializer(songs, many=True).data
+        return SongSerializer(songs, many=True, context={'request': self.context['request']}).data
 
 
 class PlaylistSongsSerializer(serializers.ModelSerializer):
