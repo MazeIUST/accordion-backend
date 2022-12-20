@@ -53,7 +53,7 @@ class SongViewSet(ViewSet):
     def update(self, request, pk=None):
         song = get_object_or_404(Song, id=pk)
         serializer = SongSerializer(
-            instance=song, data=request.data, context={'request': request})
+            instance=song, data=request.data, partial=True, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -128,7 +128,7 @@ class TagViewSet(ViewSet):
     def update(self, request, pk=None):
         tag = Tag.objects.get(id=pk)
         serializer = TagSerializer(
-            instance=tag, data=request.data, context={'request': request})
+            instance=tag, data=request.data, partial=True, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -180,7 +180,7 @@ class PlaylistViewSet(ModelViewSet):
     def update(self, request, pk=None):
         playlist = get_object_or_404(Playlist, pk=pk)
         serializer = PlaylistSerializer(
-            instance=playlist, data=request.data, context={'request': request})
+            instance=playlist, data=request.data, partial=True, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)

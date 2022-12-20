@@ -1,11 +1,11 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from .serializers import *
-from .models import User,Follow
-from rest_framework_simplejwt.tokens import RefreshToken # for email
-from django.contrib.sites.shortcuts import get_current_site # for email
-from django.urls import reverse # for email
-from .utils import Util # for email 
+from .models import User, Follow
+from rest_framework_simplejwt.tokens import RefreshToken  # for email
+from django.contrib.sites.shortcuts import get_current_site  # for email
+from django.urls import reverse  # for email
+from .utils import Util  # for email
 import jwt
 from django.conf import settings
 from django.http import JsonResponse
@@ -18,7 +18,7 @@ from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import action
-from django.shortcuts import get_object_or_404,get_list_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from song.models import *
 from song.serializers import *
 from datetime import datetime
@@ -68,7 +68,7 @@ class UrlsView(APIView):
         }
 
         return Response({'account_urls': account_urls, 'songs_urls': songs_urls})
-        
+
 
 class SignUpView(APIView):
     serializer_class = SignUpSerializer
@@ -83,9 +83,11 @@ class SignUpView(APIView):
         token = RefreshToken.for_user(user)
         current_site = get_current_site(request).domain
         relativeLink = reverse('email-verify')
-        absurl = 'http://' + current_site + relativeLink + "?token=" + str(token)
+        absurl = 'http://' + current_site + \
+            relativeLink + "?token=" + str(token)
         print(absurl)
-        email_body = 'Hi ' + user.username + ' Use link below to verify your email\n' + absurl
+        email_body = 'Hi ' + user.username + \
+            ' Use link below to verify your email\n' + absurl
         data = {
             'email_body': email_body,
             'to_email': user.email,
@@ -109,10 +111,10 @@ class LoginView(TokenObtainPairView):
         user = User.objects.filter(email=username)
         if user.exists():
             _mutable = request.data._mutable
-            request.data._mutable = True        
+            request.data._mutable = True
             request.data['username'] = user[0].username
             request.data._mutable = _mutable
-        return None      
+        return None
 
     def post(self, request, *args, **kwargs):
         self.change_username_to_email(request)
@@ -122,40 +124,45 @@ class LoginView(TokenObtainPairView):
             user = user.get(username=username)
             login(request, user)
         return super().post(request, *args, **kwargs)
-        
+
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
-    
+
     def get_serializer_class(self):
         if self.action == 'change_password':
             return ChangePasswordSerializer
         return UserPrivateSerializer
-   
+
     def list(self, request):
         users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
+        serializer = UserSerializer(
+            users, many=True, context={'request': request})
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
         if pk:
-            serializer = UserSerializer(get_object_or_404(User, pk=pk), context={'request': request}).data
-        else:  
-            serializer = UserPrivateSerializer(request.user, context={'request': request}).data
-        return Response(serializer, status=status.HTTP_200_OK) 
+            serializer = UserSerializer(get_object_or_404(
+                User, pk=pk), context={'request': request}).data
+        else:
+            serializer = UserPrivateSerializer(
+                request.user, context={'request': request}).data
+        return Response(serializer, status=status.HTTP_200_OK)
 
     def update(self, request):
-        serializer = UserPrivateSerializer(request.user, data=request.data, partial=True, context={'request': request})
+        serializer = UserPrivateSerializer(
+            request.user, data=request.data, partial=True, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK) 
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def change_password(self, request):
-        serializer = ChangePasswordSerializer(data=request.data)
+        serializer = ChangePasswordSerializer(
+            data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.update(request.user, serializer.validated_data)
         return Response({'message': 'Password updated successfully'}, status=status.HTTP_200_OK)
-    
+
 
 class FollowViewSet(ViewSet):
 
@@ -167,7 +174,7 @@ class FollowViewSet(ViewSet):
         else:
             Follow.objects.get_or_create(user1=user, user2=user_to_follow)
             return Response({'message': 'You are now following ' + user_to_follow.username}, status=status.HTTP_200_OK)
-            
+
     def unfollow(self, request, pk=None):
         user_to_unfollow = get_object_or_404(User, id=pk)
         user = request.user
@@ -176,17 +183,19 @@ class FollowViewSet(ViewSet):
         else:
             Follow.objects.filter(user1=user, user2=user_to_unfollow).delete()
             return Response({'message': 'You are no longer following ' + user_to_unfollow.username}, status=status.HTTP_200_OK)
-        
+
     def get_followers(self, request, pk=None):
         user = get_object_or_404(User, id=pk) if pk else request.user
         followers = Follow.objects.filter(user2=user)
-        followers_serializer = FollowerSerializer(followers, many=True, context={'request': request})
+        followers_serializer = FollowerSerializer(
+            followers, many=True, context={'request': request})
         return Response(followers_serializer.data, status=status.HTTP_200_OK)
-    
+
     def get_followings(self, request, pk=None):
         user = get_object_or_404(User, id=pk) if pk else request.user
         followings = Follow.objects.filter(user1=user)
-        followings_serializer = FollowingSerializer(followings, many=True, context={'request': request})
+        followings_serializer = FollowingSerializer(
+            followings, many=True, context={'request': request})
         return Response(followings_serializer.data, status=status.HTTP_200_OK)
 
 
@@ -195,29 +204,34 @@ class PermiumViewSet(ViewSet):
 
     def create(self, request):
         _mutable = request.data._mutable
-        request.data._mutable = True        
+        request.data._mutable = True
         request.data['days'] = int(request.data.get('days'))
         request.data._mutable = _mutable
         amount = request.data.get('days') * 100
-        payment_serializer = PaymentSerializer(data={'amount': -1*amount}, context={'request': request})
+        payment_serializer = PaymentSerializer(
+            data={'amount': -1*amount}, context={'request': request})
         payment_serializer.is_valid(raise_exception=True)
         payment = payment_serializer.save(user=request.user)
-        serializer = PermiumSerializer(data=request.data, context={'request': request})
+        serializer = PermiumSerializer(
+            data=request.data, context={'request': request})
         if serializer.is_valid():
-            serializer.save(payment=payment) 
+            serializer.save(payment=payment)
         else:
             payment.delete()
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'message': 'Permium created successfully'}, status=status.HTTP_200_OK)      
+        return Response({'message': 'Permium created successfully'}, status=status.HTTP_200_OK)
 
     def retrieve(self, request):
-        permiums = Permium.objects.filter(payment__user=request.user, end_date__gte=datetime.now())
-        serializer = PermiumSerializer(permiums, many=True)
+        permiums = Permium.objects.filter(
+            payment__user=request.user, end_date__gte=datetime.now())
+        serializer = PermiumSerializer(
+            permiums, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def list(self, request):
         permium = Permium.objects.filter(user=request.user)
-        serializer = PermiumSerializer(permium, many=True)
+        serializer = PermiumSerializer(
+            permium, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -225,19 +239,21 @@ class PaymentViewSet(ViewSet):
     serializer_class = PaymentSerializer
 
     def create(self, request):
-        serializer = PaymentSerializer(data=request.data, context={'request': request})
+        serializer = PaymentSerializer(
+            data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user)
         return Response({'message': f'Payment created successfully. your money is {request.user.money}'}, status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None):
         payment = get_object_or_404(Payment, id=pk)
-        serializer = PaymentSerializer(payment)
+        serializer = PaymentSerializer(payment, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def list(self, request):
         payment = Payment.objects.filter(user=request.user)
-        serializer = PaymentSerializer(payment, many=True)
+        serializer = PaymentSerializer(payment, many=True, context={
+                                       'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -248,7 +264,8 @@ class VerifyEmail(generics.GenericAPIView):
     def get(self, request):
         token = request.GET.get('token')
         try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+            payload = jwt.decode(
+                token, settings.SECRET_KEY, algorithms=['HS256'])
             user = User.objects.get(id=payload['user_id'])
             if not user.is_email_verified:
                 user.is_email_verified = True
@@ -259,9 +276,9 @@ class VerifyEmail(generics.GenericAPIView):
         except jwt.exceptions.DecodeError as identifier:
             return Response({'error': 'Invalid token'}, status=400)
 
+
 class LogoutView(APIView):
 
     def get(self, request):
         logout(request)
         return Response(status=status.HTTP_200_OK)
-
