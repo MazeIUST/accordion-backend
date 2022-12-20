@@ -114,35 +114,29 @@ class TagViewSet(ViewSet):
         return Response(serializer.data)
 
     def create(self, request):
-        serializer = TagSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = TagSerializer(
+            data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request, pk=None):
-        try:
-            tag = Tag.objects.get(id=pk)
-            serializer = TagSerializer(tag)
-            return Response(serializer.data)
-        except Tag.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        tag = get_object_or_404(Tag, id=pk)
+        serializer = TagSerializer(tag, context={'request': request})
+        return Response(serializer.data)
 
     def update(self, request, pk=None):
         tag = Tag.objects.get(id=pk)
-        serializer = TagSerializer(instance=tag, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = TagSerializer(
+            instance=tag, data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, pk=None):
-        try:
-            tag = Tag.objects.get(id=pk)
-            tag.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Tag.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        tag = get_object_or_404(Tag, id=pk)
+        tag.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class PlaylistViewSet(ModelViewSet):
@@ -160,12 +154,12 @@ class PlaylistViewSet(ModelViewSet):
         return PlaylistSerializer
 
     def create(self, request):
-        serializer = PlaylistSerializer(data=request.data)
-        if serializer.is_valid():
-            owner = request.user
-            serializer.save(owner=owner)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        owner = request.user
+        serializer = PlaylistSerializer(
+            data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(owner=owner)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, pk=None):
         playlist = get_object_or_404(Playlist, id=pk)
@@ -174,21 +168,22 @@ class PlaylistViewSet(ModelViewSet):
 
     def retrieve(self, request, pk=None):
         playlist = get_object_or_404(Playlist, pk=pk)
-        serializer = PlaylistSerializer(playlist)
+        serializer = PlaylistSerializer(playlist, context={'request': request})
         return Response(serializer.data)
 
     def list(self, request):
         playlists = get_list_or_404(Playlist, owner=request.user)
-        serializer = PlaylistSerializer(playlists, many=True)
+        serializer = PlaylistSerializer(
+            playlists, many=True, context={'request': request})
         return Response(serializer.data)
 
     def update(self, request, pk=None):
         playlist = get_object_or_404(Playlist, pk=pk)
-        serializer = PlaylistSerializer(instance=playlist, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = PlaylistSerializer(
+            instance=playlist, data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def add_song(self, request, pk=None):
         playlist = get_object_or_404(Playlist, pk=pk)
@@ -210,5 +205,6 @@ class PlaylistViewSet(ModelViewSet):
         playlists = Playlist.objects.filter(is_public=True)
         if len(playlists) > 3:
             playlists = playlists[:3]
-        serializer = PlaylistSerializer(playlists, many=True)
+        serializer = PlaylistSerializer(
+            playlists, many=True, context={'request': request})
         return Response(serializer.data)
