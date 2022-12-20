@@ -7,9 +7,9 @@ from rest_framework import status
 from .scripts import create_tag
 from accordion.permissions import *
 from django.db.models import Q
-from django.shortcuts import get_object_or_404,get_list_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.permissions import IsAuthenticated
-       
+
 
 class SongViewSet(ViewSet):
     serializer_class = SongSerializer
@@ -33,30 +33,31 @@ class SongViewSet(ViewSet):
             songs = Song.objects.filter(artist=artist)
         else:
             songs = Song.objects.all()
-        serializer = SongSerializer(songs, many=True)
+        serializer = SongSerializer(
+            songs, many=True, context={'request': request})
         return Response(serializer.data)
 
     def create(self, request):
-        serializer = SongSerializer(data=request.data)
-        if serializer.is_valid():
-            artist = Artist.objects.get(user=request.user)
-            serializer.save(artist=artist)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        artist = Artist.objects.get(user=request.user)
+        serializer = SongSerializer(
+            data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(artist=artist)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request, pk=None):
         song = get_object_or_404(Song, id=pk)
-        serializer = SongSerializer(song)
+        serializer = SongSerializer(song, context={'request': request})
         return Response(serializer.data)
 
     def update(self, request, pk=None):
         song = get_object_or_404(Song, id=pk)
-        serializer = SongSerializer(instance=song, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+        serializer = SongSerializer(
+            instance=song, data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def destroy(self, request, pk=None):
         song = get_object_or_404(Song, id=pk)
         song.delete()
@@ -73,9 +74,10 @@ class SongViewSet(ViewSet):
     def search(self, request, text=None):
         scores = {}
         title_contains = Song.objects.filter(title__contains=text)
-        artist_contains = Song.objects.filter(Q(artist__user__first_name__contains=text) | Q(artist__user__last_name__contains=text))
+        artist_contains = Song.objects.filter(
+            Q(artist__user__first_name__contains=text) | Q(artist__user__last_name__contains=text))
         lyrics_contains = Song.objects.filter(lyrics__contains=text)
-        
+
         for song in title_contains:
             scores[song] = 10
         for song in artist_contains:
@@ -91,13 +93,14 @@ class SongViewSet(ViewSet):
         # sort songs by score
         songs.sort(key=lambda x: scores[x], reverse=True)
 
-        # return top 15 songs   
+        # return top 15 songs
         if len(songs) > 15:
             songs = songs[:15]
 
-        serializer = SongSerializer(songs, many=True)
+        serializer = SongSerializer(
+            songs, many=True, context={'request': request})
         return Response(serializer.data)
-        
+
 
 class TagViewSet(ViewSet):
     serializer_class = TagSerializer
@@ -155,8 +158,8 @@ class PlaylistViewSet(ModelViewSet):
         if self.action in ['add_song', 'remove_song']:
             return PlaylistSongsSerializer
         return PlaylistSerializer
-        
-    def create(self, request):  
+
+    def create(self, request):
         serializer = PlaylistSerializer(data=request.data)
         if serializer.is_valid():
             owner = request.user
@@ -173,7 +176,7 @@ class PlaylistViewSet(ModelViewSet):
         playlist = get_object_or_404(Playlist, pk=pk)
         serializer = PlaylistSerializer(playlist)
         return Response(serializer.data)
-    
+
     def list(self, request):
         playlists = get_list_or_404(Playlist, owner=request.user)
         serializer = PlaylistSerializer(playlists, many=True)
@@ -190,7 +193,8 @@ class PlaylistViewSet(ModelViewSet):
     def add_song(self, request, pk=None):
         playlist = get_object_or_404(Playlist, pk=pk)
         song = get_object_or_404(Song, pk=request.data['song'])
-        serializer = PlaylistSongsSerializer(data=request.data , context={'request': request, 'playlist': playlist})
+        serializer = PlaylistSongsSerializer(data=request.data, context={
+                                             'request': request, 'playlist': playlist})
         serializer.is_valid(raise_exception=True)
         serializer.save(playlist=playlist, song=song)
         return Response({'message': 'Song added to playlist'}, status=status.HTTP_200_OK)
@@ -198,7 +202,8 @@ class PlaylistViewSet(ModelViewSet):
     def remove_song(self, request, playlist_pk=None, song_pk=None):
         playlist = get_object_or_404(Playlist, pk=playlist_pk)
         song = get_object_or_404(Song, pk=song_pk)
-        playlistsong = get_object_or_404(PlaylistSong, playlist=playlist, song=song)
+        playlistsong = get_object_or_404(
+            PlaylistSong, playlist=playlist, song=song)
         playlistsong.delete()
 
     def get_3_public_playlists(self, request):
@@ -207,13 +212,3 @@ class PlaylistViewSet(ModelViewSet):
             playlists = playlists[:3]
         serializer = PlaylistSerializer(playlists, many=True)
         return Response(serializer.data)
-    
-
-
-
-    
-
-
-
-
-
