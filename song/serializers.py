@@ -1,10 +1,12 @@
 from rest_framework import serializers
 from .models import *
 
+
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ('id', 'name')
+
 
 class SongSerializer(serializers.ModelSerializer):
     artist_name = serializers.SerializerMethodField()
@@ -12,7 +14,8 @@ class SongSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Song
-        fields = ('id', 'artist', 'artist_name', 'title', 'description', 'lyrics', 'song_link', 'song_download_link', 'image', 'note', 'created_at', 'tags')
+        fields = ('id', 'artist', 'artist_name', 'title', 'description', 'lyrics',
+                  'song_link', 'song_download_link', 'image', 'note', 'created_at', 'tags')
         read_only_fields = ('id', 'created_at', 'artist')
 
     def get_artist_name(self, obj):
@@ -36,12 +39,23 @@ class SongSerializer(serializers.ModelSerializer):
         return song
 
 
-class PlaylistSerializer(serializers.ModelSerializer):
-    songs = serializers.SerializerMethodField()
+class ProfilePlaylistSerializer(serializers.ModelSerializer):
+    link = serializers.HyperlinkedIdentityField(view_name='get_playlist')
+
     class Meta:
         model = Playlist
-        fields = ('id', 'title', 'owner', 'created_at', 'is_public', 'description', 'image', 'songs')
-        read_only_fields = ('id', 'created_at', 'owner', 'songs')   
+        fields = ['id', 'title', 'owner', 'created_at',
+                  'is_public', 'description', 'image', 'link']
+        read_only_fields = ['id', 'created_at', 'owner', 'link']
+
+
+class PlaylistSerializer(ProfilePlaylistSerializer):
+    songs = serializers.SerializerMethodField()
+
+    class Meta(ProfilePlaylistSerializer.Meta):
+        fields = ProfilePlaylistSerializer.Meta.fields + ['songs']
+        read_only_fields = ProfilePlaylistSerializer.Meta.read_only_fields + \
+            ['songs']
 
     def get_songs(self, obj):
         playlist_songs = PlaylistSong.objects.filter(playlist=obj)
@@ -61,15 +75,10 @@ class PlaylistSongsSerializer(serializers.ModelSerializer):
         song = attrs['song']
         if request.method == 'POST':
             if PlaylistSong.objects.filter(playlist=playlist, song=song).exists():
-                raise serializers.ValidationError('Song already exists in playlist')
+                raise serializers.ValidationError(
+                    'Song already exists in playlist')
         elif request.method == 'DELETE':
             if not PlaylistSong.objects.filter(playlist=playlist, song=song).exists():
-                raise serializers.ValidationError('Song does not exist in playlist')
+                raise serializers.ValidationError(
+                    'Song does not exist in playlist')
         return attrs
-
-
-    
-
-
-
-    

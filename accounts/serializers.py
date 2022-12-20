@@ -114,17 +114,22 @@ class ArtistPrivateSerializer(ArtistSerializer):
 class UserPrivateSerializer(UserSerializer):
     artist = ArtistPrivateSerializer()
     permium = serializers.SerializerMethodField()
+    playlists = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
         fields = ['id', 'email', 'is_email_verified', 'telegram_chat_id', 'birthday',
-                  'gender', 'country', 'city', 'bio', 'money', 'permium'] + UserSerializer.Meta.fields
+                  'gender', 'country', 'city', 'bio', 'money', 'permium', 'playlists'] + UserSerializer.Meta.fields
         read_only_fields = ['id', 'username', 'is_Artist', 'email',
-                            'is_email_verified', 'telegram_chat_id', 'money', 'permium']
+                            'is_email_verified', 'telegram_chat_id', 'money', 'permium', 'playlists']
 
     def get_permium(self, obj):
         permium = Permium.objects.filter(
             payment__user=obj, end_date__gte=datetime.now())
         return PermiumSerializer(permium, many=True, context={'request': self.context['request']}).data
+
+    def get_playlists(self, obj):
+        playlists = Playlist.objects.filter(owner=obj)
+        return ProfilePlaylistSerializer(playlists, many=True, context={'request': self.context['request']}).data
 
     def update(self, instance, validated_data):
         try:
