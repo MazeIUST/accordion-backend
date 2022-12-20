@@ -181,8 +181,8 @@ class PremiumSerializer(serializers.ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ['id', 'user', 'amount', 'date']
-        read_only_fields = ['id', 'user', 'date']
+        fields = ['id', 'user', 'amount', 'date', 'remaining_money']
+        read_only_fields = ['id', 'user', 'date', 'remaining_money']
 
     def validate(self, attrs):
         user_money = self.context['request'].user.money
