@@ -50,7 +50,7 @@ class UrlsView(APIView):
             'user get followings of other user': absurl + 'followings/<int:pk>/',
             'user payment': absurl + 'payment/',
             'user payment get': absurl + 'payment/<int:pk>/',
-            'user permium': absurl + 'permium/',
+            'user premium': absurl + 'premium/',
         }
 
         songs_urls = {
@@ -199,8 +199,8 @@ class FollowViewSet(ViewSet):
         return Response(followings_serializer.data, status=status.HTTP_200_OK)
 
 
-class PermiumViewSet(ViewSet):
-    serializer_class = PermiumSerializer
+class PremiumViewSet(ViewSet):
+    serializer_class = PremiumSerializer
 
     def create(self, request):
         _mutable = request.data._mutable
@@ -212,26 +212,26 @@ class PermiumViewSet(ViewSet):
             data={'amount': -1*amount}, context={'request': request})
         payment_serializer.is_valid(raise_exception=True)
         payment = payment_serializer.save(user=request.user)
-        serializer = PermiumSerializer(
+        serializer = PremiumSerializer(
             data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save(payment=payment)
         else:
             payment.delete()
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'message': 'Permium created successfully'}, status=status.HTTP_200_OK)
+        return Response({'message': 'Premium created successfully'}, status=status.HTTP_200_OK)
 
     def retrieve(self, request):
-        permiums = Permium.objects.filter(
+        premiums = Premium.objects.filter(
             payment__user=request.user, end_date__gte=datetime.now())
-        serializer = PermiumSerializer(
-            permiums, many=True, context={'request': request})
+        serializer = PremiumSerializer(
+            premiums, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def list(self, request):
-        permium = Permium.objects.filter(user=request.user)
-        serializer = PermiumSerializer(
-            permium, many=True, context={'request': request})
+        premium = Premium.objects.filter(user=request.user)
+        serializer = PremiumSerializer(
+            premium, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

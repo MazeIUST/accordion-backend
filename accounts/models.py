@@ -5,17 +5,20 @@ from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.exceptions import ValidationError
 
+
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     is_email_verified = models.BooleanField(default=False)
     is_Artist = models.BooleanField(default=False)
     is_public = models.BooleanField(default=True)
     birthday = models.DateField(null=True)
-    country = models.CharField(max_length=255,null=True)
-    city = models.CharField(max_length=255,null=True)
+    country = models.CharField(max_length=255, null=True)
+    city = models.CharField(max_length=255, null=True)
     bio = models.TextField(null=True)
-    image = models.ImageField(upload_to='profiles/photos/', blank=True, null=True)
-    telegram_chat_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    image = models.ImageField(
+        upload_to='profiles/photos/', blank=True, null=True)
+    telegram_chat_id = models.CharField(
+        max_length=255, null=True, blank=True, unique=True)
     money = models.IntegerField(default=0)
 
     GENDER_Male = 'M'
@@ -37,30 +40,34 @@ class User(AbstractUser):
     def tokens(self):
         refresh = RefreshToken.for_user(self)
         return {
-            'refresh_token':str(refresh),
-            'access_token':str(refresh.access_token),
+            'refresh_token': str(refresh),
+            'access_token': str(refresh.access_token),
         }
 
     def update_money(self):
-        money = self.payment_set.aggregate(models.Sum('amount'))['amount__sum'] or 0
+        money = self.payment_set.aggregate(models.Sum('amount'))[
+            'amount__sum'] or 0
         self.money = money
         self.save()
         return money
 
+
 class Artist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    artistic_name = models.CharField(max_length=200,null=True)
+    artistic_name = models.CharField(max_length=200, null=True)
     description = models.TextField(null=True)
     activitie_start_date = models.PositiveIntegerField(null=True)
+
     def __str__(self):
         return self.user.username
 
 
 class Follow(models.Model):
-    user1 = models.ForeignKey(User, related_name="user1", on_delete=models.CASCADE)
-    user2= models.ForeignKey(User, related_name="user2", on_delete=models.CASCADE)
+    user1 = models.ForeignKey(
+        User, related_name="user1", on_delete=models.CASCADE)
+    user2 = models.ForeignKey(
+        User, related_name="user2", on_delete=models.CASCADE)
     start_date = models.DateTimeField(auto_now_add=True)
-        
 
 
 class Payment(models.Model):
@@ -77,7 +84,7 @@ class Payment(models.Model):
         return self.user.username
 
 
-class Permium(models.Model):
+class Premium(models.Model):
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE)
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField(default=datetime.datetime.now)
@@ -89,7 +96,6 @@ class Permium(models.Model):
 
     def days_left(self):
         return (self.end_date - datetime.datetime.now(tz=datetime.timezone.utc)).days
-
 
     def __str__(self):
         return self.user.username

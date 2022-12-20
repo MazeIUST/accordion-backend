@@ -113,19 +113,19 @@ class ArtistPrivateSerializer(ArtistSerializer):
 
 class UserPrivateSerializer(UserSerializer):
     artist = ArtistPrivateSerializer()
-    permium = serializers.SerializerMethodField()
+    premium = serializers.SerializerMethodField()
     playlists = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
         fields = ['id', 'email', 'is_email_verified', 'telegram_chat_id', 'birthday',
-                  'gender', 'country', 'city', 'bio', 'money', 'permium', 'playlists'] + UserSerializer.Meta.fields
+                  'gender', 'country', 'city', 'bio', 'money', 'premium', 'playlists'] + UserSerializer.Meta.fields
         read_only_fields = ['id', 'username', 'is_Artist', 'email',
-                            'is_email_verified', 'telegram_chat_id', 'money', 'permium', 'playlists']
+                            'is_email_verified', 'telegram_chat_id', 'money', 'premium', 'playlists']
 
-    def get_permium(self, obj):
-        permium = Permium.objects.filter(
+    def get_premium(self, obj):
+        premium = Premium.objects.filter(
             payment__user=obj, end_date__gte=datetime.now())
-        return PermiumSerializer(permium, many=True, context={'request': self.context['request']}).data
+        return PremiumSerializer(premium, many=True, context={'request': self.context['request']}).data
 
     def get_playlists(self, obj):
         playlists = Playlist.objects.filter(owner=obj)
@@ -141,12 +141,12 @@ class UserPrivateSerializer(UserSerializer):
         return super().update(instance, validated_data)
 
 
-class PermiumSerializer(serializers.ModelSerializer):
+class PremiumSerializer(serializers.ModelSerializer):
     days = serializers.IntegerField(write_only=True)
     payment = serializers.SerializerMethodField()
 
     class Meta:
-        model = Permium
+        model = Premium
         fields = ['id', 'start_date', 'end_date',
                   'is_active', 'days_left', 'days', 'payment']
         read_only_fields = ['id', 'start_date', 'end_date',
@@ -158,16 +158,16 @@ class PermiumSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         user = self.context['request'].user
-        active_permium = Permium.objects.filter(
+        active_premium = Premium.objects.filter(
             payment__user=user, end_date__gte=datetime.now())
 
         if attrs['days'] < 1:
             raise serializers.ValidationError({
                 'days': ['days must be greater than 0.'],
             })
-        if active_permium.exists():
+        if active_premium.exists():
             raise serializers.ValidationError({
-                'user': ['user already has active permium.'],
+                'user': ['user already has active premium.'],
             })
 
         return attrs
