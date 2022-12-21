@@ -257,7 +257,7 @@ class PaymentViewSet(ViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def list(self, request):
-        payment = Payment.objects.filter(user=request.user)
+        payment = Payment.objects.filter(user=request.user).order_by('-id')
         serializer = PaymentSerializer(payment, many=True, context={
                                        'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
