@@ -23,6 +23,8 @@ from song.models import *
 from song.serializers import *
 from datetime import datetime
 from django.db.models import F, Q
+from django.http import QueryDict
+
 
 
 class UrlsView(APIView):
@@ -110,10 +112,13 @@ class LoginView(TokenObtainPairView):
         username = request.data.get('username')
         user = User.objects.filter(email=username)
         if user.exists():
-            _mutable = request.data._mutable
-            request.data._mutable = True
-            request.data['username'] = user[0].username
-            request.data._mutable = _mutable
+            if type(request.data) == QueryDict:
+                _mutable = request.data._mutable
+                request.data._mutable = True
+                request.data['username'] = user[0].username
+                request.data._mutable = _mutable
+            else:
+                request.data['username'] = user[0].username
         return None
 
     def post(self, request, *args, **kwargs):
@@ -203,17 +208,18 @@ class PremiumViewSet(ViewSet):
     serializer_class = PremiumSerializer
 
     def create(self, request):
-        _mutable = request.data._mutable
-        request.data._mutable = True
-        request.data['days'] = int(request.data.get('days'))
-        request.data._mutable = _mutable
+        if type(request.data) == QueryDict:
+            _mutable = request.data._mutable
+            request.data._mutable = True
+            request.data['days'] = int(request.data.get('days'))
+            request.data._mutable = _mutable
         amount = request.data.get('days') * 100
         payment_serializer = PaymentSerializer(
             data={'amount': -1*amount}, context={'request': request})
         payment_serializer.is_valid(raise_exception=True)
         payment = payment_serializer.save(user=request.user)
         serializer = PremiumSerializer(
-            data=request.data, context={'request': request})
+            data=request.data, context={'request': request, 'days': int(request.data.get('days'))})
         if serializer.is_valid():
             serializer.save(payment=payment)
         else:

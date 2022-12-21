@@ -2,6 +2,7 @@ from rest_framework import permissions
 from rest_framework.permissions import IsAdminUser
 from rest_framework.permissions import IsAuthenticated
 
+
 class IsSuperUser(IsAdminUser):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_superuser)
@@ -23,8 +24,6 @@ class IsArtist(permissions.BasePermission):
         return True
 
 
-
-
 class IsArtistORSuperuser(permissions.BasePermission):
 
     def has_permission(self, request, view):
@@ -32,17 +31,17 @@ class IsArtistORSuperuser(permissions.BasePermission):
         if is_authenticated:
             return request.user.is_Artist or request.user.is_superuser
         return False
-        
 
     def has_object_permission(self, request, view, obj):
         if view.action in ['update', 'destroy']:
             return request.user.is_superuser or obj.artist.user == request.user
         return True
 
+
 class IsPlaylistOwner(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        if view.action in ['add_song','remove_song', 'destroy', 'update']:
+        if view.action in ['add_song', 'remove_song', 'destroy', 'update']:
             return request.user.is_superuser or obj.owner == request.user
         elif view.action in ['retrieve']:
             return obj.is_public or obj.owner == request.user
