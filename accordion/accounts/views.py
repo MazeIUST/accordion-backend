@@ -175,6 +175,14 @@ class UserViewSet(ModelViewSet):
             Follow.objects.filter(user1=user, user2=user_to_unfollow).delete()
             return Response({'message': 'You are no longer following ' + user_to_unfollow.username}, status=status.HTTP_200_OK)
 
+
+    def get_recent_10_music(self, request):
+        user = UserSerializer(request.user).data
+        user_history =History.objects.get(user=user).order_by_('-add_datetime').distinct('song_id')[:10]
+        recent_10_music =user_history.values('song_id').to_dict()
+        return Response(recent_10_music)
+    
+
 class VerifyEmail(generics.GenericAPIView):
     permission_classes = []
     authentication_classes = []
