@@ -177,10 +177,16 @@ class UserViewSet(ModelViewSet):
 
 
     def get_recent_10_music(self, request):
-        user = UserSerializer(request.user).data
-        user_history =History.objects.get(user=user).order_by_('-add_datetime').distinct('song_id')[:10]
+        user = UserSerializer(request.user).data.get('id')
+        user_history =History.objects.get(user=user).order_by('-add_datetime').distinct('song_id')[:10] # if less than 10 tracks
         recent_10_music =user_history.values('song_id').to_dict()
         return Response(recent_10_music)
+
+    def get_recent_10_artist(self, request):
+        user = UserSerializer(request.user).data.get('id')
+        user_history =History.objects.get(user=user).order_by('-add_datetime').distinct('song__artist')[:10] # if less than 10 tracks
+        recent_10_artist =user_history.values('song__artist_id').to_dict()
+        return Response(recent_10_artist)
     
 
 class VerifyEmail(generics.GenericAPIView):

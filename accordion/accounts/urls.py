@@ -18,5 +18,6 @@ urlpatterns = [
     path('unfollow/<int:pk>/', UserViewSet.as_view({'get': 'unfollow'}), name='unfollow'),
     path('change_password/', UserViewSet.as_view({'put': 'change_password'}), name='change_password'),
     path('get_recent_10_music/', UserViewSet.as_view({'get': 'get_recent_10_music'}), name='get_recent_10_music'),
+    path('get_recent_10_artist/', UserViewSet.as_view({'get': 'get_recent_10_artist'}), name='get_recent_10_artist'),
 
 ]
