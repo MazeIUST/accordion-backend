@@ -81,12 +81,13 @@ class UserSerializer(serializers.ModelSerializer):
     followings_count = serializers.SerializerMethodField()
     followers = serializers.SerializerMethodField()
     followings = serializers.SerializerMethodField()
+    playlists = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ['username', 'is_Artist', 'first_name', 'last_name', 'image', 'bio', 'followers_count',
-                  'followings_count', 'followers', 'followings', 'artist']  # should add playlist there
-        read_only_fields = ['id', 'username', 'email']
+                  'followings_count', 'followers', 'followings', 'artist', 'playlists']  # should add playlist there
+        read_only_fields = ['id', 'username', 'email', 'playlists']
 
     def get_followers_count(self, obj):
         followers_count = Follow.objects.filter(user2=obj).count()
@@ -103,6 +104,10 @@ class UserSerializer(serializers.ModelSerializer):
     def get_followings(self, obj):
         followings = Follow.objects.filter(user1=obj)
         return FollowingSerializer(followings, many=True, context={'request': self.context['request']}).data
+    
+    def get_playlists(self, obj):
+        playlists = Playlist.objects.filter(owner=obj, is_public=True)
+        return ProfilePlaylistSerializer(playlists, many=True, context={'request': self.context['request']}).data
 
 
 class ArtistPrivateSerializer(ArtistSerializer):
@@ -114,13 +119,12 @@ class ArtistPrivateSerializer(ArtistSerializer):
 class UserPrivateSerializer(UserSerializer):
     artist = ArtistPrivateSerializer()
     premium = serializers.SerializerMethodField()
-    playlists = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
         fields = ['id', 'email', 'is_email_verified', 'telegram_chat_id', 'birthday',
-                  'gender', 'country', 'city', 'bio', 'money', 'premium', 'playlists'] + UserSerializer.Meta.fields
+                  'gender', 'country', 'city', 'bio', 'money', 'premium'] + UserSerializer.Meta.fields
         read_only_fields = ['id', 'username', 'is_Artist', 'email',
-                            'is_email_verified', 'telegram_chat_id', 'money', 'premium', 'playlists']
+                            'is_email_verified', 'telegram_chat_id', 'money', 'premium']
 
     def get_premium(self, obj):
         premium = Premium.objects.filter(
