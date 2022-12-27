@@ -44,3 +44,24 @@ class PlaylistSong(models.Model):
 
     def __str__(self):
         return f'{self.playlist} - {self.song}'
+    
+    
+class Album(models.Model):
+    title = models.CharField(max_length=100)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(null=True, blank=True)
+    image = models.ImageField(null=True, blank=True,upload_to='albums/photos/')
+
+    def str(self):
+        return self.title
+    
+class AlbumSong(models.Model):
+    album = models.ForeignKey(Album, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('album', 'song')
+
+    def __str__(self):
+        return f'{self.album} - {self.song}'

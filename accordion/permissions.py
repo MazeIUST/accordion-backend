@@ -22,6 +22,12 @@ class IsArtist(permissions.BasePermission):
                 return True
             return False
         return True
+    
+
+class IsAlbumOwner(permissions.BasePermission):
+    
+    def has_object_permission(self, request, view, obj):
+        return bool(request.user.is_superuser or obj.artist.user == request.user)
 
 
 class IsArtistORSuperuser(permissions.BasePermission):

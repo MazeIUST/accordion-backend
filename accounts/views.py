@@ -67,6 +67,10 @@ class UrlsView(APIView):
             'playlist add song': absurl + 'songs/playlist/<int:pk>/add_song/',
             'playlist remove song': absurl + 'songs/playlist/<int:playlist_pk>/remove_song/<int:song_pk>/',
             'playlist 3 public': absurl + 'songs/playlist/home/',
+            'album list, create': absurl + 'songs/album/',
+            'album get, put, delete': absurl + 'songs/album/<int:pk>/',
+            'album add song': absurl + 'songs/album/<int:pk>/add_song/',
+            'album remove song': absurl + 'songs/album/<int:album_pk>/remove_song/<int:song_pk>/',
         }
 
         return Response({'account_urls': account_urls, 'songs_urls': songs_urls})
