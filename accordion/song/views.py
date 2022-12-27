@@ -9,7 +9,7 @@ from accordion.permissions import *
 from django.db.models import Q,F
 from django.shortcuts import get_object_or_404,get_list_or_404
 from rest_framework.permissions import IsAuthenticated
-       
+from urllib.parse import urlparse, parse_qs
 
 class SongViewSet(ViewSet):
     serializer_class = SongSerializer
@@ -205,9 +205,36 @@ class PlaylistViewSet(ViewSet):
     
 
 class HistoryViewSet(ViewSet):
-    def analysis(self, request, days=None, city=None, country=None, min_age=None, max_age=None):
+    def analysis(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
         today = datetime.datetime.now()
         last_time = today-datetime.timedelta(days=days)
+        days_filter = Q(add_datetime__range=[last_time,today]) if days!= 0 else Q()
+        city_filter = Q(user__city=city) if city!= '0' else Q()
+        country_filter = Q(user__country=country) if country!= '0' else Q()
+        min_age_filter = Q(user__birthday__lte=today-datetime.timedelta(days=min_age*365)) if min_age!= 0 else Q()
+        max_age_filter = Q(user__birthday__gte=today-datetime.timedelta(days=max_age*365)) if max_age!= 0 else Q()
+        user_history =History.objects.filter(days_filter,city_filter,country_filter,min_age_filter,max_age_filter)
+        songs_tags = user_history.annotate(tags=F("song_id__tags")).values()
+        tags = Tag.objects.all()
+        result = {}
+        for tag in tags:
+            result[tag.id]=0
+        for song_tag in songs_tags:
+            for tag in song_tag.tags:
+                result[tag.id]=+1
+        return Response(result)
+
+
+    def analysis2(self, request):
+        
+        city = self.request.GET.get('city',"0")
+        country = self.request.GET.get('country',"0")
+        min_age=self.request.GET.get('min_age',"0")
+        max_age= self.request.GET.get('max_age',"0")
+        days = self.request.GET.get('days','0')
+
+        today = datetime.datetime.now()
+        last_time = today-datetime.timedelta(days=int(days))
         days_filter = Q(add_datetime__range=[last_time,today]) if days!= 0 else Q()
         city_filter = Q(user__city=city) if city!= '0' else Q()
         country_filter = Q(user__country=country) if country!= '0' else Q()
