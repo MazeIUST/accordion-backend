@@ -253,7 +253,7 @@ class AlbumViewSet(ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def list(self, request):
-        albums = Album.objects.all()
+        albums = Album.objects.all().filter(artist__user=request.user)
         serializer = AlbumSerializer(
             albums, many=True, context={'request': request})
         return Response(serializer.data)
