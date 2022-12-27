@@ -208,3 +208,70 @@ class PlaylistViewSet(ModelViewSet):
         serializer = PlaylistSerializer(
             playlists, many=True, context={'request': request})
         return Response(serializer.data)
+    
+    
+class AlbumViewSet(ModelViewSet):
+    queryset = Album.objects.all()
+    
+    def get_serializer_class(self):
+        if self.action in ['add_song', 'remove_song']:
+            return AlbumSongsSerializer
+        return AlbumSerializer
+    
+    def get_permissions(self):
+        if self.action in ['retrieve']:
+            permission_classes = []
+        elif self.action in ['update', 'destroy', 'add_song', 'remove_song']:
+            permission_classes = [IsAuthenticated, IsAlbumOwner]  
+        else:
+            permission_classes = [IsAuthenticated, IsArtist]
+        return [permission() for permission in permission_classes]    
+        
+    def create(self, request):
+        serializer = AlbumSerializer(
+            data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, pk=None):
+        album = get_object_or_404(Album, id=pk)
+        album.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def retrieve(self, request, pk=None):
+        album = get_object_or_404(Album, id=pk)
+        serializer = AlbumSerializer(album, context={'request': request})
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        album = get_object_or_404(Album, id=pk)
+        serializer = AlbumSerializer(
+            instance=album, data=request.data, partial=True, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def list(self, request):
+        albums = Album.objects.all()
+        serializer = AlbumSerializer(
+            albums, many=True, context={'request': request})
+        return Response(serializer.data)
+    
+    def add_song(self, request, pk=None):
+        album = get_object_or_404(Album, pk=pk)
+        song = get_object_or_404(Song, pk=request.data['song'])
+        serializer = AlbumSongsSerializer(data=request.data, context={
+                                             'request': request, 'album': album})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(album=album, song=song)
+        return Response({'message': 'Song added to album'}, status=status.HTTP_200_OK)
+    
+    def remove_song(self, request, album_pk=None, song_pk=None):
+        album = get_object_or_404(Album, pk=album_pk)
+        song = get_object_or_404(Song, pk=song_pk)
+        albumsong = get_object_or_404(
+            AlbumSong, album=album, song=song)
+        albumsong.delete()
+        
+    

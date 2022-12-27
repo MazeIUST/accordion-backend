@@ -82,3 +82,45 @@ class PlaylistSongsSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     'Song does not exist in playlist')
         return attrs
+    
+
+class AlbumSerializer(serializers.ModelSerializer):
+    songs = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Album
+        fields = ('id', 'title', 'artist', 'description', 'image', 'songs')
+        read_only_fields = ('id', 'artist')
+    
+    def get_songs(self, obj):
+        album_songs = AlbumSong.objects.filter(album=obj)
+        songs = [album_song.song for album_song in album_songs]
+        return SongSerializer(songs, many=True, context={'request': self.context['request']}).data
+    
+    def create(self, validated_data):
+        user = self.context.get('request').user
+        artist = Artist.objects.get(user=user)
+        album = Album.objects.create(artist=artist, **validated_data)
+        return album        
+    
+    
+class AlbumSongsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AlbumSong
+        fields = ('id', 'album', 'song')
+        read_only_fields = ('id', 'album')
+    
+    def validate(self, attrs):
+        request = self.context.get('request')
+        album = self.context.get('album')
+        song = attrs['song']
+        if album.artist != song.artist:
+            raise serializers.ValidationError('Song does not belong to artist')
+        if request.method == 'POST':
+            if AlbumSong.objects.filter(album=album, song=song).exists():
+                raise serializers.ValidationError('Song already exists in album')
+        elif request.method == 'DELETE':
+            if not AlbumSong.objects.filter(album=album, song=song).exists():
+                raise serializers.ValidationError('Song does not exist in album')
+        return attrs
+    
