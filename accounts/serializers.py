@@ -43,23 +43,27 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class FollowerSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='user1.id', read_only=True)
     username = serializers.CharField(source='user1.username', read_only=True)
     profile = serializers.HyperlinkedRelatedField(
         source='user1', read_only=True, view_name='show_other_user_profile')
+    image = serializers.ImageField(source='user1.image', read_only=True)
 
     class Meta:
         model = Follow
-        fields = ('username', 'profile')
+        fields = ('id', 'username', 'profile', 'image')
 
 
 class FollowingSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='user2.id', read_only=True)
     username = serializers.CharField(source='user2.username', read_only=True)
     profile = serializers.HyperlinkedRelatedField(
         source='user2', read_only=True, view_name='show_other_user_profile')
+    image = serializers.ImageField(source='user2.image', read_only=True)
 
     class Meta:
         model = Follow
-        fields = ('username', 'profile')
+        fields = ('id', 'username', 'profile', 'image')
 
 
 class ArtistSerializer(serializers.ModelSerializer):
