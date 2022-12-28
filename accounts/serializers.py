@@ -108,7 +108,7 @@ class UserSerializer(serializers.ModelSerializer):
     def get_followings(self, obj):
         followings = Follow.objects.filter(user1=obj)
         return FollowingSerializer(followings, many=True, context={'request': self.context['request']}).data
-    
+
     def get_playlists(self, obj):
         playlists = Playlist.objects.filter(owner=obj, is_public=True)
         return ProfilePlaylistSerializer(playlists, many=True, context={'request': self.context['request']}).data
@@ -126,7 +126,7 @@ class UserPrivateSerializer(UserSerializer):
 
     class Meta(UserSerializer.Meta):
         fields = UserSerializer.Meta.fields + ['email', 'is_email_verified', 'telegram_chat_id', 'birthday',
-                  'gender', 'country', 'city', 'bio', 'money', 'premium']
+                                               'gender', 'country', 'city', 'bio', 'money', 'premium']
         read_only_fields = ['id', 'username', 'is_Artist', 'email',
                             'is_email_verified', 'telegram_chat_id', 'money', 'premium']
 
