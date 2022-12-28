@@ -11,21 +11,35 @@ router.register(r'playlist', PlaylistViewSet, basename='playlist')
 
 urlpatterns = [
     path('', SongViewSet.as_view({'get': 'list', 'post': 'create'})),
-    path('<int:pk>/', SongViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
-    path('delete_all/', SongViewSet.as_view({'delete': 'destroy_all', 'get': 'list'})),
-    path('search/<str:text>/', SongViewSet.as_view({'get': 'search'}), name='song_search'),
+    path('<int:pk>/',
+         SongViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
+    path('delete_all/',
+         SongViewSet.as_view({'delete': 'destroy_all', 'get': 'list'})),
+    path('search/<str:text>/',
+         SongViewSet.as_view({'get': 'search'}), name='song_search'),
 
-    path('tag/', TagViewSet.as_view({'get': 'list', 'post': 'create'}), name='tags'),
-    path('tag/<int:pk>/', TagViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='tag'),
+    path(
+        'tag/', TagViewSet.as_view({'get': 'list', 'post': 'create'}), name='tags'),
+    path('tag/<int:pk>/', TagViewSet.as_view(
+        {'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='tag'),
 
-    path('playlist/', PlaylistViewSet.as_view({'post': 'create', 'get': 'list'}), name='playlist'),
-    path('playlist/<int:pk>/', PlaylistViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='get_playlist'),
-    path('playlist/<int:pk>/add_song/', PlaylistViewSet.as_view({'post': 'add_song', 'get': 'retrieve'}), name='playlist_add_song'),
-    path('playlist/<int:playlist_pk>/remove_song/<int:song_pk>/', PlaylistViewSet.as_view({'delete': 'remove_song'}), name='playlist_remove_song'),
-    path('playlist/home/', PlaylistViewSet.as_view({'get': 'get_3_public_playlists'}), name='playlist_home'),
-    
-    path('album/', AlbumViewSet.as_view({'get': 'list', 'post': 'create'}), name='album'),
-    path('album/<int:pk>/', AlbumViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='get_album'),
-    path('album/<int:pk>/add_song/', AlbumViewSet.as_view({'post': 'add_song', 'get': 'retrieve'}), name='album_add_song'),
-    path('album/<int:album_pk>/remove_song/<int:song_pk>/', AlbumViewSet.as_view({'delete': 'remove_song'}), name='album_remove_song'),
+    path('playlist/',
+         PlaylistViewSet.as_view({'post': 'create', 'get': 'list'}), name='playlist'),
+    path('playlist/<int:pk>/', PlaylistViewSet.as_view(
+        {'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='get_playlist'),
+    path('playlist/<int:pk>/add_song/', PlaylistViewSet.as_view(
+        {'post': 'add_song', 'get': 'retrieve'}), name='playlist_add_song'),
+    path('playlist/<int:playlist_pk>/remove_song/<int:song_pk>/',
+         PlaylistViewSet.as_view({'delete': 'remove_song'}), name='playlist_remove_song'),
+    path('playlist/home/',
+         PlaylistViewSet.as_view({'get': 'get_3_public_playlists'}), name='playlist_home'),
+
+    path('album/',
+         AlbumViewSet.as_view({'get': 'list', 'post': 'create'}), name='album'),
+    path('album/<int:pk>/', AlbumViewSet.as_view(
+        {'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='get_album'),
+    path('album/<int:pk>/add_song/', AlbumViewSet.as_view(
+        {'post': 'add_song', 'get': 'retrieve'}), name='album_add_song'),
+    path('album/<int:album_pk>/remove_song/<int:song_pk>/',
+         AlbumViewSet.as_view({'delete': 'remove_song'}), name='album_remove_song'),
 ]

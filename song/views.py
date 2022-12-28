@@ -15,13 +15,11 @@ class SongViewSet(ViewSet):
     serializer_class = SongSerializer
 
     def get_permissions(self):
-        permission_classes = [IsAuthenticated]
+        permission_classes = []
         if self.action in ['update', 'destroy', 'destroy_all']:
-            permission_classes.append(IsArtistORSuperuser)
+            permission_classes = [IsAuthenticated, IsArtistORSuperuser]
         elif self.action in ['create']:
-            permission_classes.append(IsArtist)
-        elif self.action in ['search', 'list']:
-            permission_classes = []
+            permission_classes = [IsAuthenticated, IsArtist]
         return [permission() for permission in permission_classes]
 
     def list(self, request):
@@ -146,6 +144,8 @@ class PlaylistViewSet(ModelViewSet):
         permission_classes = [IsAuthenticated, IsPlaylistOwner]
         if self.action in ['get_3_public_playlists']:
             permission_classes = []
+        elif self.action in ['retrieve']:
+            permission_classes = [IsAuthenticated, IsPublicPlaylist]
         return [permission() for permission in permission_classes]
 
     def get_serializer_class(self):
@@ -208,25 +208,25 @@ class PlaylistViewSet(ModelViewSet):
         serializer = PlaylistSerializer(
             playlists, many=True, context={'request': request})
         return Response(serializer.data)
-    
-    
+
+
 class AlbumViewSet(ModelViewSet):
     queryset = Album.objects.all()
-    
+
     def get_serializer_class(self):
         if self.action in ['add_song', 'remove_song']:
             return AlbumSongsSerializer
         return AlbumSerializer
-    
+
     def get_permissions(self):
         if self.action in ['retrieve']:
             permission_classes = []
         elif self.action in ['update', 'destroy', 'add_song', 'remove_song']:
-            permission_classes = [IsAuthenticated, IsAlbumOwner]  
+            permission_classes = [IsAuthenticated, IsAlbumOwner]
         else:
             permission_classes = [IsAuthenticated, IsArtist]
-        return [permission() for permission in permission_classes]    
-        
+        return [permission() for permission in permission_classes]
+
     def create(self, request):
         serializer = AlbumSerializer(
             data=request.data, context={'request': request})
@@ -257,21 +257,19 @@ class AlbumViewSet(ModelViewSet):
         serializer = AlbumSerializer(
             albums, many=True, context={'request': request})
         return Response(serializer.data)
-    
+
     def add_song(self, request, pk=None):
         album = get_object_or_404(Album, pk=pk)
         song = get_object_or_404(Song, pk=request.data['song'])
         serializer = AlbumSongsSerializer(data=request.data, context={
-                                             'request': request, 'album': album})
+            'request': request, 'album': album})
         serializer.is_valid(raise_exception=True)
         serializer.save(album=album, song=song)
         return Response({'message': 'Song added to album'}, status=status.HTTP_200_OK)
-    
+
     def remove_song(self, request, album_pk=None, song_pk=None):
         album = get_object_or_404(Album, pk=album_pk)
         song = get_object_or_404(Song, pk=song_pk)
         albumsong = get_object_or_404(
             AlbumSong, album=album, song=song)
         albumsong.delete()
-        
-    

@@ -89,7 +89,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'is_Artist', 'first_name', 'last_name', 'image', 'bio', 'followers_count',
+        fields = ['id', 'username', 'is_Artist', 'first_name', 'last_name', 'image', 'bio', 'followers_count',
                   'followings_count', 'followers', 'followings', 'artist', 'playlists']  # should add playlist there
         read_only_fields = ['id', 'username', 'email', 'playlists']
 
@@ -125,8 +125,8 @@ class UserPrivateSerializer(UserSerializer):
     premium = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
-        fields = ['id', 'email', 'is_email_verified', 'telegram_chat_id', 'birthday',
-                  'gender', 'country', 'city', 'bio', 'money', 'premium'] + UserSerializer.Meta.fields
+        fields = UserSerializer.Meta.fields + ['email', 'is_email_verified', 'telegram_chat_id', 'birthday',
+                  'gender', 'country', 'city', 'bio', 'money', 'premium']
         read_only_fields = ['id', 'username', 'is_Artist', 'email',
                             'is_email_verified', 'telegram_chat_id', 'money', 'premium']
 
