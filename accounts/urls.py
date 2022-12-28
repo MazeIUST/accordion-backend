@@ -17,6 +17,8 @@ urlpatterns = [
          UserViewSet.as_view({'get': 'list'}), name='show_all_user'),
     path('profile/<int:pk>/',
          UserViewSet.as_view({'get': 'retrieve'}), name='show_other_user_profile'),
+    path('profile/<str:pk>/',
+         UserViewSet.as_view({'get': 'retrieve'}), name='show_other_user_profile_by_username'),
     path('follow/<int:pk>/',
          FollowViewSet.as_view({'get': 'follow'}), name='follow'),
     path('unfollow/<int:pk>/',

@@ -26,7 +26,6 @@ from django.db.models import F, Q
 from django.http import QueryDict
 
 
-
 class UrlsView(APIView):
     permission_classes = []
     authentication_classes = []
@@ -151,8 +150,13 @@ class UserViewSet(ModelViewSet):
 
     def retrieve(self, request, pk=None):
         if pk:
-            serializer = UserSerializer(get_object_or_404(
-                User, pk=pk), context={'request': request}).data
+            pk_type = type(pk)
+            if pk_type == str:
+                serializer = UserSerializer(get_object_or_404(
+                    User, username=pk), context={'request': request}).data
+            else:
+                serializer = UserSerializer(get_object_or_404(
+                    User, pk=pk), context={'request': request}).data
         else:
             serializer = UserPrivateSerializer(
                 request.user, context={'request': request}).data
