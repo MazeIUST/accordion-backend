@@ -125,8 +125,8 @@ class UserPrivateSerializer(UserSerializer):
     premium = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ['email', 'is_email_verified', 'telegram_chat_id', 'birthday',
-                                               'gender', 'country', 'city', 'bio', 'money', 'premium']
+        fields = ['email', 'is_email_verified', 'telegram_chat_id', 'birthday',
+                                               'gender', 'country', 'city', 'bio', 'money', 'premium'] + UserSerializer.Meta.fields
         read_only_fields = ['id', 'username', 'is_Artist', 'email',
                             'is_email_verified', 'telegram_chat_id', 'money', 'premium']
 

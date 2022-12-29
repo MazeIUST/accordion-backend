@@ -221,7 +221,7 @@ class PremiumViewSet(ViewSet):
             request.data._mutable = True
             request.data['days'] = int(request.data.get('days'))
             request.data._mutable = _mutable
-        amount = request.data.get('days') * 30
+        amount = request.data.get('days')
         payment_serializer = PaymentSerializer(
             data={'amount': -1*amount}, context={'request': request})
         payment_serializer.is_valid(raise_exception=True)
