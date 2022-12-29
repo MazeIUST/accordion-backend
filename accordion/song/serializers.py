@@ -42,8 +42,9 @@ class PlaylistSerializer(serializers.ModelSerializer):
 
 class HistorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ( 'user_id','song_id','playlist_id')
+        model = History
+        fields = ('id','user_id','song_id','playlist_id')
+        read_only_field = ('id')  
 
     def create(self, validated_data):
         history = History.objects.create(
@@ -51,4 +52,7 @@ class HistorySerializer(serializers.ModelSerializer):
             user_id=validated_data['user_id'],
             playlist_id=validated_data['playlist_id'],
         )
+        age =  datetime.datetime.now().year - history.user.birthday.year 
+        history.user_age = age
+        history.save()
         return history

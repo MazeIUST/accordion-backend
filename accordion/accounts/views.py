@@ -177,17 +177,40 @@ class UserViewSet(ModelViewSet):
 
 
     def get_recent_10_music(self, request):
-        user = UserSerializer(request.user).data.get('id')
-        user_history =History.objects.get(user=user).order_by('-add_datetime').distinct('song_id')[:10] # if less than 10 tracks
-        recent_10_music =user_history.values('song_id').to_dict()
-        return Response(recent_10_music)
+        user = request.user
+        try:
+            user_history =History.objects.get(user=user).order_by('-add_datetime').distinct('song_id')
+            if user_history.count() <10 and user_history.count()> 0:
+                recent_10_music =user_history.values('song_id').to_dict()
+                return Response(recent_10_music)
+            elif user_history.count()>10:
+                recent_10_music =user_history.values('song_id').to_dict()
+                return Response(recent_10_music)
+            else:  
+                return Response("not found")
+        except:
+            return Response("not found exception",status=status.HTTP_404_NOT_FOUND)
+
+        # user_history =History.objects.get(user=user).order_by('-add_datetime').distinct('song_id')[:10] # if less than 10 tracks
+        # recent_10_music =user_history.values('song_id').to_dict()
+        # return Response(recent_10_music)
+
+        
 
     def get_recent_10_artist(self, request):
-        user = UserSerializer(request.user).data.get('id')
-        user_history =History.objects.get(user=user).order_by('-add_datetime').distinct('song__artist')[:10] # if less than 10 tracks
-        recent_10_artist =user_history.values('song__artist_id').to_dict()
-        return Response(recent_10_artist)
-    
+        user = request.user
+        try:
+            user_history =History.objects.get(user=user).order_by('-add_datetime').distinct('song__artist')
+            if user_history.count() <10 and user_history.count()> 0:
+                return Response(user_history.values('song__artist_id').to_dict())
+            elif user_history.count()>10:
+                recent_10_artist =user_history[:10].values('song__artist').to_dict()
+                return Response(recent_10_artist)
+            else:  
+                return Response("not found")
+        except:
+            return Response("not found exception",status=status.HTTP_404_NOT_FOUND)
+        # user_history =History.objects.get(user=user).order_by('-add_datetime').distinct('song__artist')[:10] # if less than 10 tracks    
 
 class VerifyEmail(generics.GenericAPIView):
     permission_classes = []

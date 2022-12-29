@@ -1,5 +1,5 @@
 from rest_framework.viewsets import ViewSet
-from .serializers import SongSerializer, TagSerializer,PlaylistSerializer
+from .serializers import *
 from rest_framework.response import Response
 from accounts.models import Artist
 from .models import *
@@ -205,6 +205,15 @@ class PlaylistViewSet(ViewSet):
     
 
 class HistoryViewSet(ViewSet):
+    serializer_class = HistorySerializer
+    def create(self, request):
+        serializer = HistorySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
     def analysis(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
         today = datetime.datetime.now()
         last_time = today-datetime.timedelta(days=days)

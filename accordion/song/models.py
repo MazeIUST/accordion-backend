@@ -38,7 +38,6 @@ class Playlist(models.Model):
 class History(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
-    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE,null=True)
     add_datetime = models.DateTimeField(auto_now_add=True)
-    user_age=20
-    # user_age=datetime.datetime.now().year - user.birthday.year 
+    user_age=models.IntegerField(default=0) 
