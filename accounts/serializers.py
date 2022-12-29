@@ -194,11 +194,17 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         user_money = self.context['request'].user.money
+        is_premium = self.context.get('is_premium')
         money = attrs['amount']
         if user_money + money < 0:
-            raise serializers.ValidationError({
-                'amount': [f"You Don't have Enough Charge. Your Money Is {user_money}."],
-            })
+            if is_premium:
+                raise serializers.ValidationError({
+                    'user': ["You Already Have Premium!"],
+                })
+            else:
+                raise serializers.ValidationError({
+                    'amount': [f"You Don't have Enough Charge. Your Money Is {user_money}."],
+                })
 
         return attrs
 
