@@ -42,4 +42,9 @@ urlpatterns = [
         {'post': 'add_song', 'get': 'retrieve'}), name='album_add_song'),
     path('album/<int:album_pk>/remove_song/<int:song_pk>/',
          AlbumViewSet.as_view({'delete': 'remove_song'}), name='album_remove_song'),
+
+    path('history/',
+         HistoryViewSet.as_view({'post': 'create'}), name='history'),
+    path('analysis/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>',
+         HistoryViewSet.as_view({'get': 'analysis'})),
 ]

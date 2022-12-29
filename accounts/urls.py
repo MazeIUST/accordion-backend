@@ -39,4 +39,8 @@ urlpatterns = [
          PaymentViewSet.as_view({'get': 'retrieve'}), name='get_payment'),
     path('premium/',
          PremiumViewSet.as_view({'post': 'create', 'get': 'retrieve'}), name='premium'),
+    path('get_recent_10_music/',
+         UserViewSet.as_view({'get': 'get_recent_10_music'}), name='get_recent_10_music'),
+    path('get_recent_10_artist/',
+         UserViewSet.as_view({'get': 'get_recent_10_artist'}), name='get_recent_10_artist'),
 ]
