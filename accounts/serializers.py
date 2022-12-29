@@ -68,15 +68,20 @@ class FollowingSerializer(serializers.ModelSerializer):
 
 class ArtistSerializer(serializers.ModelSerializer):
     songs = serializers.SerializerMethodField()
+    albums = serializers.SerializerMethodField()
 
     class Meta:
         model = Artist
         fields = ['artistic_name', 'activitie_start_date',
-                  'description', 'songs']
+                  'description', 'songs', 'albums']
 
     def get_songs(self, obj):
         songs = Song.objects.filter(artist__user=obj.user)
-        return SongSerializer(songs, many=True).data
+        return SongSerializer(songs, many=True, context={'request': self.context['request']}).data
+    
+    def get_albums(self, obj):
+        albums = Album.objects.filter(artist__user=obj.user)
+        return AlbumSerializer(albums, many=True, context={'request': self.context['request']}).data
 
 
 class UserSerializer(serializers.ModelSerializer):
