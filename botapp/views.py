@@ -29,10 +29,9 @@ class UserViewSet(ViewSet):
         data = request.data 
         data['telegram_chat_id'] = chat_id
         serializer = self.serializer_class(data=data)
-        if serializer.is_valid():
-            serializer.update(request.user, serializer.validated_data)
-            return Response({'status': 'OK'})
-        return Response(serializer.errors)
+        serializer.is_valid(raise_exception=True)
+        serializer.update(request.user, serializer.validated_data)
+        return Response({'status': 'OK'})
         
     def get_song(self, request, song_id):
         song = get_object_or_404(Song, id=song_id)
