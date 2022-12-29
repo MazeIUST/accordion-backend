@@ -46,5 +46,7 @@ urlpatterns = [
     path('history/',
          HistoryViewSet.as_view({'post': 'create'}), name='history'),
     path('analysis/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>',
-         HistoryViewSet.as_view({'get': 'analysis'})),
+         HistoryViewSet.as_view({'get': 'analysis_tags'})),
+     path('analysis_atrist/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>',
+         HistoryViewSet.as_view({'get': 'analysis_artists'})),
 ]
