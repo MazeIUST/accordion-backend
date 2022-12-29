@@ -175,7 +175,7 @@ class PremiumSerializer(serializers.ModelSerializer):
             })
         if active_premium.exists():
             raise serializers.ValidationError({
-                'user': ['user already has active premium.'],
+                'user': ['You Already Have Premium!'],
             })
 
         return attrs
@@ -197,7 +197,7 @@ class PaymentSerializer(serializers.ModelSerializer):
         money = attrs['amount']
         if user_money + money < 0:
             raise serializers.ValidationError({
-                'amount': [f'user does not have enough money. your money is {user_money}.'],
+                'amount': [f"You Don't have Enough Charge. Your Money Is {user_money}."],
             })
 
         return attrs
