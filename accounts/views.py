@@ -52,6 +52,8 @@ class UrlsView(APIView):
             'user payment': absurl + 'payment/',
             'user payment get': absurl + 'payment/<int:pk>/',
             'user premium': absurl + 'premium/',
+            'get 10 recent music': absurl + 'get_recent_10_music/',
+            'get 10 recent artist': absurl + 'get_recent_10_artist/',
         }
 
         songs_urls = {
@@ -70,6 +72,8 @@ class UrlsView(APIView):
             'album get, put, delete': absurl + 'songs/album/<int:pk>/',
             'album add song': absurl + 'songs/album/<int:pk>/add_song/',
             'album remove song': absurl + 'songs/album/<int:album_pk>/remove_song/<int:song_pk>/',
+            'history': absurl + 'songs/history/',
+            'analysis': absurl + 'songs/analysis/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>',
         }
 
         return Response({'account_urls': account_urls, 'songs_urls': songs_urls})
