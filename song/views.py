@@ -200,6 +200,7 @@ class PlaylistViewSet(ModelViewSet):
         playlistsong = get_object_or_404(
             PlaylistSong, playlist=playlist, song=song)
         playlistsong.delete()
+        return Response({'message': 'Song removed from playlist'}, status=status.HTTP_200_OK)
 
     def get_3_public_playlists(self, request):
         playlists = Playlist.objects.filter(is_public=True)
