@@ -16,6 +16,7 @@ class Song(models.Model):
     description = models.TextField(null=True, blank=True)
     lyrics = models.TextField(null=True, blank=True)
     song_link = models.CharField(max_length=1000)
+    speechless_song_link = models.CharField(max_length=1000,null=True)
     image = models.ImageField(upload_to='songs/images/', blank=True, null=True)
     note = models.FileField(upload_to='songs/notes/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

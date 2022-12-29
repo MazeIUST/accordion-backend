@@ -12,7 +12,7 @@ class SongSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Song
-        fields = ('id', 'artist', 'artist_name', 'title', 'description', 'lyrics', 'song_link', 'song_download_link', 'image', 'note', 'created_at', 'tags')
+        fields = ('id', 'artist', 'artist_name', 'title', 'description', 'lyrics', 'song_link','speechless_song_link', 'song_download_link', 'image', 'note', 'created_at', 'tags')
         read_only_fields = ('id', 'created_at', 'artist')
 
     def get_artist_name(self, obj):
@@ -24,7 +24,8 @@ class SongSerializer(serializers.ModelSerializer):
         song_id = view_link.split('/')[-2]
         song_link = f'https://drive.google.com/u/0/uc?id={song_id}&export=download'
         return song_link
-
+    # def get_speechless_song_link(self, obj):
+    
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         song = Song.objects.create(**validated_data)
@@ -54,5 +55,7 @@ class HistorySerializer(serializers.ModelSerializer):
         )
         age =  datetime.datetime.now().year - history.user.birthday.year 
         history.user_age = age
+        history.song.count =+1
+        history.song.save()
         history.save()
         return history

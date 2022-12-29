@@ -235,7 +235,6 @@ class HistoryViewSet(ViewSet):
 
 
     def analysis2(self, request):
-        
         city = self.request.GET.get('city',"0")
         country = self.request.GET.get('country',"0")
         min_age=self.request.GET.get('min_age',"0")
