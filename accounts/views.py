@@ -85,7 +85,8 @@ class SignUpView(APIView):
     authentication_classes = []
 
     def post(self, request):
-        serializer = SignUpSerializer(data=request.data)
+        serializer = SignUpSerializer(
+            data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         # --------- send email ---------
@@ -105,7 +106,7 @@ class SignUpView(APIView):
         Util.send_email(data)
         # ------------------------------
         return Response({
-            "user": UserSerializer(user).data,
+            "user": UserSerializer(user, context={'request': request}).data,
             "message": "User Created Successfully. Now perform Login to get your token",
         })
 
