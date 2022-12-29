@@ -6,9 +6,10 @@ from .models import *
 from rest_framework import status
 from .scripts import create_tag
 from accordion.permissions import *
-from django.db.models import Q
+from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.permissions import IsAuthenticated
+from urllib.parse import urlparse, parse_qs
 
 
 class SongViewSet(ViewSet):
