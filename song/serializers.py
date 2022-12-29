@@ -14,8 +14,8 @@ class SongSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Song
-        fields = ('id', 'artist', 'artist_name', 'title', 'description', 'lyrics',
-                  'song_link', 'song_download_link', 'image', 'note', 'created_at', 'tags')
+        fields = ('id', 'artist', 'artist_name', 'title', 'description', 'lyrics', 'song_link',
+                  'speechless_song_link', 'song_download_link', 'image', 'note', 'created_at', 'tags')
         read_only_fields = ('id', 'created_at', 'artist')
 
     def get_artist_name(self, obj):
