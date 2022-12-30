@@ -277,8 +277,7 @@ class AlbumViewSet(ModelViewSet):
 
 
 class HistoryViewSet(ViewSet):
-    serializer_class = HistorySerializer
-
+    # serializer_class = HistorySerializer
     def create(self, request):
         user = request.user
         song = get_object_or_404(Song, pk=request.data['song'])
