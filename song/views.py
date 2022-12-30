@@ -280,11 +280,20 @@ class HistoryViewSet(ViewSet):
     serializer_class = HistorySerializer
 
     def create(self, request):
-        serializer = HistorySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
+        song = get_object_or_404(Song, pk=request.data['song'])
+        age = datetime.datetime.now() - user.birthday.year 
+        history = History.objects.create(user=user, song=song,user_age = age)
+        song.count=+1
+        song.save()
+        return Response(history, status=status.HTTP_201_CREATED)
+        # serializer = HistorySerializer(data=request.data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     # song.count = +1
+        #     # song.save()
+        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def analysis_tags(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
         today = datetime.datetime.now()
