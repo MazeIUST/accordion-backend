@@ -128,20 +128,19 @@ class AlbumSongsSerializer(serializers.ModelSerializer):
 
 
 class HistorySerializer(serializers.ModelSerializer):
+    age = serializers.SerializerMethodField()
+    song_details = serializers.SerializerMethodField()
+
     class Meta:
         model = History
-        fields = ('id', 'user_id', 'song_id', 'playlist_id')
-        read_only_field = ('id')
+        fields = ('id', 'user', 'song', 'song_details', 'age', 'created_at')
+        read_only_fields = ('id', 'user', 'song_details', 'age', 'created_at')
 
-    def create(self, validated_data):
-        history = History.objects.create(
-            song_id=validated_data['song_id'],
-            user_id=validated_data['user_id'],
-            playlist_id=validated_data['playlist_id'],
-        )
-        age = datetime.datetime.now().year - history.user.birthday.year
-        history.user_age = age
-        history.song.count = +1
-        history.song.save()
-        history.save()
-        return history
+    def get_age(self, obj):
+        user = self.context.get('request').user
+        age = datetime.datetime.now().year - user.birthday.year
+        return age
+
+    def get_song_details(self, obj):
+        song = obj.song
+        return SongSerializer(song, context={'request': self.context['request']}).data

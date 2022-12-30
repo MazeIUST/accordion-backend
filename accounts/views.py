@@ -72,7 +72,10 @@ class UrlsView(APIView):
             'album get, put, delete': absurl + 'songs/album/<int:pk>/',
             'album add song': absurl + 'songs/album/<int:pk>/add_song/',
             'album remove song': absurl + 'songs/album/<int:album_pk>/remove_song/<int:song_pk>/',
-            'history': absurl + 'songs/history/',
+            'history "list of current user" or "create"': absurl + 'songs/history/',
+            'history retrieve_by_song': absurl + 'songs/history/song/<int:song_pk>/',
+            'history retrieve_by_artist': absurl + 'songs/history/artist/<int:artist_pk>/',
+            'history retrieve_by_user': absurl + 'songs/history/user/<int:user_pk>/',
             'analysis': absurl + 'songs/analysis/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>',
         }
 
