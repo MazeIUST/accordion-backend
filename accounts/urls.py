@@ -33,6 +33,8 @@ urlpatterns = [
          FollowViewSet.as_view({'get': 'get_followings'}), name='user-followings'),
     path('change_password/',
          UserViewSet.as_view({'patch': 'change_password'}), name='change_password'),
+    path('search/<str:text>/',
+         UserViewSet.as_view({'get': 'search'}), name='search'),
     path('payment/',
          PaymentViewSet.as_view({'post': 'create', 'get': 'list'}), name='payment'),
     path('payment/<int:pk>/',

@@ -43,6 +43,7 @@ class UrlsView(APIView):
             'user all profile': absurl + 'profile/all/',
             'user other profile': absurl + 'profile/<int:pk>/',
             'user change password': absurl + 'change_password/',
+            'user search': absurl + 'search/<str:text>/',
             'user follow': absurl + 'follow/<int:pk>/',
             'user unfollow': absurl + 'unfollow/<int:pk>/',
             'user get followers': absurl + 'followers/',
@@ -183,6 +184,18 @@ class UserViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.update(request.user, serializer.validated_data)
         return Response({'message': 'Password updated successfully'}, status=status.HTTP_200_OK)
+
+    def search(self, request, text=None):
+        users = User.objects.filter(Q(username__icontains=text) | Q(
+            first_name__icontains=text) | Q(last_name__icontains=text))
+        artists = Artist.objects.filter(
+            Q(artistic_name__icontains=text))
+        users_of_artists = User.objects.filter(
+            artist__in=artists)
+        all_users = users | users_of_artists
+        serializer = UserSerializer(
+            all_users, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def get_recent_10_music(self, request):
         user = request.user
