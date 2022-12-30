@@ -138,7 +138,10 @@ class HistorySerializer(serializers.ModelSerializer):
 
     def get_age(self, obj):
         user = self.context.get('request').user
-        age = datetime.datetime.now().year - user.birthday.year
+        if user.birthday:
+            age = datetime.datetime.now().year - user.birthday.year
+        else:
+            age = None
         return age
 
     def get_song_details(self, obj):
