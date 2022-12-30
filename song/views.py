@@ -6,7 +6,7 @@ from .models import *
 from rest_framework import status
 from .scripts import create_tag
 from accordion.permissions import *
-from django.db.models import Q , F
+from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.permissions import IsAuthenticated
 
@@ -277,22 +277,42 @@ class AlbumViewSet(ModelViewSet):
 
 
 class HistoryViewSet(ViewSet):
-    # serializer_class = HistorySerializer
+    serializer_class = HistorySerializer
+
     def create(self, request):
-        user = request.user
-        song = get_object_or_404(Song, pk=request.data['song'])
-        age = datetime.datetime.now() - user.birthday.year 
-        history = History.objects.create(user=user, song=song,user_age = age)
-        song.count=+1
-        song.save()
-        return Response(history, status=status.HTTP_201_CREATED)
-        # serializer = HistorySerializer(data=request.data)
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     # song.count = +1
-        #     # song.save()
-        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = HistorySerializer(
+            data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def list(self, request):
+        history = History.objects.filter(user=request.user)
+        serializer = HistorySerializer(
+            history, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    def retrieve_by_song(self, request, song_pk=None):
+        song = get_object_or_404(Song, pk=song_pk)
+        history = History.objects.filter(user=request.user, song=song)
+        serializer = HistorySerializer(
+            history, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    def retrieve_by_artist(self, request, artist_pk=None):
+        artist = get_object_or_404(Artist, pk=artist_pk)
+        history = History.objects.filter(
+            user=request.user, song__artist=artist)
+        serializer = HistorySerializer(
+            history, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    def retrieve_by_user(self, request, user_pk=None):
+        user = get_object_or_404(User, pk=user_pk)
+        history = History.objects.filter(user=user)
+        serializer = HistorySerializer(
+            history, many=True, context={'request': request})
+        return Response(serializer.data)
 
     def analysis_tags(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
         today = datetime.datetime.now()
@@ -333,8 +353,8 @@ class HistoryViewSet(ViewSet):
         songs_artist = []
         for item in user_history:
             songs_artist.append(item.song.artist)
-        result ={i:songs_artist.count(i) for i in songs_artist}
-        
+        result = {i: songs_artist.count(i) for i in songs_artist}
+
         return Response(result)
 
     # def analysis2(self, request):
