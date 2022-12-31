@@ -17,6 +17,8 @@ urlpatterns = [
          SongViewSet.as_view({'delete': 'destroy_all', 'get': 'list'})),
     path('search/<str:text>/',
          SongViewSet.as_view({'get': 'search'}), name='song_search'),
+    path('send_to_telegram/<int:pk>/',
+         SongViewSet.as_view({'get': 'send_to_telegram'}), name='send_to_telegram'),
 
     path(
         'tag/', TagViewSet.as_view({'get': 'list', 'post': 'create'}), name='tags'),

@@ -10,6 +10,7 @@ from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.permissions import IsAuthenticated
 from urllib.parse import urlparse, parse_qs
+from django.conf import settings
 
 
 class SongViewSet(ViewSet):
@@ -99,6 +100,18 @@ class SongViewSet(ViewSet):
         serializer = SongSerializer(
             songs, many=True, context={'request': request})
         return Response(serializer.data)
+
+    def send_to_telegram(self, request, pk=None):
+        song = get_object_or_404(Song, id=pk)
+        user = request.user
+        chat_id = user.telegram_chat_id
+        serializer = SongSerializer(song, context={'request': request})
+        song_link = serializer.data['song_download_link']
+        if not chat_id:
+            return Response({'message': 'You have to connect your telegram account first'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # send song to telegram
+            return Response({'message': 'Song sent to telegram'}, status=status.HTTP_200_OK)
 
 
 class TagViewSet(ViewSet):
