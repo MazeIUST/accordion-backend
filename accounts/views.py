@@ -62,6 +62,7 @@ class UrlsView(APIView):
             'song get, put, delete': absurl + 'songs/<int:pk>/',
             'song delete all': absurl + 'songs/delete_all/',
             'song search': absurl + 'songs/search/<str:text>/',
+            'song send to telegram': absurl + 'songs/send_to_telegram/<int:pk>/',
             'tag list': absurl + 'songs/tag/',
             'tag get, put, delete': absurl + 'songs/tag/<int:pk>/',
             'playlist list, create': absurl + 'songs/playlist/',
