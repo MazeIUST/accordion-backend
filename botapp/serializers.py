@@ -45,9 +45,19 @@ class LoginSerializer(serializers.ModelSerializer):
 
 
 class SongSerializer(serializers.ModelSerializer):
+    song_download_link = serializers.SerializerMethodField()
     class Meta:
         model = Song
         fields = ('id', 'title', 'song_link', 'song_download_link', 'artist__name')
+        
+    def get_song_download_link(self, obj):
+        view_link = obj.song_link
+        try:
+            song_id = view_link.split('/')[-2]
+            song_link = f'https://drive.google.com/u/0/uc?id={song_id}&export=download'
+        except:
+            song_link = view_link
+        return song_link
 
 
 class PlaylistSerializer(serializers.ModelSerializer):
