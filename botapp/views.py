@@ -26,7 +26,7 @@ class UserViewSet(ViewSet):
         serializers = LoginSerializer(
             user, data={'chat_id': chat_id, 'username': username, 'password': password})
         serializers.is_valid(raise_exception=True)
-        serializers.update(user, serializers.validated_data)
+        return Response({'status': 'OK'})
 
     def signup(self, request, chat_id):
         data = request.data
