@@ -76,8 +76,7 @@ def get_song(update: Update, context: CallbackContext, song_id):
     user_info = get_user_telegram_info_from_update(update, context)
     chat_id = user_info['chat_id']
     response = send_request('get_song', [song_id])
-    print(response['status'])
-    if response['status'] == 'OK':
+    if response.get('status') == 'OK':
         song_link = response.get('song_download_link')
         try:
             link = f'https://api.telegram.org/bot{TOKEN}/sendAudio?chat_id={chat_id}&audio={song_link}'
@@ -86,11 +85,11 @@ def get_song(update: Update, context: CallbackContext, song_id):
             song_link = response.get('song_link')
             link = f'https://api.telegram.org/bot{TOKEN}/sendAudio?chat_id={chat_id}&audio={song_link}'
             response = requests.get(link)
-        if response.status_code == 200:
-            return ConversationHandler.END
-        else:
-            update.message.reply_text(RESPONSE_TEXTS['error'])
-            return ConversationHandler.END
+        # if response.status_code == 200:
+        #     return ConversationHandler.END
+        # else:
+        #     update.message.reply_text(RESPONSE_TEXTS['error'])
+        #     return ConversationHandler.END
         # download song
         # message_id = update.message.reply_text('downloading...').message_id
         # song_name = download_song(song_link)
