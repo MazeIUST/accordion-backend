@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.permissions import IsAuthenticated
 from urllib.parse import urlparse, parse_qs
 from django.conf import settings
+import requests
 
 
 class SongViewSet(ViewSet):
@@ -22,6 +23,8 @@ class SongViewSet(ViewSet):
             permission_classes = [IsAuthenticated, IsArtistORSuperuser]
         elif self.action in ['create']:
             permission_classes = [IsAuthenticated, IsArtist]
+        elif self.action in ['send_to_telegram']:
+            permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
     def list(self, request):
@@ -111,8 +114,11 @@ class SongViewSet(ViewSet):
             return Response({'message': 'You have to connect your telegram account first'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             # send song to telegram
-            return Response({'message': 'Song sent to telegram'}, status=status.HTTP_200_OK)
-
+            link = f'https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendAudio?chat_id={chat_id}&audio={song_link}'
+            response = requests.get(link)
+            if response.status_code == 200:
+                return Response({'message': 'Song sent to telegram'}, status=status.HTTP_200_OK)
+            return Response({'message': 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
 class TagViewSet(ViewSet):
     serializer_class = TagSerializer
