@@ -358,8 +358,9 @@ class SongLogsViewSet(ViewSet):
 
         result2 = []
         for tag in tags:
-            p= Point(X=tag.name, Y=result[tag.id])
-            result2.append(p.__dict__)
+            if result[tag.id]!=0:
+                p= Point(X=tag.name, Y=result[tag.id])
+                result2.append(p.__dict__)
 
         return Response(result2)
 
