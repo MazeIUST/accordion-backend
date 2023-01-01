@@ -45,7 +45,6 @@ class LoginSerializer(serializers.ModelSerializer):
 
 
 class SongSerializer(serializers.ModelSerializer):
-    artist = serializers.SerializerMethodField()
     class Meta:
         model = Song
         fields = ('id', 'name', 'song_link', 'song_download_link', 'artist__name')
