@@ -119,7 +119,7 @@ def get_playlist(update: Update, context: CallbackContext):
     if response.get('status') == 'OK':
         if not response['songs']:
             update.message.reply_text('playlist is empty!')
-            return ConversationHandler.END
+            return GET_PLAYLIST
         keyboard = []
         USERS_KEYBOARD[user_info['chat_id']] = {}
         for song in response['songs']:
