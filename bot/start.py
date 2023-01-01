@@ -117,6 +117,9 @@ def get_playlist(update: Update, context: CallbackContext):
     response = send_request(
         'get_playlist', [user_info['chat_id'], user_playlists[text]])
     if response.get('status') == 'OK':
+        if not response['songs']:
+            update.message.reply_text('playlist is empty!')
+            return ConversationHandler.END
         keyboard = []
         USERS_KEYBOARD[user_info['chat_id']] = {}
         for song in response['songs']:
