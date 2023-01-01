@@ -24,21 +24,6 @@ class SignUpSerializer(serializers.ModelSerializer):
         return instance
 
 
-class LoginSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id', 'username', 'password')
-        read_only_fields = ('id',)
-
-    def validate(self, data):
-        user = get_object_or_404(User, username=data['username'])
-        if user.check_password(data['password']):
-            user.telegram_chat_id = data['chat_id']
-            return user
-        else:
-            raise serializers.ValidationError({'password': 'Wrong password'})
-
-
 class SongSerializer(serializers.ModelSerializer):
     song_download_link = serializers.SerializerMethodField()
     artist_name = serializers.SerializerMethodField()

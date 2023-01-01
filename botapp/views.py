@@ -23,10 +23,11 @@ class UserViewSet(ViewSet):
 
     def login(self, request, chat_id, username, password):
         user = get_object_or_404(User, username=username)
-        serializers = LoginSerializer(
-            user, data={'chat_id': chat_id, 'username': username, 'password': password})
-        serializers.is_valid(raise_exception=True)
-        return Response({'status': 'OK'})
+        if user.check_password(password):
+            user.telegram_chat_id = chat_id
+            user.save()
+            return Response({'status': 'OK'})
+        return Response({'status': 'ERROR'})
 
     def signup(self, request, chat_id):
         data = request.data
