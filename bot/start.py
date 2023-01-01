@@ -23,12 +23,29 @@ def start(update: Update, context: CallbackContext):
     user_info = get_user_telegram_info_from_update(update, context)
     response = send_request('start', [user_info['chat_id']])
     if response['status'] == 'authenticated':
-        update.message.reply_text(RESPONSE_TEXTS['welcom'])
-    else:
-        signup_url = f'{SERVER_URL}signup/{user_info["chat_id"]}/'
-        update.message.reply_text(RESPONSE_TEXTS['welcom'])
-        update.message.reply_text(RESPONSE_TEXTS['signup'].format(signup_url), parse_mode=ParseMode.HTML)
+        update.message.reply_text(RESPONSE_TEXTS['help'])
         return ConversationHandler.END
+    else:
+        update.message.reply_text(RESPONSE_TEXTS['welcom'])
+        return GET_USERPASS
+    
+
+def get_userpass(update: Update, context: CallbackContext):
+    user_info = get_user_telegram_info_from_update(update, context)
+    userpass = update.message.text
+    if len(userpass.split('\n')) != 2:
+        update.message.reply_text(RESPONSE_TEXTS['userpass_error_2_lines'])
+        return GET_USERPASS
+    username = userpass.split('\n')[0]
+    password = userpass.split('\n')[1]
+    response = send_request('login', [user_info['chat_id'], username, password])
+    if response['status'] == 'authenticated':
+        update.message.reply_text(RESPONSE_TEXTS['userpass_correct'])
+        update.message.reply_text(RESPONSE_TEXTS['help'])
+        return ConversationHandler.END
+    else:
+        update.message.reply_text(RESPONSE_TEXTS['userpass_wrong'])
+        return GET_USERPASS
 
 
 def search(update: Update, context: CallbackContext):

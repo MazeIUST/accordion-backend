@@ -18,7 +18,14 @@ def main():
     dispatcher = updater.dispatcher
 
     # handlers
-    start_handler = CommandHandler('start', start)
+    start_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start)],
+        states={
+            GET_USERPASS: [MessageHandler(Filters.text, get_userpass)],
+        },
+        fallbacks=[CommandHandler('start', start)],
+    )
+
     search_handler = MessageHandler(Filters.text, search)
 
     # add handlers to dispatcher

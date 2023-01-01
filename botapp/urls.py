@@ -11,4 +11,6 @@ urlpatterns = [
     path('start/<int:chat_id>/', UserViewSet.as_view({'get': 'start'})),
     path('get_song/<int:song_id>/', UserViewSet.as_view({'get': 'get_song'})),
     path('search/<str:text>/', SongViewSet.as_view({'get': 'search'})),
+    path('login/<int:chat_id>/<str:username>/<str:password>/',
+         UserViewSet.as_view({'get': 'login'})),
 ]
