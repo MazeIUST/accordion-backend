@@ -65,7 +65,7 @@ class PlaylistSerializer(serializers.ModelSerializer):
     songs = serializers.SerializerMethodField()
     class Meta:
         model = Playlist
-        fields = ('id', 'name', 'songs')
+        fields = ('id', 'title', 'songs')
         read_only_fields = ('id',)
         
     def get_songs(self, obj):

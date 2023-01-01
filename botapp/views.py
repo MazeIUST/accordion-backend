@@ -43,6 +43,6 @@ class UserViewSet(ViewSet):
 
     def get_playlists(self, request, chat_id):
         user = get_object_or_404(User, telegram_chat_id=chat_id)
-        playlists = Playlist.objects.filter(user=user)
+        playlists = Playlist.objects.filter(owner=user)
         serializer = PlaylistSerializer(playlists, many=True)
         return Response({'status': 'OK', 'playlists': serializer.data})
