@@ -4,7 +4,7 @@ from accounts.models import User
 from song.models import Song
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from .serializers import SignUpSerializer
+from .serializers import *
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -17,20 +17,16 @@ class UserViewSet(ViewSet):
         return []
 
     def start(self, request, chat_id):
-        user = User.objects.filter(telegram_chat_id=chat_id)
-        if user.exists():
-            return Response({'status': 'authenticated'})
-        else:
-            return Response({'status': 'not_authenticated'})
+        user = get_object_or_404(User, telegram_chat_id=chat_id)
+        serializer = UserSerializer(user)
+        return Response({'status': 'OK', 'user': serializer.data})
 
     def login(self, request, chat_id, username, password):
         user = get_object_or_404(User, username=username)
-        if user.check_password(password):
-            user.telegram_chat_id = chat_id
-            user.save()
-            return Response({'status': 'authenticated'})
-        else:
-            return Response({'status': 'not_authenticated'})
+        serializers = LoginSerializer(
+            user, data={'chat_id': chat_id, 'username': username, 'password': password})
+        serializers.is_valid(raise_exception=True)
+        serializers.update(user, serializers.validated_data)
 
     def signup(self, request, chat_id):
         data = request.data
@@ -42,4 +38,10 @@ class UserViewSet(ViewSet):
 
     def get_song(self, request, song_id):
         song = get_object_or_404(Song, id=song_id)
-        return Response({'status': 'OK', 'song': song.song_link})
+        serializer = SongSerializer(song)
+        return Response({'status': 'OK', 'song': serializer.data})
+
+    def get_playlists(self, request, chat_id):
+        user = get_object_or_404(User, telegram_chat_id=chat_id)
+        serializer = PlaylistSerializer(user.playlists, many=True)
+        return Response({'status': 'OK', 'playlists': serializer.data})

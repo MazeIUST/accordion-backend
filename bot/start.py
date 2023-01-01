@@ -22,7 +22,7 @@ USERS_SERACH_KEYBOARD = {}
 def start(update: Update, context: CallbackContext):
     user_info = get_user_telegram_info_from_update(update, context)
     response = send_request('start', [user_info['chat_id']])
-    if response['status'] == 'authenticated':
+    if response['status'] == 'OK':
         update.message.reply_text(RESPONSE_TEXTS['help'])
         return ConversationHandler.END
     else:
@@ -39,7 +39,7 @@ def get_userpass(update: Update, context: CallbackContext):
     username = userpass.split('\n')[0]
     password = userpass.split('\n')[1]
     response = send_request('login', [user_info['chat_id'], username, password])
-    if response['status'] == 'authenticated':
+    if response.get('status') == 'OK':
         update.message.reply_text(RESPONSE_TEXTS['userpass_correct'])
         update.message.reply_text(RESPONSE_TEXTS['help'])
         return ConversationHandler.END
@@ -72,19 +72,36 @@ def search(update: Update, context: CallbackContext):
 def get_song(update: Update, context: CallbackContext, song_id):
     user_info = get_user_telegram_info_from_update(update, context)
     response = send_request('get_song', [song_id])
-    if response:
-        song_link = response['song']
+    if response.get('status') == 'OK':
+        song_link = response.get('song_link')
+        try:
+            update.message.reply_audio(audio=song_link)
+        except:
+            song_link = response.get('song_download_link')
+            update.message.reply_audio()
         # download song
-        message_id = update.message.reply_text('downloading...').message_id
-        song_name = download_song(song_link)
-        # send song and delete message
-        update.message.bot.edit_message_text('sending...', chat_id=user_info['chat_id'], message_id=message_id)
-        update.message.reply_audio(audio=open(song_name, 'rb'))
-        update.message.bot.delete_message(chat_id=user_info['chat_id'], message_id=message_id)
+        # message_id = update.message.reply_text('downloading...').message_id
+        # song_name = download_song(song_link)
+        # # send song and delete message
+        # update.message.bot.edit_message_text('sending...', chat_id=user_info['chat_id'], message_id=message_id)
+        # update.message.reply_audio(audio=open(song_name, 'rb'))
+        # update.message.bot.delete_message(chat_id=user_info['chat_id'], message_id=message_id)
     else:
         update.message.reply_text(RESPONSE_TEXTS['error'])
         
     return ConversationHandler.END
+
+def my_playlists(update: Update, context: CallbackContext):
+    user_info = get_user_telegram_info_from_update(update, context)
+    response = send_request('my_playlists', [user_info['chat_id']])
+    if response.get('status') == 'OK':
+        keyboard = []
+        for playlist in response:
+            keyboard.append([KeyboardButton(playlist['title'], callback_data=playlist['id'])])
+        reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
+        update.message.reply_text('your playlists:', reply_markup=reply_markup)
+    else:
+        update.message.reply_text('not found!')
         
         
 

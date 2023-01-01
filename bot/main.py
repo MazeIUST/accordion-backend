@@ -27,10 +27,14 @@ def main():
     )
 
     search_handler = MessageHandler(Filters.text, search)
+    # command_handler = MessageHandler(Filters.command, command)
+    playlist_handler = CommandHandler('my_playlists', my_playlists)
 
     # add handlers to dispatcher
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(search_handler)
+    # dispatcher.add_handler(command_handler)
+    dispatcher.add_handler(playlist_handler)
 
     updater.start_polling()
     # updater.start_webhook(listen="0.0.0.0",
