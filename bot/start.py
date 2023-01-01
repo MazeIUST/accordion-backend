@@ -76,7 +76,7 @@ def get_song(update: Update, context: CallbackContext, song_id):
     user_info = get_user_telegram_info_from_update(update, context)
     response = send_request('get_song', [song_id])
     if response.get('status') == 'OK':
-        song_link = response.get('song_link')
+        song_link = response.get('song').get('song_link')
         message_id = update.message.reply_text('downloading...').message_id
         song_name = download_song(song_link)
         # send song and delete message
