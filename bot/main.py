@@ -10,7 +10,7 @@ from const import *
 from main_funcs import *
 import os
 
-PORT = int(os.environ.get('PORT', 8443))
+# PORT = int(os.environ.get('PORT', 8443))
 
 def main():
     TOKEN = "5659133746:AAFQ7yYYMdBCNYwvA3-YSssaJXiNeyAs4Eg"
@@ -25,11 +25,11 @@ def main():
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(search_handler)
 
-    # updater.start_polling()
-    updater.start_webhook(listen="0.0.0.0",
-                            port=PORT,
-                            url_path=TOKEN)
-    updater.bot.setWebhook('https://accordion.herokuapp.com/' + TOKEN)
+    updater.start_polling()
+    # updater.start_webhook(listen="0.0.0.0",
+    #                         port=PORT,
+    #                         url_path=TOKEN)
+    # updater.bot.setWebhook('https://accordion.herokuapp.com/' + TOKEN)
     updater.idle()
 
 
