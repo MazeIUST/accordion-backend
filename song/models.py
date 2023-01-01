@@ -36,6 +36,8 @@ class Playlist(models.Model):
     image = models.ImageField(null=True, blank=True,
                               upload_to='playlists/photos/')
 
+    unique_together = ('title', 'owner')
+
     def str(self):
         return self.title
 
