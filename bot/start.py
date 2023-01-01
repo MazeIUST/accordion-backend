@@ -95,12 +95,13 @@ def my_playlists(update: Update, context: CallbackContext):
     user_info = get_user_telegram_info_from_update(update, context)
     response = send_request('get_playlists', [user_info['chat_id']])
     print(response['status'])
-    if response.get('status') == 'OK':
-        keyboard = []
-        for playlist in response['playlists']:
-            keyboard.append(
-                [KeyboardButton(playlist['title'], callback_data=playlist['id'])])
-        reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
-        update.message.reply_text('your playlists:', reply_markup=reply_markup)
-    else:
-        update.message.reply_text('not found!')
+    update.message.reply_text('not fou')
+    # if response.get('status') == 'OK':
+    #     keyboard = []
+    #     for playlist in response['playlists']:
+    #         keyboard.append(
+    #             [KeyboardButton(playlist['title'], callback_data=playlist['id'])])
+    #     reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
+    #     update.message.reply_text('your playlists:', reply_markup=reply_markup)
+    # else:
+    #     update.message.reply_text('not found!')
