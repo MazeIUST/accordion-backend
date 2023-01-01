@@ -13,7 +13,6 @@ import os
 # PORT = int(os.environ.get('PORT', 8443))
 
 def main():
-    TOKEN = "5659133746:AAFQ7yYYMdBCNYwvA3-YSssaJXiNeyAs4Eg"
     updater = Updater(TOKEN, use_context=True)
     dispatcher = updater.dispatcher
 

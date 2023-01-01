@@ -1,3 +1,5 @@
+TOKEN = "5659133746:AAFQ7yYYMdBCNYwvA3-YSssaJXiNeyAs4Eg"
+
 GET_USERPASS = 'get_userpass'
 
 # SERVER_URL = 'http://127.0.0.1:8000/bot/'
