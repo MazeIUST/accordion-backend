@@ -72,8 +72,10 @@ def search(update: Update, context: CallbackContext):
         update.message.reply_text('not found!')
 
 
-def get_song(update: Update, context: CallbackContext, song_id):
+def get_song(update: Update, context: CallbackContext, song_id=None):
     user_info = get_user_telegram_info_from_update(update, context)
+    if not song_id:
+        song_id = USERS_KEYBOARD.get(user_info['chat_id']).get(update.message.text)
     response = send_request('get_song', [song_id])
     if response.get('status') == 'OK':
         song_link = response.get('song').get('song_link')
