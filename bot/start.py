@@ -17,7 +17,7 @@ from telegram.ext import (Updater,
 from const import *
 from main_funcs import *
 
-USERS_SERACH_KEYBOARD = {}
+USERS_KEYBOARD = {}
 
 
 def start(update: Update, context: CallbackContext):
@@ -53,19 +53,19 @@ def get_userpass(update: Update, context: CallbackContext):
 def search(update: Update, context: CallbackContext):
     user_info = get_user_telegram_info_from_update(update, context)
     text = update.message.text
-    user_songs = USERS_SERACH_KEYBOARD.get(user_info['chat_id'])
+    user_songs = USERS_KEYBOARD.get(user_info['chat_id'])
     if user_songs:
         if text in user_songs:
             return get_song(update, context, user_songs[text])
     response = send_request('search', [text])
     if response:
         keyboard = []
-        USERS_SERACH_KEYBOARD[user_info['chat_id']] = {}
+        USERS_KEYBOARD[user_info['chat_id']] = {}
         for song in response:
             song_text = f'🎵 {song["title"]} - {song["artist_name"]}'
             keyboard.append(
                 [KeyboardButton(song_text, callback_data=song['id'])])
-            USERS_SERACH_KEYBOARD[user_info['chat_id']][song_text] = song['id']
+            USERS_KEYBOARD[user_info['chat_id']][song_text] = song['id']
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
         update.message.reply_text('search results:', reply_markup=reply_markup)
     else:
@@ -96,31 +96,35 @@ def my_playlists(update: Update, context: CallbackContext):
     response = send_request('get_playlists', [user_info['chat_id']])
     if response.get('status') == 'OK':
         keyboard = []
+        USERS_KEYBOARD[user_info['chat_id']] = {}
         for playlist in response['playlists']:
+            playlist_text = f'📀 {playlist["title"]}'
             keyboard.append(
-                [KeyboardButton(playlist['title'], callback_data=playlist['id'])])
+                [KeyboardButton(playlist_text, callback_data=playlist['id'])])
+            USERS_KEYBOARD[user_info['chat_id']
+                           ][playlist_text] = playlist['id']
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
-        update.message.reply_text('your playlists:', reply_markup=reply_markup)
+        update.message.reply_text('playlists:', reply_markup=reply_markup)
         return GET_PLAYLIST
-    else:
-        update.message.reply_text('not found!')
-        return ConversationHandler.END
-    
+
+
 def get_playlist(update: Update, context: CallbackContext):
     user_info = get_user_telegram_info_from_update(update, context)
-    playlist_id = update.message.text
-    response = send_request('get_playlist', [playlist_id])
+    text = update.message.text
+    user_playlists = USERS_KEYBOARD.get(user_info['chat_id'])
+    response = send_request(
+        'get_playlist', [user_info['chat_id'], user_playlists[text]])
     if response.get('status') == 'OK':
         keyboard = []
+        USERS_KEYBOARD[user_info['chat_id']] = {}
         for song in response['songs']:
             song_text = f'🎵 {song["title"]} - {song["artist_name"]}'
             keyboard.append(
                 [KeyboardButton(song_text, callback_data=song['id'])])
+            USERS_KEYBOARD[user_info['chat_id']][song_text] = song['id']
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
         update.message.reply_text('playlist songs:', reply_markup=reply_markup)
+        return GET_SONG
     else:
-        update.message.reply_text('not found!')
-    return ConversationHandler.END
-        
-        
-
+        update.message.reply_text(RESPONSE_TEXTS['error'])
+        return GET_PLAYLIST
