@@ -104,6 +104,16 @@ class SongViewSet(ViewSet):
             songs, many=True, context={'request': request})
         return Response(serializer.data)
 
+
+    def top_5_artist_song(self, request):
+        artist = Artist.objects.get(user=request.user)
+        topsongs =Song.objects.filter(artist=artist).order_by("-count")[:5]
+        result = []
+        for song in topsongs:
+            p= Point(X=song.title, Y=song.count)
+            result.append(p.__dict__)
+        return Response(result)
+
     def send_to_telegram(self, request, pk=None):
         song = get_object_or_404(Song, id=pk)
         user = request.user
@@ -295,6 +305,10 @@ class AlbumViewSet(ModelViewSet):
             AlbumSong, album=album, song=song)
         albumsong.delete()
 
+class Point():
+    def __init__(self, X, Y):
+        self.x = X
+        self.y = Y
 
 class SongLogsViewSet(ViewSet):
     serializer_class = SongLogsSerializer
@@ -333,7 +347,7 @@ class SongLogsViewSet(ViewSet):
         serializer = SongLogsViewSet(
             history, many=True, context={'request': request})
         return Response(serializer.data)
-
+        
     def analysis_tags(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
         today = datetime.datetime.now()
         last_time = today-datetime.timedelta(days=days)
@@ -363,11 +377,6 @@ class SongLogsViewSet(ViewSet):
                 result2.append(p.__dict__)
 
         return Response(result2)
-
-class Point():
-    def __init__(self, X, Y):
-        self.x = X
-        self.y = Y
 
     def analysis_artists(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
         today = datetime.datetime.now()

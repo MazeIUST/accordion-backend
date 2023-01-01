@@ -59,4 +59,7 @@ urlpatterns = [
          SongLogsViewSet.as_view({'get': 'analysis_tags'})),
     path('analysis_atrist/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>',
          SongLogsViewSet.as_view({'get': 'analysis_artists'})),
+
+     path('get_top_5_songs/', SongViewSet.as_view(
+        {'get': 'top_5_artist_song'}), name='get_top_5_artist_song'),
 ]
