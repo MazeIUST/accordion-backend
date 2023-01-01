@@ -46,17 +46,17 @@ urlpatterns = [
          AlbumViewSet.as_view({'delete': 'remove_song'}), name='album_remove_song'),
 
     path('history/',
-         HistoryViewSet.as_view({'post': 'create', 'get': 'list'}), name='history'),
-    path('history/<int:pk>/', HistoryViewSet.as_view(
+         SongLogsViewSet.as_view({'post': 'create', 'get': 'list'}), name='history'),
+    path('history/<int:pk>/', SongLogsViewSet.as_view(
         {'get': 'retrieve'}), name='get_history'),
     path('history/song/<int:song_pk>/',
-         HistoryViewSet.as_view({'get': 'retrieve_by_song'}), name='history_retrieve_by_song'),
+         SongLogsViewSet.as_view({'get': 'retrieve_by_song'}), name='history_retrieve_by_song'),
     path('history/artist/<int:artist_pk>/',
-         HistoryViewSet.as_view({'get': 'retrieve_by_artist'}), name='history_retrieve_by_artist'),
+         SongLogsViewSet.as_view({'get': 'retrieve_by_artist'}), name='history_retrieve_by_artist'),
     path('history/user/<int:user_pk>/',
-         HistoryViewSet.as_view({'get': 'retrieve_by_user'}), name='history_retrieve_by_user'),
+         SongLogsViewSet.as_view({'get': 'retrieve_by_user'}), name='history_retrieve_by_user'),
     path('analysis/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>',
-         HistoryViewSet.as_view({'get': 'analysis_tags'})),
+         SongLogsViewSet.as_view({'get': 'analysis_tags'})),
     path('analysis_atrist/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>',
-         HistoryViewSet.as_view({'get': 'analysis_artists'})),
+         SongLogsViewSet.as_view({'get': 'analysis_artists'})),
 ]
