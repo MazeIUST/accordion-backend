@@ -46,9 +46,10 @@ class LoginSerializer(serializers.ModelSerializer):
 
 class SongSerializer(serializers.ModelSerializer):
     song_download_link = serializers.SerializerMethodField()
+    artist_name = serializers.CharField(source='artist.name', read_only=True)
     class Meta:
         model = Song
-        fields = ('id', 'title', 'song_link', 'song_download_link', 'artist__name')
+        fields = ('id', 'title', 'song_link', 'song_download_link', 'artist_name')
         
     def get_song_download_link(self, obj):
         view_link = obj.song_link
