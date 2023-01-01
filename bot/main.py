@@ -26,7 +26,14 @@ def main():
     )
 
     # command_handler = MessageHandler(Filters.command, command)
-    playlist_handler = CommandHandler('my_playlists', my_playlists)
+    playlist_handler = ConversationHandler(
+        entry_points=[CommandHandler('my_playlists', my_playlists)],
+        states={
+            GET_PLAYLIST: [MessageHandler(Filters.text, get_playlist)],
+            GET_SONG: [MessageHandler(Filters.text, get_song)],
+        },
+        fallbacks=[CommandHandler('my_playlists', my_playlists)],
+    )
     search_handler = MessageHandler(Filters.text, search)
 
     # add handlers to dispatcher

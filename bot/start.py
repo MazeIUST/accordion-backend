@@ -101,5 +101,26 @@ def my_playlists(update: Update, context: CallbackContext):
                 [KeyboardButton(playlist['title'], callback_data=playlist['id'])])
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
         update.message.reply_text('your playlists:', reply_markup=reply_markup)
+        return GET_PLAYLIST
     else:
         update.message.reply_text('not found!')
+        return ConversationHandler.END
+    
+def get_playlist(update: Update, context: CallbackContext):
+    user_info = get_user_telegram_info_from_update(update, context)
+    playlist_id = update.message.text
+    response = send_request('get_playlist', [playlist_id])
+    if response.get('status') == 'OK':
+        keyboard = []
+        for song in response['songs']:
+            song_text = f'🎵 {song["title"]} - {song["artist_name"]}'
+            keyboard.append(
+                [KeyboardButton(song_text, callback_data=song['id'])])
+        reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
+        update.message.reply_text('playlist songs:', reply_markup=reply_markup)
+    else:
+        update.message.reply_text('not found!')
+    return ConversationHandler.END
+        
+        
+
