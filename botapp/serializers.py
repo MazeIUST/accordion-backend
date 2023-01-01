@@ -46,7 +46,7 @@ class LoginSerializer(serializers.ModelSerializer):
 
 class SongSerializer(serializers.ModelSerializer):
     song_download_link = serializers.SerializerMethodField()
-    artist_name = serializers.CharField(source='artist.name', read_only=True)
+    artist_name = serializers.SerializerMethodField()
     class Meta:
         model = Song
         fields = ('id', 'title', 'song_link', 'song_download_link', 'artist_name')
@@ -59,6 +59,10 @@ class SongSerializer(serializers.ModelSerializer):
         except:
             song_link = view_link
         return song_link
+    
+    def get_artist_name(self, obj):
+        artist = obj.artist
+        return artist.artistic_name
 
 
 class PlaylistSerializer(serializers.ModelSerializer):
