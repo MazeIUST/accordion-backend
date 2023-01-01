@@ -94,7 +94,7 @@ def my_playlists(update: Update, context: CallbackContext):
     response = send_request('get_playlists', [user_info['chat_id']])
     if response.get('status') == 'OK':
         keyboard = []
-        for playlist in response:
+        for playlist in response['playlists']:
             keyboard.append(
                 [KeyboardButton(playlist['title'], callback_data=playlist['id'])])
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
