@@ -25,15 +25,15 @@ def main():
         fallbacks=[CommandHandler('start', start)],
     )
 
-    search_handler = MessageHandler(Filters.text, search)
     # command_handler = MessageHandler(Filters.command, command)
     playlist_handler = CommandHandler('my_playlists', my_playlists)
+    search_handler = MessageHandler(Filters.text, search)
 
     # add handlers to dispatcher
     dispatcher.add_handler(start_handler)
-    dispatcher.add_handler(search_handler)
     # dispatcher.add_handler(command_handler)
     dispatcher.add_handler(playlist_handler)
+    dispatcher.add_handler(search_handler)
 
     updater.start_polling()
     # updater.start_webhook(listen="0.0.0.0",
