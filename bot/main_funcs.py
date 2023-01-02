@@ -14,6 +14,8 @@ from telegram.ext import (Updater,
 
 from const import *
 import requests
+import os
+
 
 def send_request(url, options):
     url = SERVER_URL + url + '/'
@@ -31,7 +33,7 @@ def cancel(update: Update, context: CallbackContext):
     update.message.reply_text(text='ended!')
     return ConversationHandler.END
 
-    
+
 def get_user_telegram_info_from_update(update: Update, context: CallbackContext):
     result = {}
     if update.callback_query:
@@ -47,15 +49,19 @@ def get_user_telegram_info_from_update(update: Update, context: CallbackContext)
     result['language_code'] = update.message.from_user['language_code']
     return result
 
+
 def download_song(song_link):
     song_id = song_link.split('/')[-2]
-    song_link = f'https://drive.google.com/u/0/uc?id={song_id}&export=download'
-    response = requests.get(song_link)
-    with open(f'songs/song.mp3', 'wb') as f:
-        f.write(response.content)
-        return f.name
-
-
-
-
-
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    file_address = os.path.join(current_dir, 'songs', f'{song_id}.mp3')
+    if os.path.exists(file_address):
+        with open(file_address, 'rb') as song:
+            return song.name
+    new_song_link = f'https://drive.google.com/u/0/uc?id={song_id}&export=download'
+    try:
+        response = requests.get(new_song_link)
+    except:
+        response = requests.get(song_link)
+    with open(file_address, 'wb') as song:
+        song.write(response.content)
+    return song.name

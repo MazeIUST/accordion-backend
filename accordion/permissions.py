@@ -2,6 +2,7 @@ from rest_framework import permissions
 from rest_framework.permissions import IsAdminUser
 from rest_framework.permissions import IsAuthenticated
 
+
 class IsSuperUser(IsAdminUser):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_superuser)
@@ -11,39 +12,35 @@ class IsArtist(permissions.BasePermission):
 
     def has_permission(self, request, view):
         is_authenticated = request.user and request.user.is_authenticated
-        if is_authenticated:
-            return request.user.is_Artist
-        return False
+        return request.user.is_Artist if is_authenticated else False
 
     def has_object_permission(self, request, view, obj):
-        if view.action in ['update', 'destroy']:
-            if obj.artist.user == request.user:
-                return True
-            return False
-        return True
+        return bool(obj.artist.user == request.user)
 
 
+class IsAlbumOwner(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        return bool(request.user.is_superuser or obj.artist.user == request.user)
 
 
 class IsArtistORSuperuser(permissions.BasePermission):
 
     def has_permission(self, request, view):
         is_authenticated = request.user and request.user.is_authenticated
-        if is_authenticated:
-            return request.user.is_Artist or request.user.is_superuser
-        return False
-        
+        return request.user.is_Artist if is_authenticated else False
 
     def has_object_permission(self, request, view, obj):
-        if view.action in ['update', 'destroy']:
-            return request.user.is_superuser or obj.artist.user == request.user
-        return True
+        return bool(request.user.is_superuser or obj.artist.user == request.user)
+
 
 class IsPlaylistOwner(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        if view.action in ['add_song','remove_song', 'destroy', 'update']:
-            return request.user.is_superuser or obj.owner == request.user
-        elif view.action in ['retrieve']:
-            return obj.is_public or obj.owner == request.user
-        return True
+        return bool(request.user.is_superuser or obj.owner == request.user)
+
+
+class IsPublicPlaylist(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        return bool(request.user.is_superuser or obj.owner == request.user or obj.is_public)
