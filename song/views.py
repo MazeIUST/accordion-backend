@@ -107,7 +107,9 @@ class SongViewSet(ViewSet):
     def top_5_artist_song(self, request, pk=None):
         artist = get_object_or_404(Artist, id=pk) if pk else get_object_or_404(
             Artist, user=request.user)
-        topsongs = Song.objects.filter(artist=artist).order_by("-count")[:5]
+        topsongs = Song.objects.filter(artist=artist).order_by("-count")
+        if len(topsongs) > 5:
+            topsongs = topsongs[:5]
         result = []
         for song in topsongs:
             p = Point(X=song.title, Y=song.count)
