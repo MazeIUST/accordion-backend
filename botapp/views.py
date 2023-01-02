@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated
+from song.serializers import TagAnalysisSerializer, ArtistAnalysisSerializer
+from song.views import SongLogsViewSet
 
 
 class UserViewSet(ViewSet):
@@ -51,10 +53,29 @@ class UserViewSet(ViewSet):
                 non_empty_playlists.append(playlist)
         serializer = PlaylistSerializer(non_empty_playlists, many=True)
         return Response({'status': 'OK', 'playlists': serializer.data})
-    
+
     def get_playlist(self, request, chat_id, playlist_id):
-        playlist = get_object_or_404(Playlist, id=playlist_id, owner__telegram_chat_id=chat_id)
+        playlist = get_object_or_404(
+            Playlist, id=playlist_id, owner__telegram_chat_id=chat_id)
         playlist_song = PlaylistSong.objects.filter(playlist=playlist)
         songs = [song.song for song in playlist_song]
         serializer = SongSerializer(songs, many=True)
         return Response({'status': 'OK', 'songs': serializer.data})
+
+    def analysis_song(self, request, chat_id):
+        user = get_object_or_404(User, telegram_chat_id=chat_id)
+        history = SongLogsViewSet.analysis(self, user=user, days=365)
+        tags = Tag.objects.all()
+        serializers = TagAnalysisSerializer(
+            tags, many=True, context={'logs': history})
+        data = SongLogsViewSet.convert_to_percents(self, serializers.data)
+        return Response({'status': 'OK', 'data': data})
+
+    def analysis_artist(self, request, chat_id):
+        user = get_object_or_404(User, telegram_chat_id=chat_id)
+        history = SongLogsViewSet.analysis(user=user, days=365)
+        artists = Artist.objects.all()
+        serializers = ArtistAnalysisSerializer(
+            artists, many=True, context={'logs': history})
+        data = SongLogsViewSet.convert_to_percents(self, serializers.data)
+        return Response({'status': 'OK', 'data': data})

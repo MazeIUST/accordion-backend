@@ -147,3 +147,36 @@ class SongLogsSerializer(serializers.ModelSerializer):
     def get_song_details(self, obj):
         song = obj.song
         return SongSerializer(song, context={'request': self.context['request']}).data
+
+
+class TagAnalysisSerializer(serializers.ModelSerializer):
+    percent = serializers.SerializerMethodField()
+    class Meta:
+        model = Tag
+        fields = ('id', 'name', 'percent')
+        
+    def get_percent(self, obj):
+        logs_of_user = self.context.get('logs')
+        songs = [log.song for log in logs_of_user]
+        songs_count = 0
+        for song in songs:
+            if obj in song.tags.all():
+                songs_count += 1
+        return songs_count
+    
+    
+class ArtistAnalysisSerializer(serializers.ModelSerializer):
+    percent = serializers.SerializerMethodField()
+    class Meta:
+        model = Artist
+        fields = ('id', 'artistic_name', 'percent')
+        
+    def get_percent(self, obj):
+        logs_of_user = self.context.get('logs')
+        songs = [log.song for log in logs_of_user]
+        songs_count = 0
+        for song in songs:
+            if song.artist == obj:
+                songs_count += 1
+        return songs_count
+    

@@ -315,6 +315,12 @@ class Point():
 
 class SongLogsViewSet(ViewSet):
     serializer_class = SongLogsSerializer
+    
+    def get_permissions(self):
+        permission_classes = [IsAuthenticated]
+        if self.action in ['analysis', 'convert_to_percents']:
+            permission_classes = []
+        return [permission() for permission in permission_classes]
 
     def create(self, request):
         serializer = SongLogsSerializer(
@@ -351,56 +357,46 @@ class SongLogsViewSet(ViewSet):
             history, many=True, context={'request': request})
         return Response(serializer.data)
 
+    def analysis(self, user, days=0, city='0', country='0', min_age=0, max_age=0):
+        today = datetime.datetime.now()
+        last_time = today-datetime.timedelta(days=days)
+        days_filter = Q(created_at__range=[
+                        last_time, today]) if days != 0 else Q()
+        city_filter = Q(user__city=city) if city != '0' else Q()
+        country_filter = Q(user__country=country) if country != '0' else Q()
+        min_age_filter = Q(user__birthday__lte=today -
+                           datetime.timedelta(days=min_age*365)) if min_age != 0 else Q()
+        max_age_filter = Q(user__birthday__gte=today -
+                           datetime.timedelta(days=max_age*365)) if max_age != 0 else Q()
+        history = SongLogs.objects.filter(
+            days_filter, city_filter, country_filter, min_age_filter, max_age_filter, user=user)
+        return history
+
+    def convert_to_percents(self, data):
+        new_data = []
+        total = sum([d['percent'] for d in data])
+        if total == 0:
+            return new_data
+        for tag in data:
+            tag['percent'] = round(tag['percent']*100/total, 2)
+            if tag['percent'] > 0:
+                new_data.append(tag)
+        return new_data
+
     def analysis_tags(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
-        today = datetime.datetime.now()
-        last_time = today-datetime.timedelta(days=days)
-        days_filter = Q(created_at__range=[
-                        last_time, today]) if days != 0 else Q()
-        city_filter = Q(user__city=city) if city != '0' else Q()
-        country_filter = Q(user__country=country) if country != '0' else Q()
-        min_age_filter = Q(user__birthday__lte=today -
-                           datetime.timedelta(days=min_age*365)) if min_age != 0 else Q()
-        max_age_filter = Q(user__birthday__gte=today -
-                           datetime.timedelta(days=max_age*365)) if max_age != 0 else Q()
-        user_history = SongLogs.objects.filter(
-            days_filter, city_filter, country_filter, min_age_filter, max_age_filter)
-        tags = {}   
-        for log in user_history:
-            for tag in log.song.tags.all():
-                if tag.name in tags:
-                    tags[tag.name] += 1
-                else:
-                    tags[tag.name] = 1
-        # in percentage and Json
-        tags = [{
-            'tags': key,
-            'percent': round(value*100//len(user_history), 2)
-        } for key, value in tags.items()]
-        return Response(tags, status=status.HTTP_200_OK)
-        
-        
+        history = self.analysis(request.user, days, city,
+                                country, min_age, max_age)
+        tags = Tag.objects.all()
+        serializers = TagAnalysisSerializer(
+            tags, many=True, context={'request': request, 'logs': history})
+        data = self.convert_to_percents(serializers.data)
+        return Response(data, status=status.HTTP_200_OK)
+
     def analysis_artists(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
-        today = datetime.datetime.now()
-        last_time = today-datetime.timedelta(days=days)
-        days_filter = Q(created_at__range=[
-                        last_time, today]) if days != 0 else Q()
-        city_filter = Q(user__city=city) if city != '0' else Q()
-        country_filter = Q(user__country=country) if country != '0' else Q()
-        min_age_filter = Q(user__birthday__lte=today -
-                           datetime.timedelta(days=min_age*365)) if min_age != 0 else Q()
-        max_age_filter = Q(user__birthday__gte=today -
-                           datetime.timedelta(days=max_age*365)) if max_age != 0 else Q()
-        user_history = SongLogs.objects.filter(
-            days_filter, city_filter, country_filter, min_age_filter, max_age_filter)
-        artists = {}
-        for log in user_history:
-            if log.song.artist.artistic_name in artists:
-                artists[log.song.artist.artistic_name] += 1
-            else:
-                artists[log.song.artist.artistic_name] = 1
-        # in percentage and Json
-        artists = [{
-            'artist': key,
-            'percent': round(value*100//len(user_history), 2)
-        } for key, value in artists.items()]
-        return Response(artists, status=status.HTTP_200_OK)
+        history = self.analysis(request.user, days, city,
+                                country, min_age, max_age)
+        artists = Artist.objects.all()
+        serializers = ArtistAnalysisSerializer(
+            artists, many=True, context={'request': request, 'logs': history})
+        data = self.convert_to_percents(serializers.data)
+        return Response(data, status=status.HTTP_200_OK)

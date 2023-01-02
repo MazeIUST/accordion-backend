@@ -133,3 +133,29 @@ def get_playlist(update: Update, context: CallbackContext):
     else:
         update.message.reply_text(RESPONSE_TEXTS['error'])
         return GET_PLAYLIST
+    
+def song_analysis(update: Update, context: CallbackContext):
+    user_info = get_user_telegram_info_from_update(update, context)
+    response = send_request('song_analysis', [user_info['chat_id']]) 
+    if response.get('status') == 'OK':
+        datas = response.get('data')
+        values = [data['percent'] for data in datas]
+        keys = [data['name'] for data in datas]
+        # show chart with matplotlib
+        import matplotlib.pyplot as plt
+        import numpy as np
+
+        y = np.array(values)
+        mylabels = keys
+
+        plt.pie(y, labels = mylabels)
+        plt.savefig('piechart.jpg')
+        
+        update.message.reply_photo(photo=open('piechart.jpg', 'rb'))
+        return ConversationHandler.END
+    else:
+        update.message.reply_text(RESPONSE_TEXTS['error'])
+        return ConversationHandler.END
+        
+
+    
