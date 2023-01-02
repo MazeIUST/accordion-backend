@@ -364,23 +364,17 @@ class SongLogsViewSet(ViewSet):
                            datetime.timedelta(days=max_age*365)) if max_age != 0 else Q()
         user_history = SongLogs.objects.filter(
             days_filter, city_filter, country_filter, min_age_filter, max_age_filter)
-        songs_tags = user_history.annotate(tags=F("song_id__tags")).values()
-        tags = Tag.objects.all()
-        result = {}
-        for tag in tags:
-            result[tag.id] = 0
-        for song_tag in songs_tags:
-            for tag in song_tag.tags:
-                result[tag.id] = +1
-
-        result2 = []
-        for tag in tags:
-            if result[tag.id] != 0:
-                p = Point(X=tag.name, Y=result[tag.id])
-                result2.append(p.__dict__)
-
-        return Response(result2)
-
+        tags = {}   
+        for log in user_history:
+            for tag in log.song.tags.all():
+                if tag.name in tags:
+                    tags[tag.name] += 1
+                else:
+                    tags[tag.name] = 1
+        tags = [{'name': key, 'count': value} for key, value in tags.items()]
+        return Response(tags, status=status.HTTP_200_OK)
+        
+        
     def analysis_artists(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
         today = datetime.datetime.now()
         last_time = today-datetime.timedelta(days=days)
