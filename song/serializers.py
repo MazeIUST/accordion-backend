@@ -127,12 +127,12 @@ class AlbumSongsSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class HistorySerializer(serializers.ModelSerializer):
+class SongLogsSerializer(serializers.ModelSerializer):
     age = serializers.SerializerMethodField()
     song_details = serializers.SerializerMethodField()
 
     class Meta:
-        model = History
+        model = SongLogs
         fields = ('id', 'user', 'song', 'song_details', 'age', 'created_at')
         read_only_fields = ('id', 'user', 'song_details', 'age', 'created_at')
 

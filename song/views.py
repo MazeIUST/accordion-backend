@@ -104,6 +104,16 @@ class SongViewSet(ViewSet):
             songs, many=True, context={'request': request})
         return Response(serializer.data)
 
+
+    def top_5_artist_song(self, request):
+        artist = Artist.objects.get(user=request.user)
+        topsongs =Song.objects.filter(artist=artist).order_by("-count")[:5]
+        result = []
+        for song in topsongs:
+            p= Point(X=song.title, Y=song.count)
+            result.append(p.__dict__)
+        return Response(result)
+
     def send_to_telegram(self, request, pk=None):
         song = get_object_or_404(Song, id=pk)
         user = request.user
@@ -295,49 +305,53 @@ class AlbumViewSet(ModelViewSet):
             AlbumSong, album=album, song=song)
         albumsong.delete()
 
+class Point():
+    def __init__(self, X, Y):
+        self.x = X
+        self.y = Y
 
-class HistoryViewSet(ViewSet):
-    serializer_class = HistorySerializer
+class SongLogsViewSet(ViewSet):
+    serializer_class = SongLogsSerializer
 
     def create(self, request):
-        serializer = HistorySerializer(
+        serializer = SongLogsSerializer(
             data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def list(self, request):
-        history = History.objects.filter(user=request.user)
-        serializer = HistorySerializer(
+        history = SongLogs.objects.filter(user=request.user)
+        serializer = SongLogsViewSet(
             history, many=True, context={'request': request})
         return Response(serializer.data)
 
     def retrieve_by_song(self, request, song_pk=None):
         song = get_object_or_404(Song, pk=song_pk)
-        history = History.objects.filter(user=request.user, song=song)
-        serializer = HistorySerializer(
+        history = SongLogs.objects.filter(user=request.user, song=song)
+        serializer = SongLogsViewSet(
             history, many=True, context={'request': request})
         return Response(serializer.data)
 
     def retrieve_by_artist(self, request, artist_pk=None):
         artist = get_object_or_404(Artist, pk=artist_pk)
-        history = History.objects.filter(
+        history = SongLogs.objects.filter(
             user=request.user, song__artist=artist)
-        serializer = HistorySerializer(
+        serializer = SongLogsViewSet(
             history, many=True, context={'request': request})
         return Response(serializer.data)
 
     def retrieve_by_user(self, request, user_pk=None):
         user = get_object_or_404(User, pk=user_pk)
-        history = History.objects.filter(user=user)
-        serializer = HistorySerializer(
+        history = SongLogs.objects.filter(user=user)
+        serializer = SongLogsViewSet(
             history, many=True, context={'request': request})
         return Response(serializer.data)
-
+        
     def analysis_tags(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
         today = datetime.datetime.now()
         last_time = today-datetime.timedelta(days=days)
-        days_filter = Q(add_datetime__range=[
+        days_filter = Q(created_at__range=[
                         last_time, today]) if days != 0 else Q()
         city_filter = Q(user__city=city) if city != '0' else Q()
         country_filter = Q(user__country=country) if country != '0' else Q()
@@ -345,7 +359,7 @@ class HistoryViewSet(ViewSet):
                            datetime.timedelta(days=min_age*365)) if min_age != 0 else Q()
         max_age_filter = Q(user__birthday__gte=today -
                            datetime.timedelta(days=max_age*365)) if max_age != 0 else Q()
-        user_history = History.objects.filter(
+        user_history = SongLogs.objects.filter(
             days_filter, city_filter, country_filter, min_age_filter, max_age_filter)
         songs_tags = user_history.annotate(tags=F("song_id__tags")).values()
         tags = Tag.objects.all()
@@ -355,12 +369,19 @@ class HistoryViewSet(ViewSet):
         for song_tag in songs_tags:
             for tag in song_tag.tags:
                 result[tag.id] = +1
-        return Response(result)
+
+        result2 = []
+        for tag in tags:
+            if result[tag.id]!=0:
+                p= Point(X=tag.name, Y=result[tag.id])
+                result2.append(p.__dict__)
+
+        return Response(result2)
 
     def analysis_artists(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
         today = datetime.datetime.now()
         last_time = today-datetime.timedelta(days=days)
-        days_filter = Q(add_datetime__range=[
+        days_filter = Q(created_at__range=[
                         last_time, today]) if days != 0 else Q()
         city_filter = Q(user__city=city) if city != '0' else Q()
         country_filter = Q(user__country=country) if country != '0' else Q()
@@ -368,7 +389,7 @@ class HistoryViewSet(ViewSet):
                            datetime.timedelta(days=min_age*365)) if min_age != 0 else Q()
         max_age_filter = Q(user__birthday__gte=today -
                            datetime.timedelta(days=max_age*365)) if max_age != 0 else Q()
-        user_history = History.objects.filter(
+        user_history = SongLogs.objects.filter(
             days_filter, city_filter, country_filter, min_age_filter, max_age_filter)
         songs_artist = []
         for item in user_history:
