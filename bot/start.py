@@ -149,6 +149,11 @@ def song_analysis(update: Update, context: CallbackContext):
         mylabels = keys
 
         plt.pie(y, labels = mylabels)
+        #delete old chart
+        try:
+            os.remove('piechart.jpg')
+        except:
+            pass
         plt.savefig('piechart.jpg')
         
         update.message.reply_photo(photo=open('piechart.jpg', 'rb'))
