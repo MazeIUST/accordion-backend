@@ -201,7 +201,7 @@ class UserViewSet(ModelViewSet):
     def get_recent_10_music(self, request):
         user = request.user
         try:
-            user_history = History.objects.get(user=user).order_by(
+            user_history = SongLogs.objects.get(user=user).order_by(
                 '-add_datetime').distinct('song_id')
             if user_history.count() < 10 and user_history.count() > 0:
                 recent_10_music = user_history.values('song_id').to_dict()
@@ -221,7 +221,7 @@ class UserViewSet(ModelViewSet):
     def get_recent_10_artist(self, request):
         user = request.user
         try:
-            user_history = History.objects.get(user=user).order_by(
+            user_history = SongLogs.objects.get(user=user).order_by(
                 '-add_datetime').distinct('song__artist')
             if user_history.count() < 10 and user_history.count() > 0:
                 return Response(user_history.values('song__artist_id').to_dict())
