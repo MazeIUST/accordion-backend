@@ -80,7 +80,8 @@ class UrlsView(APIView):
             'history retrieve_by_song': absurl + 'songs/history/song/<int:song_pk>/',
             'history retrieve_by_artist': absurl + 'songs/history/artist/<int:artist_pk>/',
             'history retrieve_by_user': absurl + 'songs/history/user/<int:user_pk>/',
-            'analysis': absurl + 'songs/analysis/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>',
+            'analysis by song': absurl + 'songs/analysis/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>/',
+            'analysis by artist': absurl + 'songs/analysis_artist/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>/',
         }
 
         return Response({'account_urls': account_urls, 'songs_urls': songs_urls})

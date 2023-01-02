@@ -371,7 +371,8 @@ class SongLogsViewSet(ViewSet):
                     tags[tag.name] += 1
                 else:
                     tags[tag.name] = 1
-        tags = [{'name': key, 'count': value} for key, value in tags.items()]
+        # in percentage
+        tags = {key: round(value//len(user_history)*100, 2) for key, value in tags.items()}
         return Response(tags, status=status.HTTP_200_OK)
         
         
@@ -388,9 +389,12 @@ class SongLogsViewSet(ViewSet):
                            datetime.timedelta(days=max_age*365)) if max_age != 0 else Q()
         user_history = SongLogs.objects.filter(
             days_filter, city_filter, country_filter, min_age_filter, max_age_filter)
-        songs_artist = []
-        for item in user_history:
-            songs_artist.append(item.song.artist)
-        result = {i: songs_artist.count(i) for i in songs_artist}
-
-        return Response(result)
+        artists = {}
+        for log in user_history:
+            if log.song.artist.artistic_name in artists:
+                artists[log.song.artist.artistic_name] += 1
+            else:
+                artists[log.song.artist.artistic_name] = 1
+        # in percentage
+        artists = {key: round(value//len(user_history)*100, 2) for key, value in artists.items()}
+        return Response(artists, status=status.HTTP_200_OK)
