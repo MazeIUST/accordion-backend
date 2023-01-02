@@ -104,13 +104,13 @@ class SongViewSet(ViewSet):
             songs, many=True, context={'request': request})
         return Response(serializer.data)
 
-
-    def top_5_artist_song(self, request):
-        artist = Artist.objects.get(user=request.user)
-        topsongs =Song.objects.filter(artist=artist).order_by("-count")[:5]
+    def top_5_artist_song(self, request, pk=None):
+        artist = get_object_or_404(Artist, id=pk) if pk else get_object_or_404(
+            Artist, user=request.user)
+        topsongs = Song.objects.filter(artist=artist).order_by("-count")[:5]
         result = []
         for song in topsongs:
-            p= Point(X=song.title, Y=song.count)
+            p = Point(X=song.title, Y=song.count)
             result.append(p.__dict__)
         return Response(result)
 
@@ -129,6 +129,7 @@ class SongViewSet(ViewSet):
             if response.status_code == 200:
                 return Response({'message': 'Song sent to telegram'}, status=status.HTTP_200_OK)
             return Response({'message': 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class TagViewSet(ViewSet):
     serializer_class = TagSerializer
@@ -305,10 +306,12 @@ class AlbumViewSet(ModelViewSet):
             AlbumSong, album=album, song=song)
         albumsong.delete()
 
+
 class Point():
     def __init__(self, X, Y):
         self.x = X
         self.y = Y
+
 
 class SongLogsViewSet(ViewSet):
     serializer_class = SongLogsSerializer
@@ -322,14 +325,14 @@ class SongLogsViewSet(ViewSet):
 
     def list(self, request):
         history = SongLogs.objects.filter(user=request.user)
-        serializer = SongLogsViewSet(
+        serializer = SongLogsSerializer(
             history, many=True, context={'request': request})
         return Response(serializer.data)
 
     def retrieve_by_song(self, request, song_pk=None):
         song = get_object_or_404(Song, pk=song_pk)
         history = SongLogs.objects.filter(user=request.user, song=song)
-        serializer = SongLogsViewSet(
+        serializer = SongLogsSerializer(
             history, many=True, context={'request': request})
         return Response(serializer.data)
 
@@ -337,17 +340,17 @@ class SongLogsViewSet(ViewSet):
         artist = get_object_or_404(Artist, pk=artist_pk)
         history = SongLogs.objects.filter(
             user=request.user, song__artist=artist)
-        serializer = SongLogsViewSet(
+        serializer = SongLogsSerializer(
             history, many=True, context={'request': request})
         return Response(serializer.data)
 
     def retrieve_by_user(self, request, user_pk=None):
         user = get_object_or_404(User, pk=user_pk)
         history = SongLogs.objects.filter(user=user)
-        serializer = SongLogsViewSet(
+        serializer = SongLogsSerializer(
             history, many=True, context={'request': request})
         return Response(serializer.data)
-        
+
     def analysis_tags(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
         today = datetime.datetime.now()
         last_time = today-datetime.timedelta(days=days)
@@ -372,8 +375,8 @@ class SongLogsViewSet(ViewSet):
 
         result2 = []
         for tag in tags:
-            if result[tag.id]!=0:
-                p= Point(X=tag.name, Y=result[tag.id])
+            if result[tag.id] != 0:
+                p = Point(X=tag.name, Y=result[tag.id])
                 result2.append(p.__dict__)
 
         return Response(result2)

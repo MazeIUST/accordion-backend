@@ -19,6 +19,10 @@ urlpatterns = [
          SongViewSet.as_view({'get': 'search'}), name='song_search'),
     path('send_to_telegram/<int:pk>/',
          SongViewSet.as_view({'get': 'send_to_telegram'}), name='send_to_telegram'),
+    path('get_top_5_songs/', SongViewSet.as_view(
+         {'get': 'top_5_artist_song'}), name='get_top_5_artist_song'),
+    path('get_top_5_songs/<int:pk>/', SongViewSet.as_view(
+         {'get': 'top_5_artist_song'}), name='get_top_5_artist_song_by_id'),
 
     path(
         'tag/', TagViewSet.as_view({'get': 'list', 'post': 'create'}), name='tags'),
@@ -59,7 +63,4 @@ urlpatterns = [
          SongLogsViewSet.as_view({'get': 'analysis_tags'})),
     path('analysis_atrist/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>',
          SongLogsViewSet.as_view({'get': 'analysis_artists'})),
-
-     path('get_top_5_songs/', SongViewSet.as_view(
-        {'get': 'top_5_artist_song'}), name='get_top_5_artist_song'),
 ]
