@@ -25,7 +25,8 @@ def main():
         fallbacks=[CommandHandler('start', start)],
     )
 
-    # command_handler = MessageHandler(Filters.command, command)
+    song_analysis_handler = CommandHandler('song_analysis', song_analysis)
+    
     playlist_handler = ConversationHandler(
         entry_points=[CommandHandler('my_playlists', my_playlists)],
         states={
@@ -34,16 +35,16 @@ def main():
         },
         fallbacks=[CommandHandler('my_playlists', my_playlists)],
     )
+
     search_handler = MessageHandler(Filters.text, search)
     
-    song_analysis_handler = CommandHandler('song_analysis', song_analysis)
 
     # add handlers to dispatcher
     dispatcher.add_handler(start_handler)
     # dispatcher.add_handler(command_handler)
     dispatcher.add_handler(playlist_handler)
-    dispatcher.add_handler(search_handler)
     dispatcher.add_handler(song_analysis_handler)
+    dispatcher.add_handler(search_handler)
 
     updater.start_polling()
     # updater.start_webhook(listen="0.0.0.0",
