@@ -371,8 +371,11 @@ class SongLogsViewSet(ViewSet):
                     tags[tag.name] += 1
                 else:
                     tags[tag.name] = 1
-        # in percentage
-        tags = {key: round(value//len(user_history)*100, 2) for key, value in tags.items()}
+        # in percentage and Json
+        tags = [{
+            'tags': key,
+            'percent': round(value//len(user_history)*100, 2)
+        } for key, value in tags.items()]
         return Response(tags, status=status.HTTP_200_OK)
         
         
@@ -395,6 +398,9 @@ class SongLogsViewSet(ViewSet):
                 artists[log.song.artist.artistic_name] += 1
             else:
                 artists[log.song.artist.artistic_name] = 1
-        # in percentage
-        artists = {key: round(value//len(user_history)*100, 2) for key, value in artists.items()}
+        # in percentage and Json
+        artists = [{
+            'artist': key,
+            'percent': round(value//len(user_history)*100, 2)
+        } for key, value in artists.items()]
         return Response(artists, status=status.HTTP_200_OK)
