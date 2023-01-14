@@ -28,7 +28,7 @@ class UserViewSet(ViewSet):
         if user.check_password(password):
             user.telegram_chat_id = chat_id
             user.save()
-            return Response({'status': 'OK'})
+            return Responadd_songse({'status': 'OK'})
         return Response({'status': 'ERROR'})
 
     def signup(self, request, chat_id):
@@ -79,3 +79,15 @@ class UserViewSet(ViewSet):
             artists, many=True, context={'logs': history})
         data = SongLogsViewSet.convert_to_percents(self, serializers.data)
         return Response({'status': 'OK', 'data': data})
+    
+
+class SongViewSet(ViewSet):
+    serializer_class = CreateSongSerializer
+    permission_classes = []
+    
+    def add_song(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'status': 'OK'})
+        
