@@ -59,7 +59,7 @@ def get_user_telegram_info_from_update(update: Update, context: CallbackContext)
     return result
 
 
-def get_song_info(update: Update, context: CallbackContext, song_link):
+def get_song_info(update: Update, context: CallbackContext):
     song = update.message.audio
     if song:
         # forward to channel
