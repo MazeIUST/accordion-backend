@@ -12,6 +12,7 @@ import os
 
 # PORT = int(os.environ.get('PORT', 8443))
 
+
 def main():
     updater = Updater(TOKEN, use_context=True)
     dispatcher = updater.dispatcher
@@ -26,7 +27,7 @@ def main():
     )
 
     song_analysis_handler = CommandHandler('song_analysis', song_analysis)
-    
+
     playlist_handler = ConversationHandler(
         entry_points=[CommandHandler('my_playlists', my_playlists)],
         states={
@@ -37,7 +38,8 @@ def main():
     )
 
     search_handler = MessageHandler(Filters.text, search)
-    
+
+    add_new_song_handler = MessageHandler(Filters.audio, add_new_song)
 
     # add handlers to dispatcher
     dispatcher.add_handler(start_handler)
@@ -45,6 +47,7 @@ def main():
     dispatcher.add_handler(playlist_handler)
     dispatcher.add_handler(song_analysis_handler)
     dispatcher.add_handler(search_handler)
+    dispatcher.add_handler(add_new_song_handler)
 
     updater.start_polling()
     # updater.start_webhook(listen="0.0.0.0",
