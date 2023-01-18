@@ -62,6 +62,9 @@ def get_user_telegram_info_from_update(update: Update, context: CallbackContext)
 def get_song_info(update: Update, context: CallbackContext):
     song = update.message.audio
     if song:
+        # forward to channel
+        forwarded_song = context.bot.forward_message(chat_id=SONGS_CHANNEL, from_chat_id=update.message.chat_id,
+                                                     message_id=update.message.message_id)
         id = song.file_id
         title = song.title
         artist = song.performer
@@ -75,13 +78,10 @@ def get_song_info(update: Update, context: CallbackContext):
         image_path = os.path.join(images_dir, f'{image}.jpg')
         image_file = context.bot.get_file(image)
         image_file.download(image_path)
-        # forward to channel
-        song = context.bot.forward_message(chat_id=SONGS_CHANNEL, from_chat_id=update.message.chat_id,
-                                           message_id=update.message.message_id)
         data = {'id': id, 'title': title,
-                'artist': artist, 'telegram_id': song.message_id}
+                'artist': artist, 'telegram_id': forwarded_song.message_id}
         files = {'image': open(image_path, 'rb')}
-        return {'data': data, 'files': files}
+        return {'data': data, 'files': files, 'song': song}
     return None
 
 
