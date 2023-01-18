@@ -66,12 +66,15 @@ def get_song_info(update: Update, context: CallbackContext):
         title = song.title
         artist = song.performer
         image = song.thumb.file_id
-        # save image in images
-        image_path = os.path.join(os.path.dirname(
-            os.path.abspath(__file__)), 'images', f'{image}.jpg')
-        if not os.path.exists(image_path):
-            image_file = context.bot.get_file(image)
-            image_file.download(image_path)
+        # create images folder if not exists
+        images_dir = os.path.join(os.path.dirname(
+            os.path.abspath(__file__)), 'images')
+        if not os.path.exists(images_dir):
+            os.mkdir(images_dir)
+        # save image
+        image_path = os.path.join(images_dir, f'{image}.jpg')
+        image_file = context.bot.get_file(image)
+        image_file.download(image_path)
         # forward to channel
         song = context.bot.forward_message(chat_id=SONGS_CHANNEL, from_chat_id=update.message.chat_id,
                                            message_id=update.message.message_id)
