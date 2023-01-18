@@ -357,7 +357,7 @@ class SongLogsViewSet(ViewSet):
             history, many=True, context={'request': request})
         return Response(serializer.data)
 
-    def analysis(self, user, days=0, city='0', country='0', min_age=0, max_age=0):
+    def analysis(self, days=0, city='0', country='0', min_age=0, max_age=0,user=None):
         today = datetime.datetime.now()
         last_time = today-datetime.timedelta(days=days)
         days_filter = Q(created_at__range=[
@@ -368,8 +368,12 @@ class SongLogsViewSet(ViewSet):
                            datetime.timedelta(days=min_age*365)) if min_age != 0 else Q()
         max_age_filter = Q(user__birthday__gte=today -
                            datetime.timedelta(days=max_age*365)) if max_age != 0 else Q()
-        history = SongLogs.objects.filter(
-            days_filter, city_filter, country_filter, min_age_filter, max_age_filter, user=user)
+        if user!=None:
+            history = SongLogs.objects.filter(
+                days_filter, user=user)
+        else:
+            history = SongLogs.objects.filter(
+            days_filter, city_filter, country_filter, min_age_filter, max_age_filter)
         return history
 
     def convert_to_percents(self, data):
@@ -384,8 +388,16 @@ class SongLogsViewSet(ViewSet):
         return new_data
 
     def analysis_tags(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
-        history = self.analysis(request.user, days, city,
-                                country, min_age, max_age)
+        history = self.analysis( days, city,
+                                country, min_age, max_age,user=None)
+        tags = Tag.objects.all()
+        serializers = TagAnalysisSerializer(
+            tags, many=True, context={'request': request, 'logs': history})
+        data = self.convert_to_percents(serializers.data)
+        return Response(data, status=status.HTTP_200_OK)
+
+    def user_analysis_tags(self, request, days=0):
+        history = self.analysis( days,user=request.user)
         tags = Tag.objects.all()
         serializers = TagAnalysisSerializer(
             tags, many=True, context={'request': request, 'logs': history})

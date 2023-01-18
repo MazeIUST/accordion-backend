@@ -61,6 +61,8 @@ urlpatterns = [
          SongLogsViewSet.as_view({'get': 'retrieve_by_user'}), name='history_retrieve_by_user'),
     path('analysis/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>/',
          SongLogsViewSet.as_view({'get': 'analysis_tags'})),
+     path('user_analysis/<int:days>/',
+         SongLogsViewSet.as_view({'get': 'user_analysis_tags'})),
     path('analysis_artist/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>/',
          SongLogsViewSet.as_view({'get': 'analysis_artists'})),
 ]
