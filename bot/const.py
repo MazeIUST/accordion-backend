@@ -1,5 +1,5 @@
 TOKEN = "5659133746:AAFQ7yYYMdBCNYwvA3-YSssaJXiNeyAs4Eg"
-SONGS_CHANNEL = ""
+SONGS_CHANNEL = "@accordion_songs"
 
 GET_USERPASS = 'get_userpass'
 GET_PLAYLIST = 'get_playlist'
