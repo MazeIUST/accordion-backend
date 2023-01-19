@@ -64,7 +64,7 @@ class UserViewSet(ViewSet):
 
     def analysis_song(self, request, chat_id):
         user = get_object_or_404(User, telegram_chat_id=chat_id)
-        history = SongLogsViewSet.analysis(self, user=user, days=365)
+        history = SongLogsViewSet.make_filters(self, user=user)
         tags = Tag.objects.all()
         serializers = TagAnalysisSerializer(
             tags, many=True, context={'logs': history})
@@ -73,7 +73,7 @@ class UserViewSet(ViewSet):
 
     def analysis_artist(self, request, chat_id):
         user = get_object_or_404(User, telegram_chat_id=chat_id)
-        history = SongLogsViewSet.analysis(user=user, days=365)
+        history = SongLogsViewSet.make_filters(self, user=user)
         artists = Artist.objects.all()
         serializers = ArtistAnalysisSerializer(
             artists, many=True, context={'logs': history})

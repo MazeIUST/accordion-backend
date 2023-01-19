@@ -80,9 +80,8 @@ class UrlsView(APIView):
             'history retrieve_by_song': absurl + 'songs/history/song/<int:song_pk>/',
             'history retrieve_by_artist': absurl + 'songs/history/artist/<int:artist_pk>/',
             'history retrieve_by_user': absurl + 'songs/history/user/<int:user_pk>/',
-            'analysis by song(total)': absurl + 'songs/analysis/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>/',
-            'analysis by user song(just that person)': absurl + 'songs/user_analysis/<int:days>/',
-            'analysis by artist': absurl + 'songs/analysis_artist/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>/',
+            'analysis': absurl + 'songs/analysis/<int:days>/<str:city>/<int:min_age>/<int:max_age>/',
+            'analysis for user': absurl + 'songs/analysis_for_user/<int:days>/',
         }
 
         return Response({'account_urls': account_urls, 'songs_urls': songs_urls})

@@ -151,11 +151,13 @@ class SongLogsSerializer(serializers.ModelSerializer):
 
 class TagAnalysisSerializer(serializers.ModelSerializer):
     percent = serializers.SerializerMethodField()
+    count = serializers.SerializerMethodField()
+
     class Meta:
         model = Tag
-        fields = ('id', 'name', 'percent')
-        
-    def get_percent(self, obj):
+        fields = ('id', 'name', 'count', 'percent')
+
+    def get_count(self, obj):
         logs_of_user = self.context.get('logs')
         songs = [log.song for log in logs_of_user]
         songs_count = 0
@@ -164,14 +166,28 @@ class TagAnalysisSerializer(serializers.ModelSerializer):
                 songs_count += 1
         return songs_count
     
-    
+    def get_percent(self, obj):
+        logs_of_user = self.context.get('logs')
+        return self.get_count(obj) / len(logs_of_user) * 100 if logs_of_user else 0
+
+
 class ArtistAnalysisSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
     percent = serializers.SerializerMethodField()
+    count = serializers.SerializerMethodField()
+
     class Meta:
         model = Artist
-        fields = ('id', 'artistic_name', 'percent')
-        
-    def get_percent(self, obj):
+        fields = ('id', 'name', 'count', 'percent')
+
+    def get_name(self, obj):
+        artistic_name = obj.artistic_name
+        first_name = obj.user.first_name
+        last_name = obj.user.last_name
+        username = obj.user.username
+        return artistic_name if artistic_name else f'{first_name} {last_name}' if first_name and last_name else username
+
+    def get_count(self, obj):
         logs_of_user = self.context.get('logs')
         songs = [log.song for log in logs_of_user]
         songs_count = 0
@@ -179,4 +195,7 @@ class ArtistAnalysisSerializer(serializers.ModelSerializer):
             if song.artist == obj:
                 songs_count += 1
         return songs_count
-    
+
+    def get_percent(self, obj):
+        logs_of_user = self.context.get('logs')
+        return self.get_count(obj) / len(logs_of_user) * 100 if logs_of_user else 0
