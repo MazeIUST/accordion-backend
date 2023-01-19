@@ -167,8 +167,7 @@ class TagAnalysisSerializer(serializers.ModelSerializer):
         return songs_count
     
     def get_percent(self, obj):
-        logs_of_user = self.context.get('logs')
-        return self.get_count(obj) / len(logs_of_user) * 100 if logs_of_user else 0
+        return self.get_count(obj)
 
 
 class ArtistAnalysisSerializer(serializers.ModelSerializer):
@@ -197,5 +196,4 @@ class ArtistAnalysisSerializer(serializers.ModelSerializer):
         return songs_count
 
     def get_percent(self, obj):
-        logs_of_user = self.context.get('logs')
-        return self.get_count(obj) / len(logs_of_user) * 100 if logs_of_user else 0
+        return self.get_count(obj)
