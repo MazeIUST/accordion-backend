@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'accounts',
     'song',
     'botapp',
-    'scripts'
+    'scripts',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
