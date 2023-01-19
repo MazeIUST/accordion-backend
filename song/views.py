@@ -388,11 +388,9 @@ class SongLogsViewSet(ViewSet):
         queryset = model.objects.all()
         serializers = serializer(
             queryset, many=True, context={'request': request, 'logs': logs})
-        results = []
-        for data in serializers.data:
-            if data['count'] != 0:
-                results.append(data)
-        return results
+        data = serializers.data
+        data = self.convert_to_percents(data)
+        return data
 
     def analysis_all(self, request, days=0, city='0', min_age=0, max_age=0):
         by_tags = self.analysis(
