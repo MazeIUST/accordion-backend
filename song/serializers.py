@@ -15,8 +15,8 @@ class SongSerializer(serializers.ModelSerializer):
     class Meta:
         model = Song
         fields = ('id', 'artist', 'artist_name', 'title', 'description', 'lyrics', 'song_link',
-                  'speechless_song_link', 'song_download_link', 'image', 'note', 'created_at', 'tags')
-        read_only_fields = ('id', 'created_at', 'artist')
+                  'speechless_song_link', 'song_download_link', 'image', 'note', 'created_at', 'tags','count')
+        read_only_fields = ('id', 'created_at', 'artist','count')
 
     def get_artist_name(self, obj):
         artist = obj.artist
@@ -197,3 +197,12 @@ class ArtistAnalysisSerializer(serializers.ModelSerializer):
 
     def get_percent(self, obj):
         return self.get_count(obj)
+    
+class SongAnalysisSerializer(serializers.ModelSerializer):
+    # percent = serializers.SerializerMethodField()
+    class Meta:
+        model = Song
+        fields = ('id', 'title', 'count')
+    
+    # def get_percent(self, obj):
+    #     return self.get_count(obj)

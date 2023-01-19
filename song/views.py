@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.permissions import IsAuthenticated
 from urllib.parse import urlparse, parse_qs
 from django.conf import settings
+from accounts.serializers import *
 import requests
 
 
@@ -412,3 +413,22 @@ class SongLogsViewSet(ViewSet):
         results = {'by_tags': by_tags, 'by_artists': by_artists}
 
         return Response(results)
+    
+    def analysis_artist_recent_song(self, request):
+        songs = UserSerializer(request.user).artist.songs.get_value().order_by('-created_at')
+        if len(songs)>10:
+            songs = songs[:10]
+        serializers = SongAnalysisSerializer(songs, many=True)
+        data = serializers.data
+        return data
+    
+    def analysis_artist_top_song(self, request):
+        songs = UserSerializer(request.user).artist.songs.get_value().order_by('-count')
+        if len(songs)>10:
+            songs = songs[:10]
+        serializers = SongAnalysisSerializer(songs, many=True)
+        data = serializers.data
+        return data
+    
+
+
