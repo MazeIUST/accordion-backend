@@ -2,6 +2,7 @@ from rest_framework import serializers
 from accounts.models import *
 from song.models import *
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.hashers import make_password
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -45,6 +46,28 @@ class SongSerializer(serializers.ModelSerializer):
     def get_artist_name(self, obj):
         artist = obj.artist
         return artist.artistic_name
+
+
+class CreateSongSerializer(serializers.ModelSerializer):
+    artistic_name = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Song
+        fields = ('id', 'title', 'image', 'artistic_name')
+        read_only_fields = ('id',)
+
+    def create(self, validated_data):
+        artistic_name = validated_data.pop('artistic_name')
+        artist = Artist.objects.filter(artistic_name=artistic_name)
+        if artist.exists():
+            artist = artist[0]
+        else:
+            new_user = User.objects.create(
+                username=artistic_name, password=make_password('1234'))
+            artist = Artist.objects.create(
+                user=new_user, artistic_name=artistic_name)
+        song = Song.objects.create(artist=artist, **validated_data)
+        return song
 
 
 class PlaylistSerializer(serializers.ModelSerializer):

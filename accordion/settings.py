@@ -42,15 +42,12 @@ INSTALLED_APPS = [
     'accounts',
     'song',
     'botapp',
+    'scripts',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
     'rest_framework_simplejwt',
 ]
-
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
-}
 
 
 MIDDLEWARE = [

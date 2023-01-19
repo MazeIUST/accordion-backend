@@ -161,6 +161,23 @@ def song_analysis(update: Update, context: CallbackContext):
     else:
         update.message.reply_text(RESPONSE_TEXTS['error'])
         return ConversationHandler.END
+    
+    
+def add_new_song(update: Update, context: CallbackContext):
+    update.message.reply_text('downloading...')
+    song = get_song_info(update, context)
+    # if song:
+    #     response = send_post_request('add_song', song, None)
+    #     if response.get('status') == 'OK':
+    #         update.message.reply_text(RESPONSE_TEXTS['song_added'])
+    #     else:
+    #         update.message.reply_text(RESPONSE_TEXTS['error'])
+    if song:
+        # response info
+        update.message.reply_text(str(song['data']))
+        
+        
+
         
 
     

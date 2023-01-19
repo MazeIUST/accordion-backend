@@ -69,6 +69,11 @@ class Follow(models.Model):
         User, related_name="user2", on_delete=models.CASCADE)
     start_date = models.DateTimeField(auto_now_add=True)
 
+    unique_together = ('user1', 'user2')
+
+    def __str__(self):
+        return self.user1.username + ' follows ' + self.user2.username
+
 
 class Payment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

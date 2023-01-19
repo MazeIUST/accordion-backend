@@ -28,6 +28,15 @@ def send_request(url, options):
         return {'status': 'error'}
 
 
+def send_post_request(url, datas, files):
+    url = SERVER_URL + url + '/'
+    response = requests.post(url, data=datas, files=files)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return {'status': 'error'}
+
+
 def cancel(update: Update, context: CallbackContext):
     """Cancels and ends the conversation."""
     update.message.reply_text(text='ended!')
@@ -48,6 +57,32 @@ def get_user_telegram_info_from_update(update: Update, context: CallbackContext)
     result['is_group'] = update.message.chat.type != "private"
     result['language_code'] = update.message.from_user['language_code']
     return result
+
+
+def get_song_info(update: Update, context: CallbackContext):
+    song = update.message.audio
+    if song:
+        # forward to channel
+        forwarded_song = context.bot.forward_message(chat_id=SONGS_CHANNEL, from_chat_id=update.message.chat_id,
+                                                     message_id=update.message.message_id)
+        id = song.file_id
+        title = song.title
+        artist = song.performer
+        image = song.thumb.file_id
+        # create images folder if not exists
+        images_dir = os.path.join(os.path.dirname(
+            os.path.abspath(__file__)), 'images')
+        if not os.path.exists(images_dir):
+            os.mkdir(images_dir)
+        # save image
+        image_path = os.path.join(images_dir, f'{image}.jpg')
+        image_file = context.bot.get_file(image)
+        image_file.download(image_path)
+        data = {'id': id, 'title': title,
+                'artist': artist, 'telegram_id': forwarded_song.message_id}
+        files = {'image': open(image_path, 'rb')}
+        return {'data': data, 'files': files, 'song': song}
+    return None
 
 
 def download_song(song_link):

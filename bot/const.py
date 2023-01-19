@@ -1,4 +1,5 @@
 TOKEN = "5659133746:AAFQ7yYYMdBCNYwvA3-YSssaJXiNeyAs4Eg"
+SONGS_CHANNEL = "@accordion_songs"
 
 GET_USERPASS = 'get_userpass'
 GET_PLAYLIST = 'get_playlist'
@@ -16,4 +17,5 @@ RESPONSE_TEXTS = {
     'userpass_correct': 'login successfull.',
     'userpass_wrong': 'Username or password is wrong.\nPlease send your username and password in one message and in two lines.',
     'help': 'for search send your text:',
+    'song_added': 'song added!',
 }
