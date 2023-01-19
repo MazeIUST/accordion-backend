@@ -51,16 +51,16 @@ urlpatterns = [
 
     path('history/',
          SongLogsViewSet.as_view({'post': 'create', 'get': 'list'}), name='history'),
-    path('history/<int:pk>/', SongLogsViewSet.as_view(
-        {'get': 'retrieve'}), name='get_history'),
+    path('history/<int:pk>/',
+         SongLogsViewSet.as_view({'get': 'retrieve'}), name='get_history'),
     path('history/song/<int:song_pk>/',
          SongLogsViewSet.as_view({'get': 'retrieve_by_song'}), name='history_retrieve_by_song'),
     path('history/artist/<int:artist_pk>/',
          SongLogsViewSet.as_view({'get': 'retrieve_by_artist'}), name='history_retrieve_by_artist'),
     path('history/user/<int:user_pk>/',
          SongLogsViewSet.as_view({'get': 'retrieve_by_user'}), name='history_retrieve_by_user'),
-    path('analysis/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>/',
-         SongLogsViewSet.as_view({'get': 'analysis_tags'})),
-    path('analysis_artist/<int:days>/<str:city>/<str:country>/<int:min_age>/<int:max_age>/',
-         SongLogsViewSet.as_view({'get': 'analysis_artists'})),
+    path('analysis/<int:days>/<str:city>/<int:min_age>/<int:max_age>/',
+         SongLogsViewSet.as_view({'get': 'analysis_all'})),
+    path('analysis_for_user/<int:days>/',
+         SongLogsViewSet.as_view({'get': 'analysis_for_user'})),
 ]

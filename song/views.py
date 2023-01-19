@@ -315,7 +315,7 @@ class Point():
 
 class SongLogsViewSet(ViewSet):
     serializer_class = SongLogsSerializer
-    
+
     def get_permissions(self):
         permission_classes = [IsAuthenticated]
         if self.action in ['analysis', 'convert_to_percents']:
@@ -357,19 +357,19 @@ class SongLogsViewSet(ViewSet):
             history, many=True, context={'request': request})
         return Response(serializer.data)
 
-    def analysis(self, user, days=0, city='0', country='0', min_age=0, max_age=0):
+    def make_filters(self, days=0, city='0', min_age=0, max_age=0, user=None):
         today = datetime.datetime.now()
         last_time = today-datetime.timedelta(days=days)
         days_filter = Q(created_at__range=[
                         last_time, today]) if days != 0 else Q()
         city_filter = Q(user__city=city) if city != '0' else Q()
-        country_filter = Q(user__country=country) if country != '0' else Q()
         min_age_filter = Q(user__birthday__lte=today -
                            datetime.timedelta(days=min_age*365)) if min_age != 0 else Q()
         max_age_filter = Q(user__birthday__gte=today -
                            datetime.timedelta(days=max_age*365)) if max_age != 0 else Q()
+        user_filter = Q(user=user) if user != None else Q()
         history = SongLogs.objects.filter(
-            days_filter, city_filter, country_filter, min_age_filter, max_age_filter, user=user)
+            days_filter & city_filter & min_age_filter & max_age_filter & user_filter)
         return history
 
     def convert_to_percents(self, data):
@@ -383,20 +383,34 @@ class SongLogsViewSet(ViewSet):
                 new_data.append(tag)
         return new_data
 
-    def analysis_tags(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
-        history = self.analysis(request.user, days, city,
-                                country, min_age, max_age)
-        tags = Tag.objects.all()
-        serializers = TagAnalysisSerializer(
-            tags, many=True, context={'request': request, 'logs': history})
-        data = self.convert_to_percents(serializers.data)
-        return Response(data, status=status.HTTP_200_OK)
+    def analysis(self, request, days=0, city='0', min_age=0, max_age=0, user=None, model=None, serializer=None):
+        logs = self.make_filters(days, city, min_age, max_age, user)
+        queryset = model.objects.all()
+        serializers = serializer(
+            queryset, many=True, context={'request': request, 'logs': logs})
+        results = []
+        for data in serializers.data:
+            if data['count'] != 0:
+                results.append(data)
+        return results
 
-    def analysis_artists(self, request, days=0, city='0', country='0', min_age=0, max_age=0):
-        history = self.analysis(request.user, days, city,
-                                country, min_age, max_age)
-        artists = Artist.objects.all()
-        serializers = ArtistAnalysisSerializer(
-            artists, many=True, context={'request': request, 'logs': history})
-        data = self.convert_to_percents(serializers.data)
-        return Response(data, status=status.HTTP_200_OK)
+    def analysis_all(self, request, days=0, city='0', min_age=0, max_age=0):
+        by_tags = self.analysis(
+            request, days, city, min_age, max_age, None, Tag, TagAnalysisSerializer)
+        by_artists = self.analysis(
+            request, days, city, min_age, max_age, None, Artist, ArtistAnalysisSerializer)
+
+        results = {'by_tags': by_tags, 'by_artists': by_artists}
+
+        return Response(results)
+
+    def analysis_for_user(self, request, days=0):
+        user = request.user
+        by_tags = self.analysis(
+            request, days=days, user=user, model=Tag, serializer=TagAnalysisSerializer)
+        by_artists = self.analysis(
+            request, days=days, user=user, model=Artist, serializer=ArtistAnalysisSerializer)
+
+        results = {'by_tags': by_tags, 'by_artists': by_artists}
+
+        return Response(results)
