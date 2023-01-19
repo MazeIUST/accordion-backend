@@ -10,7 +10,7 @@ SERVER_URL = 'https://accordion.pythonanywhere.com/bot/'
 
 
 RESPONSE_TEXTS = {
-    'error': 'مشکلی پیش اومده...',
+    'error': 'something went wrong!',
     'welcom': 'Hi.\nPlease send your username and password in one message and in two lines.',
     'signup': '{}',
     'userpass_error_2_lines': 'Please send your username and password in one message and in two lines.',

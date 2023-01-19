@@ -175,6 +175,8 @@ def add_new_song(update: Update, context: CallbackContext):
     if song:
         # response info
         update.message.reply_text(str(song['data']))
+    else:
+        update.message.reply_text(RESPONSE_TEXTS['error'])
         
         
 
