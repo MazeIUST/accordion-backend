@@ -53,8 +53,8 @@ class CreateSongSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Song
-        fields = ('id', 'title', 'image', 'artistic_name')
-        read_only_fields = ('id',)
+        fields = ('title', 'image', 'song_link',
+                  'telegram_id', 'artistic_name')
 
     def create(self, validated_data):
         artistic_name = validated_data.pop('artistic_name')

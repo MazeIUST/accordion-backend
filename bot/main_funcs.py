@@ -16,6 +16,9 @@ from const import *
 import requests
 import os
 
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+
 
 def send_request(url, options):
     url = SERVER_URL + url + '/'
@@ -103,3 +106,27 @@ def download_song(song_link):
     with open(file_address, 'wb') as song:
         song.write(response.content)
     return song.name
+
+
+def upload_to_drive(song, context: CallbackContext):
+    # download song from telegram
+    # songs_dir = os.path.join(os.path.dirname(
+    #     os.path.abspath(__file__)), 'songs')
+    # if not os.path.exists(songs_dir):
+    #     os.mkdir(songs_dir)
+    # song_path = os.path.join(songs_dir, f'{song.file_id}.mp3')
+    # song_file = context.bot.get_file(song)
+    # song_file.download(song_path)
+
+    # # upload to drive
+    # gauth = GoogleAuth()
+    # drive = GoogleDrive(gauth)
+
+    # file = drive.CreateFile({'title': song.title})
+    # file.SetContentFile(song_path)
+    # file.Upload()
+    # # https://drive.google.com/file/d/<id>/view?usp=drivesdk
+    # id = file['id']
+    id = 'sdlkfjslkdfjlsjdflk'
+    song_link = f'https://drive.google.com/file/d/{id}/view?usp=drivesdk'
+    return song_link

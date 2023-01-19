@@ -22,6 +22,7 @@ class Song(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     tags = models.ManyToManyField(Tag, blank=True, related_name='tags')
     count = models.IntegerField(default=0)
+    telegram_id = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return self.title

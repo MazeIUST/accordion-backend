@@ -75,7 +75,8 @@ def search(update: Update, context: CallbackContext):
 def get_song(update: Update, context: CallbackContext, song_id=None):
     user_info = get_user_telegram_info_from_update(update, context)
     if not song_id:
-        song_id = USERS_KEYBOARD.get(user_info['chat_id']).get(update.message.text)
+        song_id = USERS_KEYBOARD.get(
+            user_info['chat_id']).get(update.message.text)
     response = send_request('get_song', [song_id])
     if response.get('status') == 'OK':
         song_link = response.get('song').get('song_link')
@@ -133,10 +134,11 @@ def get_playlist(update: Update, context: CallbackContext):
     else:
         update.message.reply_text(RESPONSE_TEXTS['error'])
         return GET_PLAYLIST
-    
+
+
 def song_analysis(update: Update, context: CallbackContext):
     user_info = get_user_telegram_info_from_update(update, context)
-    response = send_request('analysis_song', [user_info['chat_id']]) 
+    response = send_request('analysis_song', [user_info['chat_id']])
     if response.get('status') == 'OK':
         datas = response.get('data')
         values = [data['percent'] for data in datas]
@@ -148,38 +150,34 @@ def song_analysis(update: Update, context: CallbackContext):
         y = np.array(values)
         mylabels = keys
 
-        plt.pie(y, labels = mylabels)
-        #delete old chart
+        plt.pie(y, labels=mylabels)
+        # delete old chart
         try:
             os.remove('piechart.jpg')
         except:
             pass
         plt.savefig('piechart.jpg')
-        
+
         update.message.reply_photo(photo=open('piechart.jpg', 'rb'))
         return ConversationHandler.END
     else:
         update.message.reply_text(RESPONSE_TEXTS['error'])
         return ConversationHandler.END
-    
-    
+
+
 def add_new_song(update: Update, context: CallbackContext):
-    update.message.reply_text('downloading...')
+    message = update.message.reply_text('downloading...')
     song = get_song_info(update, context)
-    # if song:
-    #     response = send_post_request('add_song', song, None)
-    #     if response.get('status') == 'OK':
-    #         update.message.reply_text(RESPONSE_TEXTS['song_added'])
-    #     else:
-    #         update.message.reply_text(RESPONSE_TEXTS['error'])
     if song:
-        # response info
-        update.message.reply_text(str(song['data']))
+        song_link = upload_to_drive(song['song'], context)
+        song['data']['song_link'] = song_link
+        response = send_post_request('add_song', song, None)
+        if response.get('status') == 'OK':
+            update.message.reply_text(RESPONSE_TEXTS['song_added'])
+        else:
+            update.message.reply_text(RESPONSE_TEXTS['error'])
+    # if song:
+    #     message.edit_text('song added!')
+        # update.message.reply_text(str(song['data']))
     else:
         update.message.reply_text(RESPONSE_TEXTS['error'])
-        
-        
-
-        
-
-    
