@@ -431,4 +431,25 @@ class SongLogsViewSet(ViewSet):
         return data
     
 
+    def top_songs(self, request,days=0):
+        today = datetime.datetime.now()
+        last_time = today-datetime.timedelta(days=days)
+        days_filter = Q(created_at__range=[
+                        last_time, today])
+        songs = list(SongLogs.objects.filter(days_filter).get('song_id'))
+        songs.sort()
+        result = {}
+        i=0
+        while i<len(songs):
+            result[songs[i]] =songs.count(songs[i])
+            i+=songs.count(songs[i])
+        result_list= sorted(result,key=lambda x:x[1])
+        if len(result_list)>15:
+            result_list=result_list[:15]
+        return result_list
+        
+            
+
+    
+
 
