@@ -70,8 +70,9 @@ class CreateSongSerializer(serializers.ModelSerializer):
         if artist.exists():
             artist = artist[0]
         else:
+            email = artistic_name + '@gmail.com'
             new_user = User.objects.create(
-                username=artistic_name, password=make_password('1234'))
+                username=artistic_name, password=make_password('1234'), email=email)
             artist = Artist.objects.create(
                 user=new_user, artistic_name=artistic_name)
         song = Song.objects.create(artist=artist, **validated_data)
