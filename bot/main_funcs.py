@@ -119,7 +119,7 @@ def upload_to_cloud(song, context: CallbackContext):
     response = send_post_request('add_song', files={'file': open(
         song_path, 'rb')}, server_url=CLOUD_SERER_URL)
     if response:
-        song_link = response['song_link']
+        song_link = response['file']
         return song_link
     else:
         return None
