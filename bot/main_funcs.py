@@ -119,8 +119,8 @@ def upload_to_drive(song, context: CallbackContext):
     song_file.download(song_path)
 
     # upload to drive
-    client_json_path = os.path.join(current_dir, 'client_secrets.json')
-    GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = client_json_path
+    # client_json_path = os.path.join(current_dir, 'client_secrets.json')
+    # GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = client_json_path
     gauth = GoogleAuth()
     drive = GoogleDrive(gauth)
 
