@@ -171,14 +171,10 @@ def add_new_song(update: Update, context: CallbackContext):
     if song:
         song_link = upload_to_drive(song['song'], context)
         song['data']['song_link'] = song_link
-        response = send_post_request('add_song', song['data'], None)
-        print(response)
+        response = send_post_request('add_song', song['data'], song['files'])
         if response.get('status') == 'OK':
-            update.message.reply_text(RESPONSE_TEXTS['song_added'])
+            message.edit_text(RESPONSE_TEXTS['add_song'])
         else:
-            update.message.reply_text(RESPONSE_TEXTS['error'])
-    # if song:
-    #     message.edit_text('song added!')
-        # update.message.reply_text(str(song['data']))
+            message.edit_text(response.get('message'))
     else:
-        update.message.reply_text(RESPONSE_TEXTS['error'])
+        message.edit_text(RESPONSE_TEXTS['error'])
