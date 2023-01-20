@@ -97,9 +97,9 @@ def download_song(song_link):
             return song.name
     new_song_link = f'https://drive.google.com/u/0/uc?id={song_id}&export=download'
     try:
-        response = requests.get(new_song_link)
-    except:
         response = requests.get(song_link)
+    except:
+        response = requests.get(new_song_link)
     with open(file_address, 'wb') as song:
         song.write(response.content)
     return song.name
