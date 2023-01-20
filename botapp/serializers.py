@@ -56,6 +56,14 @@ class CreateSongSerializer(serializers.ModelSerializer):
         fields = ('title', 'image', 'song_link',
                   'telegram_id', 'artistic_name')
 
+    def validate(self, attrs):
+        song = Song.objects.filter(
+            title=attrs['title'], artist__artistic_name=attrs['artistic_name'])
+        if song.exists():
+            raise serializers.ValidationError(
+                'Song with this title already exists')
+        return attrs
+
     def create(self, validated_data):
         artistic_name = validated_data.pop('artistic_name')
         artist = Artist.objects.filter(artistic_name=artistic_name)
