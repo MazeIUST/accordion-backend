@@ -80,7 +80,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'accordion.wsgi.application'
+WSGI_APPLICATION = 'accordion2.wsgi.application'
 
 
 # Database
