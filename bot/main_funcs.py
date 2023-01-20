@@ -37,7 +37,7 @@ def send_post_request(url, datas, files):
     if response.status_code == 200:
         return response.json()
     else:
-        return {'status': 'error'}
+        return {'status': 'error', 'message': response.text}
 
 
 def cancel(update: Update, context: CallbackContext):
