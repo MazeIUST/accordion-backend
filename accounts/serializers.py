@@ -78,7 +78,7 @@ class ArtistSerializer(serializers.ModelSerializer):
     def get_songs(self, obj):
         songs = Song.objects.filter(artist__user=obj.user)
         return SongSerializer(songs, many=True, context={'request': self.context['request']}).data
-    
+
     def get_albums(self, obj):
         albums = Album.objects.filter(artist__user=obj.user)
         return AlbumSerializer(albums, many=True, context={'request': self.context['request']}).data
@@ -131,7 +131,7 @@ class UserPrivateSerializer(UserSerializer):
 
     class Meta(UserSerializer.Meta):
         fields = ['email', 'is_email_verified', 'telegram_chat_id', 'birthday',
-                                               'gender', 'country', 'city', 'bio', 'money', 'premium'] + UserSerializer.Meta.fields
+                  'gender', 'country', 'city', 'bio', 'money', 'premium'] + UserSerializer.Meta.fields
         read_only_fields = ['id', 'username', 'is_Artist', 'email',
                             'is_email_verified', 'telegram_chat_id', 'money', 'premium']
 
@@ -198,14 +198,23 @@ class PaymentSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'user', 'date', 'remaining_money']
 
     def validate(self, attrs):
+        user = self.context['request'].user
         user_money = self.context['request'].user.money
-        is_premium = self.context.get('is_premium')
+        is_premium = self.context['is_premium']
         money = attrs['amount']
+        
         if user_money + money < 0:
             if is_premium:
-                raise serializers.ValidationError({
-                    'user': ["You Already Have Premium!"],
-                })
+                has_premium = Premium.objects.filter(
+                    payment__user=user, end_date__gte=datetime.now()).exists()
+                if has_premium:
+                    raise serializers.ValidationError({
+                        'user': ["You Already Have Premium!"],
+                    })
+                else:
+                    raise serializers.ValidationError({
+                        'amount': [f"You Don't have Enough Charge. Your Money Is {user_money}."],
+                    })
             else:
                 raise serializers.ValidationError({
                     'amount': [f"You Don't have Enough Charge. Your Money Is {user_money}."],
