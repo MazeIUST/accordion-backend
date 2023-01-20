@@ -120,7 +120,7 @@ def upload_to_cloud(song, context: CallbackContext):
         song_path, 'rb')}, server_url=CLOUD_SERER_URL)
     print(response)
     if response.get('status') != 'error':
-        song_link = response['file']
+        song_link = response['download_link']
         return song_link
     else:
         return None
