@@ -28,7 +28,7 @@ def send_request(url, options, server_url=SERVER_URL):
         return {'status': 'error'}
 
 
-def send_post_request(url, datas, files, server_url=SERVER_URL):
+def send_post_request(url, datas=None, files=None, server_url=SERVER_URL):
     url = server_url + url + '/'
     response = requests.post(url, data=datas, files=files)
     if response.status_code in [200, 201]:
