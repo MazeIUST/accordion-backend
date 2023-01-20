@@ -85,7 +85,7 @@ def get_song_info(update: Update, context: CallbackContext):
         forwarded_song = context.bot.forward_message(chat_id=SONGS_CHANNEL, from_chat_id=update.message.chat_id,
                                                      message_id=update.message.message_id)
         data = {'id': id, 'title': title,
-                'artist': artist, 'telegram_id': forwarded_song.message_id}
+                'artistic_name': artist, 'telegram_id': forwarded_song.message_id}
         files = {'image': open(image_path, 'rb')}
         return {'data': data, 'files': files, 'song': song}
     return None
