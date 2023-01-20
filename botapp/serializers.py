@@ -32,7 +32,7 @@ class SongSerializer(serializers.ModelSerializer):
     class Meta:
         model = Song
         fields = ('id', 'title', 'song_link',
-                  'song_download_link', 'artist_name')
+                  'song_download_link', 'artist_name', 'telegram_id')
 
     def get_song_download_link(self, obj):
         view_link = obj.song_link

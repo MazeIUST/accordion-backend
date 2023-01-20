@@ -91,10 +91,7 @@ def get_song_info(update: Update, context: CallbackContext):
 def download_song(song_link):
     song_id = song_link.split('/')[-2]
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    file_address = os.path.join(current_dir, 'songs', f'{song_id}.mp3')
-    if os.path.exists(file_address):
-        with open(file_address, 'rb') as song:
-            return song.name
+    file_address = os.path.join(current_dir, 'songs', 'song.mp3')
     new_song_link = f'https://drive.google.com/u/0/uc?id={song_id}&export=download'
     try:
         response = requests.get(song_link)

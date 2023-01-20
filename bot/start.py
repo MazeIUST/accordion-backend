@@ -79,6 +79,14 @@ def get_song(update: Update, context: CallbackContext, song_id=None):
             user_info['chat_id']).get(update.message.text)
     response = send_request('get_song', [song_id])
     if response.get('status') == 'OK':
+        telegram_id = response.get('song').get('telegram_id')
+        if telegram_id:
+            # forward from channel
+            update.message.bot.forward_message(
+                chat_id=user_info['chat_id'],
+                from_chat_id=SONGS_CHANNEL,
+                message_id=telegram_id)
+            return ConversationHandler.END
         song_link = response.get('song').get('song_link')
         message_id = update.message.reply_text('downloading...').message_id
         song_name = download_song(song_link)
