@@ -171,7 +171,7 @@ def add_new_song(update: Update, context: CallbackContext):
     if song:
         song_link = upload_to_drive(song['song'], context)
         song['data']['song_link'] = song_link
-        response = send_post_request('add_song', song, None)
+        response = send_post_request('add_song', song['data'], None)
         print(response)
         if response.get('status') == 'OK':
             update.message.reply_text(RESPONSE_TEXTS['song_added'])
