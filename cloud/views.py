@@ -7,6 +7,7 @@ from .serializers import SongSerializer
 
 class SongViewSet(ViewSet):
     serializer_class = SongSerializer
+    permission_classes = []
 
     def create(self, request):
         serializer = self.serializer_class(
