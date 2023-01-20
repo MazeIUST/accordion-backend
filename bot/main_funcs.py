@@ -110,8 +110,8 @@ def download_song(song_link):
 
 def upload_to_drive(song, context: CallbackContext):
     # download song from telegram
-    songs_dir = os.path.join(os.path.dirname(
-        os.path.abspath(__file__)), 'songs')
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    songs_dir = os.path.join(current_dir, 'songs')
     if not os.path.exists(songs_dir):
         os.mkdir(songs_dir)
     song_path = os.path.join(songs_dir, f'{song.file_id}.mp3')
@@ -119,6 +119,8 @@ def upload_to_drive(song, context: CallbackContext):
     song_file.download(song_path)
 
     # upload to drive
+    client_json_path = os.path.join(current_dir, 'client_secrets.json')
+    GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = client_json_path
     gauth = GoogleAuth()
     drive = GoogleDrive(gauth)
 
