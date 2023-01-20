@@ -6,7 +6,7 @@ GET_PLAYLIST = 'get_playlist'
 GET_SONG = 'get_song'
 
 # SERVER_URL = 'http://127.0.0.1:8000/bot/'
-SERVER_URL = 'https://accordion.pythonanywhere.com/bot/'
+SERVER_URL = 'https://accordion2.pythonanywhere.com/bot/'
 
 
 RESPONSE_TEXTS = {
