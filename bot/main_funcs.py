@@ -16,12 +16,6 @@ from const import *
 import requests
 import os
 
-from pydrive.auth import GoogleAuth
-from pydrive.drive import GoogleDrive
-
-from Google import Create_Service
-from googleapiclient.http import MediaFileUpload
-
 
 def send_request(url, options, server_url=SERVER_URL):
     url = server_url + url + '/'
