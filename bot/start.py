@@ -169,7 +169,7 @@ def add_new_song(update: Update, context: CallbackContext):
     message = update.message.reply_text('downloading...')
     song = get_song_info(update, context)
     if song:
-        song_link = upload_to_drive(song['song'], context)
+        song_link = upload_to_cloud(song['song'], context)
         song['data']['song_link'] = song_link
         response = send_post_request('add_song', song['data'], song['files'])
         if response.get('status') == 'OK':

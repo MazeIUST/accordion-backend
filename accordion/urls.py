@@ -23,7 +23,8 @@ media_path = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", include('accounts.urls')), 
+    path("", include('accounts.urls')),
     path('songs/', include('song.urls')),
     path('bot/', include('botapp.urls')),
+    path('cloud/', include('cloud.urls')),
 ] + static_path + media_path

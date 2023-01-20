@@ -23,21 +23,21 @@ from Google import Create_Service
 from googleapiclient.http import MediaFileUpload
 
 
-def send_request(url, options):
-    url = SERVER_URL + url + '/'
+def send_request(url, options, server_url=SERVER_URL):
+    url = server_url + url + '/'
     for option in options:
         url += f'{option}/'
     response = requests.get(url)
-    if response.status_code == 200:
+    if response.status_code in [200, 201]:
         return response.json()
     else:
         return {'status': 'error'}
 
 
-def send_post_request(url, datas, files):
-    url = SERVER_URL + url + '/'
+def send_post_request(url, datas, files, server_url=SERVER_URL):
+    url = server_url + url + '/'
     response = requests.post(url, data=datas, files=files)
-    if response.status_code == 200:
+    if response.status_code in [200, 201]:
         return response.json()
     else:
         return {'status': 'error', 'message': response.text}
@@ -111,7 +111,7 @@ def download_song(song_link):
     return song.name
 
 
-def upload_to_drive2(song, context: CallbackContext):
+def upload_to_cloud(song, context: CallbackContext):
     # download song from telegram
     current_dir = os.path.dirname(os.path.abspath(__file__))
     songs_dir = os.path.join(current_dir, 'songs')
@@ -121,54 +121,11 @@ def upload_to_drive2(song, context: CallbackContext):
     song_file = context.bot.get_file(song)
     song_file.download(song_path)
 
-    # upload to drive
-    # client_json_path = os.path.join(current_dir, 'client_secrets.json')
-    # GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = client_json_path
-    gauth = GoogleAuth()
-    drive = GoogleDrive(gauth)
-
-    file = drive.CreateFile({'title': song.title})
-    file.SetContentFile(song_path)
-    file.Upload()
-    # https://drive.google.com/file/d/<id>/view?usp=drivesdk
-    id = file['id']
-    # id = 'sdlkfjslkdfjlsjdflk'
-    song_link = f'https://drive.google.com/file/d/{id}/view?usp=drivesdk'
-    return song_link
-
-
-def upload_to_drive(song, context: CallbackContext):
-    # download song from telegram
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    songs_dir = os.path.join(current_dir, 'songs')
-    if not os.path.exists(songs_dir):
-        os.mkdir(songs_dir)
-    song_path = os.path.join(songs_dir, 'song.mp3')
-    song_file = context.bot.get_file(song)
-    song_file.download(song_path)
-
-    # upload to drive
-    CLIENT_SECRET_FILE = 'client_secrets.json'
-    API_NAME = 'drive'
-    API_VERSION = 'v3'
-    SCOPES = ['https://www.googleapis.com/auth/drive']
-
-    service = Create_Service(CLIENT_SECRET_FILE, API_NAME, API_VERSION, SCOPES)
-    
-    folder_id = '1niLMRkf31NyU7rbtCznPoln03zsxj4Kr'
-    file_metadata = {
-        'name': song.title,
-        'parents': [folder_id]
-    }
-    media = MediaFileUpload(song_path, mimetype='audio/mp3')
-    file = service.files().create(
-        body=file_metadata,
-        media_body=media,
-        fields='id'
-    ).execute()
-    id = file.get('id')
-    song_link = f'https://drive.google.com/file/d/{id}/view?usp=drivesdk'
-    return song_link
-    
-    
-    
+    # upload to cloud
+    response = send_post_request('add_song', files={'file': open(
+        song_path, 'rb')}, server_url=CLOUD_SERER_URL)
+    if response:
+        song_link = response['song_link']
+        return song_link
+    else:
+        return None

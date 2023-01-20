@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'song',
     'botapp',
     'scripts',
+    'cloud',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
