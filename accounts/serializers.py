@@ -199,8 +199,8 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         user = self.context['request'].user
-        user_money = self.context['request'].user.money
-        is_premium = self.context['is_premium']
+        user_money = user.money
+        is_premium = self.context.get('is_premium', False)
         money = attrs['amount']
         
         if user_money + money < 0:
