@@ -357,7 +357,7 @@ class SongLogsViewSet(ViewSet):
             history, many=True, context={'request': request})
         return Response(serializer.data)
 
-    def make_filters(self, days=0, city='0', min_age=0, max_age=0, user=None):
+    def make_filters(self, days=0, city='0', min_age=0, max_age=0, user=None, artist=None):
         today = datetime.datetime.now()
         last_time = today-datetime.timedelta(days=days)
         days_filter = Q(created_at__range=[
@@ -368,28 +368,38 @@ class SongLogsViewSet(ViewSet):
         max_age_filter = Q(user__birthday__gte=today -
                            datetime.timedelta(days=max_age*365)) if max_age != 0 else Q()
         user_filter = Q(user=user) if user != None else Q()
+        artist_filter = Q(song__artist=artist) if artist != None else Q()
         history = SongLogs.objects.filter(
-            days_filter & city_filter & min_age_filter & max_age_filter & user_filter)
+            days_filter & city_filter & min_age_filter & max_age_filter & user_filter & artist_filter)
         return history
 
-    def convert_to_percents(self, data):
+    def convert_to_percents(self, data, sort_by_id, top5):
+        # remove 0 count
+        data = [d for d in data if d['count'] > 0]
+        if sort_by_id:
+            data = sorted(data, key=lambda k: k['id'], reverse=True)
+        else:
+            data = sorted(data, key=lambda k: k['count'], reverse=True)
+        if top5:
+            data = data[:5] if len(data) > 5 else data
+
         new_data = []
-        total = sum([d['percent'] for d in data])
+        total = sum([d['count'] for d in data])
         if total == 0:
             return new_data
         for tag in data:
-            tag['percent'] = round(tag['percent']*100/total, 2)
-            if tag['percent'] > 0:
-                new_data.append(tag)
+            tag['percent'] = round(tag['count']*100/total, 2)
+            new_data.append(tag)
+        new_data = sorted(new_data, key=lambda k: k['count'], reverse=True)
         return new_data
 
-    def analysis(self, request, days=0, city='0', min_age=0, max_age=0, user=None, model=None, serializer=None):
-        logs = self.make_filters(days, city, min_age, max_age, user)
+    def analysis(self, request, days=0, city='0', min_age=0, max_age=0, user=None, artist=None, model=None, serializer=None, sort_by_id=False, top5=False):
+        logs = self.make_filters(days, city, min_age, max_age, user, artist)
         queryset = model.objects.all()
         serializers = serializer(
             queryset, many=True, context={'request': request, 'logs': logs})
         data = serializers.data
-        data = self.convert_to_percents(data)
+        data = self.convert_to_percents(data, sort_by_id, top5)
         return data
 
     def analysis_all(self, request, days=0, city='0', min_age=0, max_age=0):
@@ -408,7 +418,20 @@ class SongLogsViewSet(ViewSet):
             request, days=days, user=user, model=Tag, serializer=TagAnalysisSerializer)
         by_artists = self.analysis(
             request, days=days, user=user, model=Artist, serializer=ArtistAnalysisSerializer)
+        by_top_songs = None
+        by_last_songs = None
+        artist = Artist.objects.filter(user=user).first()
+        if artist:
+            by_top_songs = self.analysis(
+                request, days=days, user=user, artist=artist, model=Song, serializer=SongAnalysisSerializer, top5=True)
+            by_last_songs = self.analysis(
+                request, days=days, user=user, artist=artist, model=Song, serializer=SongAnalysisSerializer, sort_by_id=True, top5=True)
 
-        results = {'by_tags': by_tags, 'by_artists': by_artists}
+        results = {
+            'by_tags': by_tags,
+            'by_artists': by_artists,
+            'by_top_songs': by_top_songs,
+            'by_last_songs': by_last_songs
+        }
 
         return Response(results)

@@ -200,3 +200,28 @@ class ArtistAnalysisSerializer(serializers.ModelSerializer):
 
     def get_percent(self, obj):
         return self.get_count(obj)
+    
+    
+class SongAnalysisSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    percent = serializers.SerializerMethodField()
+    count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Song
+        fields = ('id', 'name', 'count', 'percent')
+
+    def get_name(self, obj):
+        return obj.title
+
+    def get_count(self, obj):
+        logs_of_user = self.context.get('logs')
+        songs = [log.song for log in logs_of_user]
+        songs_count = 0
+        for song in songs:
+            if song == obj:
+                songs_count += 1
+        return songs_count
+
+    def get_percent(self, obj):
+        return self.get_count(obj)
