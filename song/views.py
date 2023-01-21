@@ -373,7 +373,7 @@ class SongLogsViewSet(ViewSet):
             days_filter & city_filter & min_age_filter & max_age_filter & user_filter & artist_filter)
         return history
 
-    def convert_to_percents(self, data, sort_by_id, top5):
+    def convert_to_percents(self, data, sort_by_id=False, top5=False):
         # remove 0 count
         data = [d for d in data if d['count'] > 0]
         if sort_by_id:
