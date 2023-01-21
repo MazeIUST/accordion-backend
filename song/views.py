@@ -404,9 +404,9 @@ class SongLogsViewSet(ViewSet):
 
     def analysis_all(self, request, days=0, city='0', min_age=0, max_age=0):
         by_tags = self.analysis(
-            request, days, city, min_age, max_age, None, Tag, TagAnalysisSerializer)
+            request, days, city, min_age, max_age, None, None, Tag, TagAnalysisSerializer)
         by_artists = self.analysis(
-            request, days, city, min_age, max_age, None, Artist, ArtistAnalysisSerializer)
+            request, days, city, min_age, max_age, None, None, Artist, ArtistAnalysisSerializer)
 
         results = {'by_tags': by_tags, 'by_artists': by_artists}
 
