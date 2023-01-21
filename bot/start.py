@@ -155,6 +155,7 @@ def get_playlist(update: Update, context: CallbackContext):
 
 
 def song_analysis(update: Update, context: CallbackContext):
+    update.message.reply_text('wait...')
     user_info = get_user_telegram_info_from_update(update, context)
     response = send_request('analysis_song', [user_info['chat_id']])
     if response.get('status') == 'OK':
