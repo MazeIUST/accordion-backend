@@ -11,11 +11,12 @@ class TagSerializer(serializers.ModelSerializer):
 class SongSerializer(serializers.ModelSerializer):
     artist_name = serializers.SerializerMethodField()
     song_download_link = serializers.SerializerMethodField()
+    count = serializers.SerializerMethodField()
 
     class Meta:
         model = Song
         fields = ('id', 'artist', 'artist_name', 'title', 'description', 'lyrics', 'song_link',
-                  'speechless_song_link', 'song_download_link', 'image', 'note', 'created_at', 'tags')
+                  'speechless_song_link', 'song_download_link', 'image', 'note', 'created_at', 'count', 'tags')
         read_only_fields = ('id', 'created_at', 'artist')
 
     def get_artist_name(self, obj):
@@ -33,6 +34,10 @@ class SongSerializer(serializers.ModelSerializer):
         except:
             song_link = view_link
         return song_link
+
+    def get_count(self, obj):
+        logs_count = SongLogs.objects.filter(song=obj).count()
+        return logs_count
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
