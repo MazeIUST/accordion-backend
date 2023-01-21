@@ -104,7 +104,7 @@ def make_user():
             'first_name': f'user{i}',
             'last_name': f'user{i}',
             'password': '1234',
-            'email': 'user1@gmail.com',
+            'email': f'user{i}@gmail.com',
             'is_email_verified': True,
             'is_Artist': i % 5 == 0,
             'birthday': f'{random.randint(1950, 2002)}-{random.randint(1, 12)}-{random.randint(1, 28)}',

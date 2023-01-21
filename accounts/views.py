@@ -84,7 +84,11 @@ class UrlsView(APIView):
             'analysis for user': absurl + 'songs/analysis_for_user/<int:days>/',
         }
 
-        return Response({'account_urls': account_urls, 'songs_urls': songs_urls})
+        scripts_urls = {
+            'run all scripts': absurl + 'scripts/all/',
+        }
+
+        return Response({'account_urls': account_urls, 'songs_urls': songs_urls, 'scripts_urls': scripts_urls}, status=status.HTTP_200_OK)
 
 
 class SignUpView(APIView):

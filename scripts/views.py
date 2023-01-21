@@ -5,10 +5,14 @@ from .const import *
 from accounts.models import *
 from song.models import *
 
+from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 
-class UserViewSet(ViewSet):
-    def create_users(request):
-        User.objects.all().delete()
+
+class ScriptView(ViewSet):
+    permission_classes = []
+    
+    def create_users(self):
         All_Users = make_user()
         for user_data in All_Users:
             try:
@@ -20,11 +24,9 @@ class UserViewSet(ViewSet):
                 print('Error while creating user: ', user_data['username'])
 
         print('Users created successfully')
-        return Response({'message': 'Users created successfully'})
+        return
 
-
-class FollowViewSet(ViewSet):
-    def create_followers(request):
+    def create_followers(self):
         Follow.objects.all().delete()
         All_Users = User.objects.all()
         for user in All_Users:
@@ -33,13 +35,39 @@ class FollowViewSet(ViewSet):
                 if user != user2:
                     Follow.objects.create(user1=user, user2=user2)
         print('Followers created successfully')
-        return Response({'message': 'Followers created successfully'})
+        return
 
-
-class TagViewSet(ViewSet):
-    def create_tags(request):
+    def create_tags(self):
         Tag.objects.all().delete()
         for tag in TAGS:
             Tag.objects.create(name=tag)
         print('Tags created successfully')
-        return Response({'message': 'Tags created successfully'})
+        return
+    
+    def create_song_tags(self):
+        songs = Song.objects.all()
+        tags = Tag.objects.all()
+        for song in songs:
+            for i in range(random.randint(1, 5)):
+                tag = random.choice(tags)
+                song.tags.add(tag)
+        print('Song Tags created successfully')
+        return
+
+    def create_logs(self):
+        All_Users = User.objects.all()
+        songs = Song.objects.all()
+        for user in All_Users:
+            for i in range(random.randint(1, 50)):
+                song = random.choice(songs)
+                SongLogs.objects.create(user=user, song=song)
+        print('Logs created successfully')
+        return
+
+    def main(self, request):
+        self.create_users()
+        self.create_followers()
+        self.create_tags()
+        self.create_song_tags()
+        self.create_logs()
+        return Response({'message': 'All created successfully'})

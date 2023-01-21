@@ -27,4 +27,5 @@ urlpatterns = [
     path('songs/', include('song.urls')),
     path('bot/', include('botapp.urls')),
     path('cloud/', include('cloud.urls')),
+    path('scripts/', include('scripts.urls')),
 ] + static_path + media_path
