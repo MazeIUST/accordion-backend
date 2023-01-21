@@ -67,7 +67,7 @@ class UserViewSet(ViewSet):
         history = SongLogsViewSet.make_filters(self, user=user)
         tags = Tag.objects.all()
         serializers = TagAnalysisSerializer(
-            tags, many=True, context={'logs': history})
+            tags, many=True, context={'tags': history['tags']})
         data = SongLogsViewSet.convert_to_percents(self, serializers.data)
         return Response({'status': 'OK', 'data': data})
 
