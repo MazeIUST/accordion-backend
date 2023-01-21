@@ -167,26 +167,24 @@ def song_analysis(update: Update, context: CallbackContext):
         by_artist = response.get('by_artist')
         by_top_songs = response.get('by_top_songs')
         by_last_songs = response.get('by_last_songs')
-        analysis_user = {
-            'by tags': by_tags,
-            'by artist': by_artist,
+        analysis = {
+            'analysis by tags': by_tags,
+            'analysis by artist': by_artist,
+            'analysis by top songs': by_top_songs,
+            'analysis by last songs': by_last_songs
         }
-        analysis_artist = {
-            'by top songs': by_top_songs,
-            'by last songs': by_last_songs
-        }
-        # reomve empty analysis
-        analysis = {k: v for k, v in analysis_user.items() if v}
+        # remove empty analysis
+        analysis = {k: v for k, v in analysis.items() if v}
 
-        fig1, ax1 = plt.subplots(1, 2)
-        for i, (key, value) in enumerate(analysis.items()):
-            # create pie chart
-            labels = [v['name'] for v in value]
-            sizes = [v['count'] for v in value]
-            ax1[i].pie(sizes, labels=labels)
-            ax1[i].set_title(key)
-        plt.savefig('piechart.jpg')
-        update.message.reply_photo(photo=open('piechart.jpg', 'rb'))
+        for key, value in analysis.items():
+            keys = [v['name'] for v in value]
+            values = [v['count'] for v in value]
+            plt.clf()
+            plt.title(key)
+            plt.pie(np.array(values), labels=keys)
+            plt.savefig(f'{key}.jpg')
+            update.message.reply_photo(
+                photo=open(f'{key}.jpg', 'rb'), caption=key)
 
     else:
         update.message.reply_text(RESPONSE_TEXTS['error'])
