@@ -58,7 +58,7 @@ def search(update: Update, context: CallbackContext):
         if text in user_songs:
             return get_song(update, context, user_songs[text])
     response = send_request('search', [text])
-    if response:
+    if response.get('status') == 'OK':
         keyboard = []
         USERS_KEYBOARD[user_info['chat_id']] = {}
         for song in response:
@@ -67,7 +67,10 @@ def search(update: Update, context: CallbackContext):
                 [KeyboardButton(song_text, callback_data=song['id'])])
             USERS_KEYBOARD[user_info['chat_id']][song_text] = song['id']
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
-        update.message.reply_text('search results:', reply_markup=reply_markup)
+        if keyboard:
+            update.message.reply_text('search results:', reply_markup=reply_markup)
+        else:
+            update.message.reply_text('not found!')
     else:
         update.message.reply_text('not found!')
 
