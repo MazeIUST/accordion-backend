@@ -438,7 +438,8 @@ class SongLogsViewSet(ViewSet):
             'by_tags': by_tags,
             'by_artists': by_artists,
             'by_top_songs': by_top_songs,
-            'by_last_songs': by_last_songs
+            'by_last_songs': by_last_songs,
+            'status': 'OK',
         }
 
         return Response(results)

@@ -64,12 +64,9 @@ class UserViewSet(ViewSet):
 
     def analysis_song(self, request, chat_id):
         user = get_object_or_404(User, telegram_chat_id=chat_id)
-        history = SongLogsViewSet.make_filters(self, user=user)
-        tags = Tag.objects.all()
-        serializers = TagAnalysisSerializer(
-            tags, many=True, context={'tags': history['tags']})
-        data = SongLogsViewSet.convert_to_percents(self, serializers.data)
-        return Response({'status': 'OK', 'data': data})
+        request.user = user
+        slvs = SongLogsViewSet()
+        return slvs.analysis_for_user(request=request)
 
     def analysis_artist(self, request, chat_id):
         user = get_object_or_404(User, telegram_chat_id=chat_id)

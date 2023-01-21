@@ -16,6 +16,9 @@ from telegram.ext import (Updater,
 
 from const import *
 from main_funcs import *
+import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
 
 USERS_KEYBOARD = {}
 
@@ -68,7 +71,8 @@ def search(update: Update, context: CallbackContext):
             USERS_KEYBOARD[user_info['chat_id']][song_text] = song['id']
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
         if keyboard:
-            update.message.reply_text('search results:', reply_markup=reply_markup)
+            update.message.reply_text(
+                'search results:', reply_markup=reply_markup)
         else:
             update.message.reply_text('not found!')
     else:
@@ -159,22 +163,31 @@ def song_analysis(update: Update, context: CallbackContext):
     user_info = get_user_telegram_info_from_update(update, context)
     response = send_request('analysis_song', [user_info['chat_id']])
     if response.get('status') == 'OK':
-        datas = response.get('data')
-        values = [data['percent'] for data in datas]
-        keys = [data['name'] for data in datas]
-        # show chart with matplotlib
-        import matplotlib.pyplot as plt
-        import numpy as np
+        by_tags = response.get('by_tags')
+        by_artist = response.get('by_artist')
+        by_top_songs = response.get('by_top_songs')
+        by_last_songs = response.get('by_last_songs')
+        analysis = {
+            'by tags': by_tags,
+            'by artist': by_artist,
+            'by top songs': by_top_songs,
+            'by last songs': by_last_songs
+        }
+        # reomve empty analysis
+        analysis = {k: v for k, v in analysis.items() if v}
 
-        y = np.array(values)
-        mylabels = keys
-        # delete cache
-        plt.clf()
-        plt.pie(y, labels=mylabels)
+        fig1, ax1 = plt.subplots(2, 2)
+        for i, (key, value) in enumerate(analysis.items()):
+            # create pie chart
+            labels = [v['name'] for k, v in value.items()]
+            sizes = [v['count'] for k, v in value.items()]
+            ax1[i // 2, i % 2].pie(sizes, labels=labels,
+                                   autopct='%1.1f%%', shadow=True, startangle=90)
+            ax1[i // 2, i % 2].axis('equal')
+            ax1[i // 2, i % 2].set_title(key)
         plt.savefig('piechart.jpg')
-
         update.message.reply_photo(photo=open('piechart.jpg', 'rb'))
-        return ConversationHandler.END
+
     else:
         update.message.reply_text(RESPONSE_TEXTS['error'])
         return ConversationHandler.END
