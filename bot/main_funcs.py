@@ -23,7 +23,7 @@ def send_request(url, options, server_url=SERVER_URL):
         url += f'{option}/'
     response = requests.get(url)
     if response.status_code in [200, 201]:
-        return response.json()
+        return response.json() + {'status': 'OK'}
     else:
         return {'status': 'error'}
 
