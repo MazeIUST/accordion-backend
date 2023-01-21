@@ -33,7 +33,7 @@ class ScriptView(ViewSet):
             for i in range(random.randint(1, 50)):
                 user2 = random.choice(All_Users)
                 if user != user2:
-                    Follow.objects.create(user1=user, user2=user2)
+                    Follow.objects.create(user1=user, user2=user2) if not Follow.objects.filter(user1=user, user2=user2) else None
         print('Followers created successfully')
         return
 
