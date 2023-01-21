@@ -115,8 +115,15 @@ def my_playlists(update: Update, context: CallbackContext):
             USERS_KEYBOARD[user_info['chat_id']
                            ][playlist_text] = playlist['id']
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
-        update.message.reply_text('playlists:', reply_markup=reply_markup)
-        return GET_PLAYLIST
+        if keyboard:
+            update.message.reply_text('playlists:', reply_markup=reply_markup)
+            return GET_PLAYLIST
+        else:
+            update.message.reply_text('you have no playlists!')
+            return ConversationHandler.END
+    else:
+        update.message.reply_text(RESPONSE_TEXTS['error'])
+        return ConversationHandler.END
 
 
 def get_playlist(update: Update, context: CallbackContext):
