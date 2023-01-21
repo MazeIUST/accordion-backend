@@ -108,14 +108,15 @@ def upload_to_cloud(song, context: CallbackContext):
     songs_dir = os.path.join(current_dir, 'songs')
     if not os.path.exists(songs_dir):
         os.mkdir(songs_dir)
-    song_path = os.path.join(songs_dir, 'song.mp3')
+    song_path = os.path.join(songs_dir, f'{song.title}.mp3')
     song_file = context.bot.get_file(song)
     song_file.download(song_path)
 
     # upload to cloud
     response = send_post_request('add_song', files={'file': open(
-        song_path, 'rb')}, server_url=CLOUD_SERER_URL)
-    print(response)
+        song_path, 'rb')}, server_url=CLOUD_SERVER_URL)
+    # delete song
+    os.remove(song_path)
     if response.get('status') != 'error':
         song_link = response['song_link']
         return song_link

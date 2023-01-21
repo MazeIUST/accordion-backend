@@ -7,7 +7,7 @@ GET_SONG = 'get_song'
 
 # SERVER_URL = 'http://127.0.0.1:8000/bot/'
 SERVER_URL = 'https://accordion2.pythonanywhere.com/bot/'
-CLOUD_SERER_URL = 'https://accordioncloud.pythonanywhere.com/cloud/'
+CLOUD_SERVER_URL = 'https://accordioncloud.pythonanywhere.com/cloud/'
 
 RESPONSE_TEXTS = {
     'error': 'something went wrong!',
