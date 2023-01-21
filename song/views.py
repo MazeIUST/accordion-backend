@@ -446,7 +446,11 @@ class SongLogsViewSet(ViewSet):
         result_list= sorted(result,key=lambda x:x[1])
         if len(result_list)>15:
             result_list=result_list[:15]
-        return result_list
+        result = list(dict(result_list).keys())
+        query = Song.objects.filter(result__contains=id)
+        serializers = SongAnalysisSerializer(query, many=True)
+        data = serializers.data
+        return data
         
             
 
