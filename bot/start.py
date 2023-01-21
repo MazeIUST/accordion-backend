@@ -164,27 +164,27 @@ def song_analysis(update: Update, context: CallbackContext):
     response = send_request('analysis_song', [user_info['chat_id']])
     if response.get('status') == 'OK':
         by_tags = response.get('by_tags')
-        by_artist = response.get('by_artist')
+        by_artist = response.get('by_artists')
         by_top_songs = response.get('by_top_songs')
         by_last_songs = response.get('by_last_songs')
         analysis = {
             'analysis by tags': by_tags,
             'analysis by artist': by_artist,
-            'analysis by top songs': by_top_songs,
-            'analysis by last songs': by_last_songs
+            # 'analysis by top songs': by_top_songs,
+            # 'analysis by last songs': by_last_songs
         }
         # remove empty analysis
         analysis = {k: v for k, v in analysis.items() if v}
 
-        for key, value in analysis.items():
+        figs, axis = plt.subplots(1, 2)
+        for i, (key, value) in enumerate(analysis.items()):
             keys = [v['name'] for v in value]
             values = [v['count'] for v in value]
-            plt.clf()
-            plt.title(key)
-            plt.pie(np.array(values), labels=keys)
-            plt.savefig(f'{key}.jpg')
-            update.message.reply_photo(
-                photo=open(f'{key}.jpg', 'rb'), caption=key)
+            axis[i].set_title(key)
+            axis[i].pie(values, labels=keys)
+        figs.set_size_inches(18.5, 10.5)
+        figs.savefig('analysis.png')
+        update.message.reply_photo(photo=open('analysis.png', 'rb'))
 
     else:
         update.message.reply_text(RESPONSE_TEXTS['error'])
