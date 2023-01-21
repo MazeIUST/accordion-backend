@@ -58,7 +58,7 @@ def search(update: Update, context: CallbackContext):
         if text in user_songs:
             return get_song(update, context, user_songs[text])
     response = send_request('search', [text])
-    if response.get('status') == 'OK':
+    if type(response) == list:
         keyboard = []
         USERS_KEYBOARD[user_info['chat_id']] = {}
         for song in response:
