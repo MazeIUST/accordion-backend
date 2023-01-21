@@ -25,8 +25,11 @@ class SongSerializer(serializers.ModelSerializer):
     def get_song_download_link(self, obj):
         view_link = obj.song_link
         try:
-            song_id = view_link.split('/')[-2]
-            song_link = f'https://drive.google.com/u/0/uc?id={song_id}&export=download'
+            if 'google' in view_link:
+                song_id = view_link.split('/')[-2]
+                song_link = f'https://drive.google.com/u/0/uc?id={song_id}&export=download'
+            else:
+                song_link = view_link
         except:
             song_link = view_link
         return song_link
@@ -165,7 +168,7 @@ class TagAnalysisSerializer(serializers.ModelSerializer):
             if obj in song.tags.all():
                 songs_count += 1
         return songs_count
-    
+
     def get_percent(self, obj):
         return self.get_count(obj)
 
