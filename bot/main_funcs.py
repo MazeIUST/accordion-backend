@@ -108,7 +108,7 @@ def upload_to_cloud(song, context: CallbackContext):
     songs_dir = os.path.join(current_dir, 'songs')
     if not os.path.exists(songs_dir):
         os.mkdir(songs_dir)
-    song_path = os.path.join(songs_dir, f'{song.title}.mp3')
+    song_path = os.path.join(songs_dir, 'song.mp3')
     song_file = context.bot.get_file(song)
     song_file.download(song_path)
 
