@@ -179,8 +179,8 @@ def song_analysis(update: Update, context: CallbackContext):
         fig1, ax1 = plt.subplots(2, 2)
         for i, (key, value) in enumerate(analysis.items()):
             # create pie chart
-            labels = [v['name'] for k, v in value.items()]
-            sizes = [v['count'] for k, v in value.items()]
+            labels = [v['name'] for k, v in value]
+            sizes = [v['count'] for k, v in value]
             ax1[i // 2, i % 2].pie(sizes, labels=labels,
                                    autopct='%1.1f%%', shadow=True, startangle=90)
             ax1[i // 2, i % 2].axis('equal')
