@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from urllib.parse import urlparse, parse_qs
 from django.conf import settings
 import requests
+from django.db.models import Count
 
 
 class SongViewSet(ViewSet):
@@ -369,9 +370,15 @@ class SongLogsViewSet(ViewSet):
                            datetime.timedelta(days=max_age*365)) if max_age != 0 else Q()
         user_filter = Q(user=user) if user != None else Q()
         artist_filter = Q(song__artist=artist) if artist != None else Q()
-        history = SongLogs.objects.filter(
-            days_filter & city_filter & min_age_filter & max_age_filter & user_filter & artist_filter)
-        return history
+        annotate_on_songs = SongLogs.objects.filter(days_filter & city_filter & min_age_filter &
+                                                    max_age_filter & user_filter & artist_filter).values('song').annotate(count=Count('song'))
+        annotate_on_tags = SongLogs.objects.filter(days_filter & city_filter & min_age_filter & max_age_filter & user_filter & artist_filter).values(
+            'song__tags').annotate(count=Count('song__tags'))
+        annotate_on_artists = SongLogs.objects.filter(days_filter & city_filter & min_age_filter & max_age_filter & user_filter & artist_filter).values(
+            'song__artist').annotate(count=Count('song__artist'))
+        result = {'songs': annotate_on_songs,
+                  'tags': annotate_on_tags, 'artists': annotate_on_artists}
+        return result
 
     def convert_to_percents(self, data, sort_by_id=False, top5=False):
         # remove 0 count
@@ -396,8 +403,8 @@ class SongLogsViewSet(ViewSet):
     def analysis(self, request, days=0, city='0', min_age=0, max_age=0, user=None, artist=None, model=None, serializer=None, sort_by_id=False, top5=False):
         logs = self.make_filters(days, city, min_age, max_age, user, artist)
         queryset = model.objects.all()
-        serializers = serializer(
-            queryset, many=True, context={'request': request, 'logs': logs})
+        serializers = serializer(queryset, many=True, context={
+                                 'request': request, 'songs': logs['songs'], 'tags': logs['tags'], 'artists': logs['artists']})
         data = serializers.data
         data = self.convert_to_percents(data, sort_by_id, top5)
         return data

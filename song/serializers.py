@@ -161,16 +161,14 @@ class TagAnalysisSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'count', 'percent')
 
     def get_count(self, obj):
-        logs_of_user = self.context.get('logs')
-        songs = [log.song for log in logs_of_user]
-        songs_count = 0
-        for song in songs:
-            if obj in song.tags.all():
-                songs_count += 1
-        return songs_count
+        tags = self.context.get('tags')
+        for tag in tags:
+            if tag['song__tags'] == obj.id:
+                return tag['count']
+        return 0
 
     def get_percent(self, obj):
-        return self.get_count(obj)
+        return 0
 
 
 class ArtistAnalysisSerializer(serializers.ModelSerializer):
@@ -190,18 +188,16 @@ class ArtistAnalysisSerializer(serializers.ModelSerializer):
         return artistic_name if artistic_name else f'{first_name} {last_name}' if first_name and last_name else username
 
     def get_count(self, obj):
-        logs_of_user = self.context.get('logs')
-        songs = [log.song for log in logs_of_user]
-        songs_count = 0
-        for song in songs:
-            if song.artist == obj:
-                songs_count += 1
-        return songs_count
+        artists = self.context.get('artists')
+        for artist in artists:
+            if artist['song__artist'] == obj.id:
+                return artist['count']
+        return 0
 
     def get_percent(self, obj):
-        return self.get_count(obj)
-    
-    
+        return 0
+
+
 class SongAnalysisSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     percent = serializers.SerializerMethodField()
@@ -215,13 +211,11 @@ class SongAnalysisSerializer(serializers.ModelSerializer):
         return obj.title
 
     def get_count(self, obj):
-        logs_of_user = self.context.get('logs')
-        songs = [log.song for log in logs_of_user]
-        songs_count = 0
+        songs = self.context.get('songs')
         for song in songs:
-            if song == obj:
-                songs_count += 1
-        return songs_count
+            if song['song'] == obj.id:
+                return song['count']
+        return 0
 
     def get_percent(self, obj):
-        return self.get_count(obj)
+        return 0
