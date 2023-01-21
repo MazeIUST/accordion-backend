@@ -24,6 +24,7 @@ from song.serializers import *
 from datetime import datetime
 from django.db.models import F, Q
 from django.http import QueryDict
+from django.db.models import Count
 
 
 class UrlsView(APIView):
@@ -53,8 +54,10 @@ class UrlsView(APIView):
             'user payment': absurl + 'payment/',
             'user payment get': absurl + 'payment/<int:pk>/',
             'user premium': absurl + 'premium/',
-            'get 10 recent music': absurl + 'get_recent_10_music/',
-            'get 10 recent artist': absurl + 'get_recent_10_artist/',
+            'get 10 recent music': absurl + 'get_recent_songs/',
+            'get 10 recent artist': absurl + 'get_recent_artists/',
+            'get 10 top music': absurl + 'get_top_songs/',
+            'get 10 top artist': absurl + 'get_top_artists/',
         }
 
         songs_urls = {
@@ -205,42 +208,46 @@ class UserViewSet(ModelViewSet):
             all_users, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def get_recent_10_music(self, request):
+    def get_recent_songs(self, request):
         user = request.user
-        try:
-            user_history = SongLogs.objects.get(user=user).order_by(
-                '-add_datetime').distinct('song_id')
-            if user_history.count() < 10 and user_history.count() > 0:
-                recent_10_music = user_history.values('song_id').to_dict()
-                return Response(recent_10_music)
-            elif user_history.count() > 10:
-                recent_10_music = user_history.values('song_id').to_dict()
-                return Response(recent_10_music)
-            else:
-                return Response("not found")
-        except:
-            return Response("not found exception", status=status.HTTP_404_NOT_FOUND)
+        logs = SongLogs.objects.filter(user=user).order_by('-created_at').annotate(
+            count=Count('song'))
+        songs = Song.objects.filter(id__in=logs.values('song_id'))
+        recent10 = songs[:10] if songs.count() > 10 else songs
+        serializer = SongSerializer(
+            recent10, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-        # user_history =History.objects.get(user=user).order_by('-add_datetime').distinct('song_id')[:10] # if less than 10 tracks
-        # recent_10_music =user_history.values('song_id').to_dict()
-        # return Response(recent_10_music)
-
-    def get_recent_10_artist(self, request):
+    def get_recent_artists(self, request):
         user = request.user
-        try:
-            user_history = SongLogs.objects.get(user=user).order_by(
-                '-add_datetime').distinct('song__artist')
-            if user_history.count() < 10 and user_history.count() > 0:
-                return Response(user_history.values('song__artist_id').to_dict())
-            elif user_history.count() > 10:
-                recent_10_artist = user_history[:10].values(
-                    'song__artist').to_dict()
-                return Response(recent_10_artist)
-            else:
-                return Response("not found")
-        except:
-            return Response("not found exception", status=status.HTTP_404_NOT_FOUND)
-        # user_history =History.objects.get(user=user).order_by('-add_datetime').distinct('song__artist')[:10] # if less than 10 tracks
+        logs = SongLogs.objects.filter(user=user).order_by('-created_at').annotate(
+            count=Count('song__artist'))
+        artists = Artist.objects.filter(id__in=logs.values('song__artist'))
+        recent10 = artists[:10] if artists.count() > 10 else artists
+        serializer = ArtistSerializer(
+            recent10, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def get_top_songs(self, request):
+        user = request.user
+        logs = SongLogs.objects.filter(user=user).annotate(
+            count=Count('song')).order_by('-count')
+        songs = Song.objects.filter(id__in=logs.values('song_id'))
+        top10 = songs[:10] if songs.count() > 10 else songs
+        serializer = SongSerializer(
+            top10, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def get_top_artists(self, request):
+        user = request.user
+        logs = SongLogs.objects.filter(user=user).annotate(
+            count=Count('song__artist')).order_by('-count')
+        artists = Artist.objects.filter(id__in=logs.values('song__artist'))
+        top10 = artists[:10] if artists.count() > 10 else artists
+        users = User.objects.filter(artist__in=top10)
+        serializer = UserSerializer(
+            users, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class FollowViewSet(ViewSet):
