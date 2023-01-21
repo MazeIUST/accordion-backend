@@ -84,10 +84,10 @@ class ScriptView(ViewSet):
         return
 
     def main(self, request):
-        # self.create_users()
-        # self.create_followers()
-        # self.create_tags()
-        # self.create_song_tags()
-        # self.create_logs()
+        self.create_users()
+        self.create_followers()
+        self.create_tags()
+        self.create_song_tags()
+        self.create_logs()
         self.create_playlists()
         return Response({'message': 'All created successfully'})
