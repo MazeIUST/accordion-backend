@@ -1,5 +1,6 @@
 import random
-
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 
 # Users
 USERS = [
@@ -7,7 +8,7 @@ USERS = [
         'username': 'mhhasani',
         'first_name': 'mohammadhosein',
         'last_name': 'hasani',
-        'password': '1234',
+        'password': make_password('1234'),
         'email': 'hasanimohammadhosein@gmail.com',
         'is_email_verified': True,
         'is_Artist': True,
@@ -20,7 +21,7 @@ USERS = [
         'username': 'melika',
         'first_name': 'melika',
         'last_name': 'mohammadi',
-        'password': '1234',
+        'password': make_password('1234'),
         'email': 'melikamfakhar@gmail.com',
         'is_email_verified': True,
         'is_Artist': True,
@@ -33,7 +34,7 @@ USERS = [
         'username': 'zahra',
         'first_name': 'zahra',
         'last_name': 'tabatabaei',
-        'password': '1234',
+        'password': make_password('1234'),
         'email': 'zahrasadat@gmail.com',
         'is_email_verified': True,
         'is_Artist': True,
@@ -46,7 +47,7 @@ USERS = [
         'username': 'maryam',
         'first_name': 'maryam',
         'last_name': 'jafari',
-        'password': '1234',
+        'password': make_password('1234'),
         'email': 'maryamjafari@gmail.com',
         'is_email_verified': True,
         'is_Artist': True,
@@ -59,7 +60,7 @@ USERS = [
         'username': 'mojtaba',
         'first_name': 'mojtaba',
         'last_name': 'janbaz',
-        'password': '1234',
+        'password': make_password('1234'),
         'email': 'mojtabajanbaz@gmail.com',
         'is_email_verified': True,
         'is_Artist': True,
@@ -72,7 +73,7 @@ USERS = [
         'username': 'amirmohammad',
         'first_name': 'amirmohammad',
         'last_name': 'khorshidi',
-        'password': '1234',
+        'password': make_password('1234'),
         'email': 'amirmohammadkhorshidi@gmail.com',
         'is_email_verified': True,
         'is_Artist': True,
@@ -103,7 +104,7 @@ def make_user():
             'username': f'user{i}',
             'first_name': f'user{i}',
             'last_name': f'user{i}',
-            'password': '1234',
+            'password': make_password('1234'),
             'email': f'user{i}@gmail.com',
             'is_email_verified': True,
             'is_Artist': i % 5 == 0,
