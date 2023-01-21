@@ -76,10 +76,10 @@ class SongViewSet(ViewSet):
 
     def search(self, request, text=None):
         scores = {}
-        title_contains = Song.objects.filter(title__contains=text)
+        title_contains = Song.objects.filter(title__icontains=text)
         artist_contains = Song.objects.filter(
-            Q(artist__user__first_name__contains=text) | Q(artist__user__last_name__contains=text))
-        lyrics_contains = Song.objects.filter(lyrics__contains=text)
+            Q(artist__user__first_name__icontains=text) | Q(artist__user__last_name__icontains=text) | Q(artist__artistic_name__icontains=text))
+        lyrics_contains = Song.objects.filter(lyrics__icontains=text)
 
         for song in title_contains:
             scores[song] = 10
