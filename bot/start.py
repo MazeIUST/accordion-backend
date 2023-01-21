@@ -170,8 +170,10 @@ def song_analysis(update: Update, context: CallbackContext):
         analysis = {
             'analysis by tags': by_tags,
             'analysis by artist': by_artist,
-            # 'analysis by top songs': by_top_songs,
-            # 'analysis by last songs': by_last_songs
+        }
+        artist_analysis = {
+            'analysis by top songs': by_top_songs,
+            'analysis by last songs': by_last_songs
         }
         # remove empty analysis
         analysis = {k: v for k, v in analysis.items() if v}
@@ -183,8 +185,19 @@ def song_analysis(update: Update, context: CallbackContext):
             axis[i].set_title(key)
             axis[i].pie(values, labels=keys)
         figs.set_size_inches(18.5, 10.5)
-        figs.savefig('analysis.png')
-        update.message.reply_photo(photo=open('analysis.png', 'rb'))
+        figs.savefig('user_analysis.png')
+
+        figs, axis = plt.subplots(1, 2)
+        for i, (key, value) in enumerate(artist_analysis.items()):
+            keys = [v['name'] for v in value]
+            values = [v['count'] for v in value]
+            axis[i].set_title(key)
+            axis[i].pie(values, labels=keys)
+        figs.set_size_inches(18.5, 10.5)
+        figs.savefig('artist_analysis.png')
+        update.message.reply_photo(photo=open('user_analysis.png', 'rb'))
+        update.message.reply_photo(photo=open(
+            'artist_analysis.png', 'rb')) if by_top_songs else None
 
     else:
         update.message.reply_text(RESPONSE_TEXTS['error'])
