@@ -67,12 +67,15 @@ class FollowingSerializer(serializers.ModelSerializer):
 
 
 class ArtistSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='user.id', read_only=True)
     songs = serializers.SerializerMethodField()
     albums = serializers.SerializerMethodField()
+    profile = serializers.HyperlinkedRelatedField(
+        source='user', read_only=True, view_name='show_other_user_profile')
 
     class Meta:
         model = Artist
-        fields = ['artistic_name', 'activitie_start_date',
+        fields = ['id', 'profile', 'artistic_name', 'activitie_start_date',
                   'description', 'songs', 'albums']
 
     def get_songs(self, obj):
