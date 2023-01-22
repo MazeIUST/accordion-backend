@@ -162,6 +162,12 @@ class UserViewSet(ModelViewSet):
         if self.action == 'change_password':
             return ChangePasswordSerializer
         return UserPrivateSerializer
+    
+    def get_permissions(self):
+        permissions = [IsAuthenticated]
+        if self.action in ['get_top_songs', 'get_top_artists']:
+            permissions = []
+        return [permission() for permission in permissions]
 
     def list(self, request):
         users = User.objects.all()
