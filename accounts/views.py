@@ -54,10 +54,10 @@ class UrlsView(APIView):
             'user payment': absurl + 'payment/',
             'user payment get': absurl + 'payment/<int:pk>/',
             'user premium': absurl + 'premium/',
-            'get 10 recent music': absurl + 'get_recent_songs/',
-            'get 10 recent artist': absurl + 'get_recent_artists/',
-            'get 10 top music': absurl + 'get_top_songs/',
-            'get 10 top artist': absurl + 'get_top_artists/',
+            'get 6 recent music': absurl + 'get_recent_songs/',
+            'get 6 recent artist': absurl + 'get_recent_artists/',
+            'get 6 top music': absurl + 'get_top_songs/',
+            'get 6 top artist': absurl + 'get_top_artists/',
         }
 
         songs_urls = {
@@ -223,9 +223,9 @@ class UserViewSet(ModelViewSet):
         logs = SongLogs.objects.filter(user=user).order_by('-created_at').annotate(
             count=Count('song__artist'))
         artists = Artist.objects.filter(id__in=logs.values('song__artist'))
-        recent10 = artists[:10] if artists.count() > 10 else artists
+        recent6 = artists[:6] if artists.count() > 6 else artists
         serializer = ArtistSerializer(
-            recent10, many=True, context={'request': request})
+            recent6, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def get_top_songs(self, request):
@@ -233,9 +233,9 @@ class UserViewSet(ModelViewSet):
         logs = SongLogs.objects.filter(user=user).annotate(
             count=Count('song')).order_by('-count')
         songs = Song.objects.filter(id__in=logs.values('song_id'))
-        top10 = songs[:10] if songs.count() > 10 else songs
+        top6 = songs[:6] if songs.count() > 6 else songs
         serializer = SongSerializer(
-            top10, many=True, context={'request': request})
+            top6, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def get_top_artists(self, request):
@@ -243,8 +243,8 @@ class UserViewSet(ModelViewSet):
         logs = SongLogs.objects.filter(user=user).annotate(
             count=Count('song__artist')).order_by('-count')
         artists = Artist.objects.filter(id__in=logs.values('song__artist'))
-        top10 = artists[:10] if artists.count() > 10 else artists
-        users = User.objects.filter(artist__in=top10)
+        top6 = artists[:6] if artists.count() > 6 else artists
+        users = User.objects.filter(artist__in=top6)
         serializer = UserSerializer(
             users, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
