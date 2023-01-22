@@ -158,15 +158,19 @@ def get_playlist(update: Update, context: CallbackContext):
         return GET_PLAYLIST
 
 
+def remove_zero_count(data):
+    return {k: v for k, v in data.items() if v != 0}
+
+
 def song_analysis(update: Update, context: CallbackContext):
     update.message.reply_text('wait...')
     user_info = get_user_telegram_info_from_update(update, context)
     response = send_request('analysis_song', [user_info['chat_id']])
     if response.get('status') == 'OK':
-        by_tags = response.get('by_tags')
-        by_artist = response.get('by_artists')
-        by_top_songs = response.get('by_top_songs')
-        by_last_songs = response.get('by_last_songs')
+        by_tags = remove_zero_count(response.get('by_tags'))
+        by_artist = remove_zero_count(response.get('by_artist'))
+        by_top_songs = remove_zero_count(response.get('by_top_songs'))
+        by_last_songs = remove_zero_count(response.get('by_last_songs'))
         analysis = {
             'analysis by tags': by_tags,
             'analysis by artist': by_artist,
