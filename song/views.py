@@ -381,8 +381,8 @@ class SongLogsViewSet(ViewSet):
         return result
 
     def convert_to_percents(self, data, sort_by_id=False, top5=False):
-        # # remove 0 count
-        # data = [d for d in data if d['count'] > 0]
+        # remove 0 count
+        data = [d for d in data if d['count'] > 0]
         if sort_by_id:
             data = sorted(data, key=lambda k: k['id'], reverse=True)
         else:
