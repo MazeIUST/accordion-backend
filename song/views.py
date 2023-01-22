@@ -9,7 +9,6 @@ from accordion.permissions import *
 from django.db.models import Q, F
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.permissions import IsAuthenticated
-from urllib.parse import urlparse, parse_qs
 from django.conf import settings
 import requests
 from django.db.models import Count

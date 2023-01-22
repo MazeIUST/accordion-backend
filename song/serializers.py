@@ -13,12 +13,30 @@ class SongSerializer(serializers.ModelSerializer):
     song_download_link = serializers.SerializerMethodField()
     count = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
+    show_tags = serializers.SerializerMethodField()
+    tags = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Song
         fields = ('id', 'artist', 'artist_name', 'title', 'description', 'lyrics', 'song_link',
-                  'speechless_song_link', 'song_download_link', 'image', 'note', 'created_at', 'count', 'tags')
-        read_only_fields = ('id', 'created_at', 'artist')
+                  'speechless_song_link', 'song_download_link', 'image', 'note', 'created_at', 'count', 'tags', 'show_tags')
+        read_only_fields = ('id', 'created_at', 'artist', 'show_tags')
+
+    def validate(self, attrs):
+        tags = attrs.get('tags').split(',')
+        # check is integer
+        for tag in tags:
+            try:
+                int(tag)
+            except:
+                raise serializers.ValidationError(
+                    f'{tag} is not integer')
+        tags = map(int, tags)
+        for tag in tags:
+            if not Tag.objects.filter(id=tag).exists():
+                raise serializers.ValidationError(
+                    f'Tag with id: {tag} does not exist')
+        return attrs
 
     def get_artist_name(self, obj):
         artist = obj.artist
@@ -40,11 +58,22 @@ class SongSerializer(serializers.ModelSerializer):
         logs_count = SongLogs.objects.filter(song=obj).count()
         return logs_count
 
+    def get_show_tags(self, obj):
+        tags = obj.tags.all()
+        return TagSerializer(tags, many=True).data
+
     def create(self, validated_data):
-        tags = validated_data.pop('tags')
-        song = Song.objects.create(**validated_data)
-        for tag in tags:
-            song.tags.add(tag)
+        tags = map(int, validated_data.pop('tags').split(','))
+        tags = Tag.objects.filter(id__in=tags)
+        song = super().save(validated_data)
+        song.tags.set(tags)
+        return song
+
+    def update(self, instance, validated_data):
+        tags = map(int, validated_data.pop('tags').split(','))
+        tags = Tag.objects.filter(id__in=tags)
+        song = super().update(instance, validated_data)
+        song.tags.set(tags)
         return song
 
 
