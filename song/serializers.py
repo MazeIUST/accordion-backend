@@ -65,7 +65,7 @@ class SongSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tags = map(int, validated_data.pop('tags').split(','))
         tags = Tag.objects.filter(id__in=tags)
-        song = super().save(validated_data)
+        song = super().create(validated_data)
         song.tags.set(tags)
         return song
 
