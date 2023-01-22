@@ -192,17 +192,22 @@ class PremiumSerializer(serializers.ModelSerializer):
 
 
 class PaymentSerializer(serializers.ModelSerializer):
+    date = serializers.SerializerMethodField()
+
     class Meta:
         model = Payment
         fields = ['id', 'user', 'amount', 'date', 'remaining_money']
         read_only_fields = ['id', 'user', 'date', 'remaining_money']
+
+    def get_date(self, obj):
+        return obj.date.strftime("%Y-%m-%d")
 
     def validate(self, attrs):
         user = self.context['request'].user
         user_money = user.money
         is_premium = self.context.get('is_premium', False)
         money = attrs['amount']
-        
+
         if user_money + money < 0:
             if is_premium:
                 has_premium = Premium.objects.filter(

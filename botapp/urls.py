@@ -17,7 +17,7 @@ urlpatterns = [
     path('search/<str:text>/', MainSongViewSet.as_view({'get': 'search'})),
     path('login/<int:chat_id>/<str:username>/<str:password>/',
          UserViewSet.as_view({'get': 'login'})),
-    path('analysis_song/<int:chat_id>/',
+    path('analysis_song/<int:chat_id>/',#
          UserViewSet.as_view({'get': 'analysis_song'})),
     path('analysis_artist/<int:chat_id>/',
          UserViewSet.as_view({'get': 'analysis_artist'})),
