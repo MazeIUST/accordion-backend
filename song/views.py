@@ -369,7 +369,7 @@ class SongLogsViewSet(ViewSet):
         max_age_filter = Q(user__birthday__gte=today -
                            datetime.timedelta(days=max_age*365)) if max_age != 0 else Q()
         user_filter = Q(user=user) if user != None else Q()
-        artist_filter = Q(song__artist=artist) if artist != None else Q()
+        artist_filter = Q(song__artist=artist) if artist else Q()
         annotate_on_songs = SongLogs.objects.filter(days_filter & city_filter & min_age_filter &
                                                     max_age_filter & user_filter & artist_filter).values('song').annotate(count=Count('song'))
         annotate_on_tags = SongLogs.objects.filter(days_filter & city_filter & min_age_filter & max_age_filter & user_filter & artist_filter).values(
@@ -428,8 +428,8 @@ class SongLogsViewSet(ViewSet):
             request, days=days, user=user, model=Artist, serializer=ArtistAnalysisSerializer)
         by_top_songs = None
         by_last_songs = None
-        artist = Artist.objects.filter(user=user).first()
-        if artist:
+        if user.is_Artist:
+            artist = Artist.objects.get(user=user)
             by_top_songs = self.analysis(
                 request, days=days, user=user, artist=artist, model=Song, serializer=SongAnalysisSerializer, top5=True)
             by_last_songs = self.analysis(
