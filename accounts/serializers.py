@@ -195,15 +195,12 @@ class PremiumSerializer(serializers.ModelSerializer):
 
 
 class PaymentSerializer(serializers.ModelSerializer):
-    date = serializers.SerializerMethodField()
+    date = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
 
     class Meta:
         model = Payment
         fields = ['id', 'user', 'amount', 'date', 'remaining_money']
         read_only_fields = ['id', 'user', 'date', 'remaining_money']
-
-    def get_date(self, obj):
-        return obj.date.strftime("%Y-%m-%d")
 
     def validate(self, attrs):
         user = self.context['request'].user

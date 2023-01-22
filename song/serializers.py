@@ -12,6 +12,7 @@ class SongSerializer(serializers.ModelSerializer):
     artist_name = serializers.SerializerMethodField()
     song_download_link = serializers.SerializerMethodField()
     count = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
 
     class Meta:
         model = Song
