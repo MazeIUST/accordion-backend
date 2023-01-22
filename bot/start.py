@@ -158,8 +158,8 @@ def get_playlist(update: Update, context: CallbackContext):
         return GET_PLAYLIST
 
 
-def remove_zero_count(data):
-    return {k: v for k, v in data.items() if v != 0}
+def remove_zero_count(datas):
+    return [data for data in datas if data['count'] != 0]
 
 
 def song_analysis(update: Update, context: CallbackContext):
