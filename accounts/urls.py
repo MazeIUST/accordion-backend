@@ -45,8 +45,8 @@ urlpatterns = [
          UserViewSet.as_view({'get': 'get_recent_songs'}), name='get_recent_songs'),
     path('get_recent_artists/',
          UserViewSet.as_view({'get': 'get_recent_artists'}), name='get_recent_artists'),
-    path('get_top_songs/',
+    path('get_top_songs/<int:days>/',
          UserViewSet.as_view({'get': 'get_top_songs'}), name='get_top_songs'),
-    path('get_top_artists/',
+    path('get_top_artists/<int:days>/',
          UserViewSet.as_view({'get': 'get_top_artists'}), name='get_top_artists'),
 ]

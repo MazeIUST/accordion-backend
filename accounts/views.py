@@ -25,6 +25,7 @@ from datetime import datetime
 from django.db.models import F, Q
 from django.http import QueryDict
 from django.db.models import Count
+from django.utils import timezone
 
 
 class UrlsView(APIView):
@@ -56,8 +57,8 @@ class UrlsView(APIView):
             'user premium': absurl + 'premium/',
             'get 6 recent music': absurl + 'get_recent_songs/',
             'get 6 recent artist': absurl + 'get_recent_artists/',
-            'get 6 top music': absurl + 'get_top_songs/',
-            'get 6 top artist': absurl + 'get_top_artists/',
+            'get 6 top music': absurl + 'get_top_songs/<int:days>/',
+            'get 6 top artist': absurl + 'get_top_artists/<int:days>',
         }
 
         songs_urls = {
@@ -228,9 +229,10 @@ class UserViewSet(ModelViewSet):
             recent6, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def get_top_songs(self, request):
-        user = request.user
-        logs = SongLogs.objects.filter(user=user).annotate(
+    def get_top_songs(self, request, days=0):
+        days_filter = Q(created_at__gte=timezone.now() -
+                        timedelta(days=days)) if days > 0 else Q()
+        logs = SongLogs.objects.filter(days_filter).annotate(
             count=Count('song')).order_by('-count')
         songs = Song.objects.filter(id__in=logs.values('song_id'))
         top6 = songs[:6] if songs.count() > 6 else songs
@@ -238,9 +240,10 @@ class UserViewSet(ModelViewSet):
             top6, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def get_top_artists(self, request):
-        user = request.user
-        logs = SongLogs.objects.filter(user=user).annotate(
+    def get_top_artists(self, request, days=0):
+        days_filter = Q(created_at__gte=timezone.now() -
+                        timedelta(days=days)) if days > 0 else Q()
+        logs = SongLogs.objects.filter(days_filter).annotate(
             count=Count('song__artist')).order_by('-count')
         artists = Artist.objects.filter(id__in=logs.values('song__artist'))
         top6 = artists[:6] if artists.count() > 6 else artists
