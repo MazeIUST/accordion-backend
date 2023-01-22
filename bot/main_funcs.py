@@ -89,14 +89,15 @@ def get_song_info(update: Update, context: CallbackContext):
 
 
 def download_song(song_link):
-    song_id = song_link.split('/')[-2]
     current_dir = os.path.dirname(os.path.abspath(__file__))
     file_address = os.path.join(current_dir, 'songs', 'song.mp3')
-    new_song_link = f'https://drive.google.com/u/0/uc?id={song_id}&export=download'
     try:
-        response = requests.get(song_link)
-    except:
+        song_id = song_link.split('/')[-2]
+        new_song_link = f'https://drive.google.com/u/0/uc?id={song_id}&export=download'
         response = requests.get(new_song_link)
+    except:
+        response = requests.get(song_link)
+
     with open(file_address, 'wb') as song:
         song.write(response.content)
     return song.name
