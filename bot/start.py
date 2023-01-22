@@ -168,12 +168,12 @@ def song_analysis(update: Update, context: CallbackContext):
     response = send_request('analysis_song', [user_info['chat_id']])
     if response.get('status') == 'OK':
         by_tags = remove_zero_count(response.get('by_tags'))
-        by_artist = remove_zero_count(response.get('by_artist'))
+        by_artists = remove_zero_count(response.get('by_artists'))
         by_top_songs = remove_zero_count(response.get('by_top_songs'))
         by_last_songs = remove_zero_count(response.get('by_last_songs'))
         analysis = {
             'analysis by tags': by_tags,
-            'analysis by artist': by_artist,
+            'analysis by artists': by_artists,
         }
         artist_analysis = {
             'analysis by top songs': by_top_songs,
