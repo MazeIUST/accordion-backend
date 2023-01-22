@@ -401,9 +401,9 @@ class SongLogsViewSet(ViewSet):
         new_data = sorted(new_data, key=lambda k: k['count'], reverse=True)
         return new_data
 
-    def analysis(self, request, days=0, city='0', min_age=0, max_age=0, user=None, artist=None, model=None, serializer=None, sort_by_id=False, top5=False):
+    def analysis(self, request, days=0, city='0', min_age=0, max_age=0, user=None, artist=None, model=None, serializer=None, queryset=None, sort_by_id=False, top5=False):
         logs = self.make_filters(days, city, min_age, max_age, user, artist)
-        queryset = model.objects.all()
+        queryset = model.objects.all() if queryset == None else queryset
         serializers = serializer(queryset, many=True, context={
                                  'request': request, 'songs': logs['songs'], 'tags': logs['tags'], 'artists': logs['artists']})
         data = serializers.data
@@ -431,9 +431,9 @@ class SongLogsViewSet(ViewSet):
         if user.is_Artist:
             artist = Artist.objects.get(user=user)
             by_top_songs = self.analysis(
-                request, days=days, user=user, artist=artist, model=Song, serializer=SongAnalysisSerializer, top5=True)
+                request, days=days, user=user, artist=artist, model=Song, serializer=SongAnalysisSerializer, top5=True, queryset=Song.objects.filter(artist=artist))
             by_last_songs = self.analysis(
-                request, days=days, user=user, artist=artist, model=Song, serializer=SongAnalysisSerializer, sort_by_id=True, top5=True)
+                request, days=days, user=user, artist=artist, model=Song, serializer=SongAnalysisSerializer, sort_by_id=True, top5=True, queryset=Song.objects.filter(artist=artist))
 
         results = {
             'by_tags': by_tags,
