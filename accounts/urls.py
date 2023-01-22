@@ -11,6 +11,8 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
     path('verify_email/', VerifyEmail.as_view(), name='email-verify'),
+    path('delete_account/<int:pk>/',
+         UserViewSet.as_view({'get': 'destroy'}), name='delete_account'),
     path('profile/',
          UserViewSet.as_view({'get': 'retrieve', 'put': 'update'}), name='profile'),
     path('profile/all/',

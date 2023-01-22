@@ -26,6 +26,7 @@ from django.db.models import F, Q
 from django.http import QueryDict
 from django.db.models import Count
 from django.utils import timezone
+from accordion.permissions import IsSuperUser
 
 
 class UrlsView(APIView):
@@ -39,6 +40,7 @@ class UrlsView(APIView):
             'user signup': absurl + 'signup/',
             'user login': absurl + 'login/',
             'user logout': absurl + 'logout/',
+            'user delete account': absurl + 'delete_account/<int:pk>/',
             'user refresh token': absurl + 'token/refresh/',
             'user verify email': absurl + 'verify_email/',
             'user profile get, put': absurl + 'profile/',
@@ -162,11 +164,13 @@ class UserViewSet(ModelViewSet):
         if self.action == 'change_password':
             return ChangePasswordSerializer
         return UserPrivateSerializer
-    
+
     def get_permissions(self):
         permissions = [IsAuthenticated]
         if self.action in ['get_top_songs', 'get_top_artists']:
             permissions = []
+        elif self.action in ['destroy']:
+            permissions = [IsAuthenticated, IsSuperUser]
         return [permission() for permission in permissions]
 
     def list(self, request):
@@ -195,6 +199,13 @@ class UserViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def destroy(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
+        if user == request.user:
+            return Response({'message': 'You cannot delete yourself'}, status=status.HTTP_400_BAD_REQUEST)
+        user.delete()
+        return Response({'message': 'User deleted successfully'}, status=status.HTTP_200_OK)
 
     def change_password(self, request):
         serializer = ChangePasswordSerializer(
