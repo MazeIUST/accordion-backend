@@ -213,9 +213,9 @@ class UserViewSet(ModelViewSet):
         logs = SongLogs.objects.filter(user=user).order_by('-created_at').annotate(
             count=Count('song'))
         songs = Song.objects.filter(id__in=logs.values('song_id'))
-        recent10 = songs[:10] if songs.count() > 10 else songs
+        recent6 = songs[:6] if songs.count() > 6 else songs
         serializer = SongSerializer(
-            recent10, many=True, context={'request': request})
+            recent6, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def get_recent_artists(self, request):
