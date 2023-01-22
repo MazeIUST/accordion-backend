@@ -244,9 +244,8 @@ class UserViewSet(ModelViewSet):
             count=Count('song__artist')).order_by('-count')
         artists = Artist.objects.filter(id__in=logs.values('song__artist'))
         top6 = artists[:6] if artists.count() > 6 else artists
-        users = User.objects.filter(artist__in=top6)
-        serializer = UserSerializer(
-            users, many=True, context={'request': request})
+        serializer = ArtistSerializer(
+            top6, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
