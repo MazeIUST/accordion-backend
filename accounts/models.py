@@ -16,7 +16,7 @@ class User(AbstractUser):
     city = models.CharField(max_length=255, null=True)
     bio = models.TextField(null=True)
     image = models.ImageField(
-        upload_to='profiles/photos/', blank=True, null=True)
+        upload_to='profiles/photos/', default='profiles/photos/default.png')
     telegram_chat_id = models.CharField(
         max_length=255, null=True, blank=True, unique=True)
     money = models.IntegerField(default=0)

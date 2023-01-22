@@ -83,11 +83,19 @@ class ScriptView(ViewSet):
         print('Playlists created successfully')
         return
 
+    def set_default_profile_pic(self):
+        # image null = True
+        All_Users = User.objects.all()
+        All_Users.update(image='profiles/photos/default.png')
+        print('Default profile pic set successfully')
+        return
+
     def main(self, request):
-        self.create_users()
-        self.create_followers()
-        self.create_tags()
-        self.create_song_tags()
-        self.create_logs()
-        self.create_playlists()
+        # self.create_users()
+        # self.create_followers()
+        # self.create_tags()
+        # self.create_song_tags()
+        # self.create_logs()
+        # self.create_playlists()
+        self.set_default_profile_pic()
         return Response({'message': 'All created successfully'})
